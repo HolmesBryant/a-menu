@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Foo</title>
+
+  <script type="module" src="src/me-nu.js"></script>
+</head>
+<body>
+
+<me-nu>
+  <strong slot="label">XXX</strong>
+  <a href="#">foo</a>
+  <a href="#">bar</a>
+
+  <me-nu>
+    <b slot="label">Sub A</b>
+
+    <a href="#">baz</a>
+    <a href="#">boom</a>
+
+    <me-nu>
+      <b slot="label">Sub Sub A</b>
+      <a href="#">bing</a>
+      <a href="#">bang</a>
+    </me-nu>
+
+    <me-nu>
+      <b slot="label">Sub Sub B</b>
+      <a href="#">fee</a>
+      <a href="#">fie</a>
+    </me-nu>
+  </me-nu>
+
+  <me-nu>
+    <b slot="label">Sub B</b>
+    <a href="#">foe</a>
+    <a href="#">fum</a>
+  </me-nu>
+</me-nu>
+
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>A-Menu</title>
+	<script type="module" src="src/a-menu.js"></script>
+
+	<!-- <link rel="stylesheet" href="src/a-menu.css"> -->
+	<style>
+
+
+	</style>
+</head>
+<body>
+<header>
+	<h1>A-Menu</h1>
+	<p>A custom element that renders a configurable, responsive menu.</p>
+</header>
+
+<a-menu top type="classic">
+	<a href="#one">One</a>
+	<a href="#two">Two</a>
+	<a href="#three">Three</a>
+
+	<a-menu group="menu">
+		<strong slot="label">Group One</strong>
+		<a href="#">Four</a>
+		<a href="#">Five</a>
+		<a href="#">Six</a>
+
+		<a-menu type="flyout">
+			<strong slot="label">Sub one</strong>
+			<a href="#">Seven</a>
+			<a href="#">Eight</a>
+			<a href="#">Nine</a>
+
+			<a-menu type="flyout">
+				<strong slot="label">Sub Sub One</strong>
+				<a href="#">Twelve</a>
+				<a href="#">Thirteen</a>
+				<a href="#">Fourteen</a>
+			</a-menu>
+		</a-menu>
+	</a-menu>
+
+	<a-menu group="menu">
+		<em slot="label">Group Two</em>
+		<a href="#">Seven</a>
+		<a href="#">Eight</a>
+		<a href="#">Nine</a>
+		<a href="#">Ten</a>
+		<a href="#">Eleven</a>
+	</a-menu>
+</a-menu>
+
+<p>Proident minim do voluptate incididunt ullamco dolore labore ex non enim quis ut commodo ea elit minim dolore esse ut dolor elit ut veniam id quis adipisicing in cillum velit incididunt dolore mollit qui ullamco in dolor eiusmod ut est labore sint ex fugiat reprehenderit in do dolore amet magna dolor fugiat aliqua ut culpa do culpa eu in dolore ut occaecat cupidatat in deserunt culpa sit nostrud veniam duis et dolor irure proident id nulla ut consectetur id ut excepteur ex dolor occaecat occaecat officia ut sit incididunt ex exercitation nostrud eu eiusmod dolor aliquip ullamco consectetur enim laborum nisi minim labore cupidatat est duis ex nisi ut velit dolore laborum in ut commodo reprehenderit sed veniam anim incididunt sit ullamco cillum incididunt sed ea ex magna reprehenderit sed laborum eu labore nulla in ut dolor nisi et elit consectetur irure in exercitation tempor in enim sint minim ad consectetur sed ex ad in consequat excepteur ad in cupidatat dolore sit ut consequat commodo aliqua do duis labore labore minim laboris et minim esse laboris reprehenderit dolor laborum in magna dolore dolor aliquip pariatur et qui nulla quis voluptate eu ut ex fugiat in pariatur reprehenderit dolor fugiat aliqua veniam culpa nulla non pariatur qui est magna excepteur magna ullamco tempor id dolor ut laborum sint ut labore consequat labore enim commodo adipisicing cillum pariatur veniam commodo est laborum dolor pariatur quis ad culpa sunt et nostrud sed sint commodo duis consectetur ut commodo laborum.</p>
+
+</body>
+</html>

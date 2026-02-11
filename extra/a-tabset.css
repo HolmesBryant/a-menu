@@ -1,0 +1,42 @@
+a-tabset {
+	--atabset-bg1-color: hsl(45, 40%, 98.039%);
+  --atabset-bg2-color: hsl(40, 23.077%, 94.902%);
+  --atabset-bg3-color: hsl(40, 17.647%, 90%);
+  --atabset-bg4-color: hsl(38.182, 15.068%, 85.686%);
+  --atabset-border-color: hsl(40, 17.647%, 83.333%);
+  --atabset-text-color: hsl(36, 8.8757%, 33.137%);
+  --atabset-tab-radius: 5px;
+  --atabset-content-radius: 0 0 10px 10px;
+  --atabset-tab-padding: .25rem;
+  --atabset-content-padding: 1rem;
+  --atabset-transition: all .25s;
+  /* height: 70svh; */
+  /* overflow: auto; */
+}
+
+@media (prefers-color-scheme: dark) {
+  a-tabset {
+    --atabset-bg1-color: rgb(20, 20, 20);
+    --atabset-bg2-color: rgb(40,40,40);
+    --atabset-bg3-color: rgb(60, 60, 60);
+    --atabset-bg4-color:  rgb(80, 80, 80);
+    --atabset-border-color: dimgray;
+    --atabset-text-color: snow;
+  }
+}
+
+@media (max-width: 450px) {
+  a-tabset {
+    --atabset-content-padding: .5rem 0;
+  }
+}
+
+/* wraps both tablist and tabpanels */
+a-tabset::part(wrapper) {}
+
+/* holds all the tab titles */
+a-tabset::part(tablist){}
+
+/* holds all the content panels*/
+a-tabset::part(tabpanels) {}
+
