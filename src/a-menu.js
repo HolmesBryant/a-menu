@@ -1,10 +1,8 @@
 export default class AMenu extends HTMLElement {
 
 	// -- Attributes --
-	// #burger = false;
-	#classname = 'a-bind';
 	#group;
-	#minWidth;
+	// #minWidth;
 	#open = false;
 	#top = false;
 
@@ -17,7 +15,7 @@ export default class AMenu extends HTMLElement {
 	 * @private
 	 * @type {String ['mobile', 'classic', 'ribbon', 'sitemap']}
 	 */
-	#type;
+	#type = "mobile";
 
 	// -- Private Properties --
 	#abortController;
@@ -47,25 +45,22 @@ export default class AMenu extends HTMLElement {
 		this.template.innerHTML = `
 			<style>
 				:host {
-					--bg1-color: pink;
+					--min: 35px;
+
 					display: block;
 					interpolate-size: allow-keywords;
 				}
 
-				#label,
-				::slotted(*) {
-					background: var(--bg1-color);
+				::slotted(*),
+				#label {
+					align-items: center;
+					display: flex;
+					min-height: var(--min);
+					width: 100%;
+					padding: 0 .5rem;
 				}
 
-				menu[top] {
-					position: relative;
-
-					& li {
-						position: absolute;
-						align-items: baseline;
-						min-width: max-content;
-					}
-				}
+				#items { white-space: nowrap }
 
 				menu {
 					display: flex;
@@ -73,11 +68,14 @@ export default class AMenu extends HTMLElement {
 					list-style: none;
 					margin: 0;
 					padding: 0;
+					position: relative;
 
 					& li {
 						display: flex;
 						flex-direction: column;
 						height: min-content;
+						align-items: baseline;
+						min-width: max-content;
 					}
 				}
 
@@ -89,6 +87,28 @@ export default class AMenu extends HTMLElement {
 						display: inline-flex;
 						flex-direction: row;
 						gap: 1rem;
+						position: absolute;
+					}
+				}
+
+				menu.flydown {
+					flex-direction: column;
+					position: relative;
+
+					& #items {
+						height: 0;
+						position: absolute;
+						top: 100%;
+						overflow: clip;
+						transition: all .25s allow-discrete;
+						min-width: 200px;
+						z-index: 1;
+					}
+
+					&[open] #items,
+					&:hover #items {
+						height: auto;
+						overflow: visible;
 					}
 				}
 
@@ -112,19 +132,11 @@ export default class AMenu extends HTMLElement {
 						overflow: visible;
 					}
 				}
-
-				#items {
-					white-space: nowrap;
-				}
 			</style>
 
 			<menu part="menu">
-				<li part="label" id="label">
-					<slot name="label"></slot>
-				</li>
-				<li part="items" id="items">
-					<slot></slot>
-				</li>
+				<li part="label" id="label"><slot name="label"></slot></li>
+				<li part="items" id="items"><slot></slot></li>
 			</menu>
 		`;
 	}
@@ -147,7 +159,7 @@ export default class AMenu extends HTMLElement {
 		switch (attr) {
 		case 'open':
 			this.#open = this.hasAttribute('open');
-			this.#menu.open = this.hasAttribute('open');
+			this.#menu.toggleAttribute('open', this.hasAttribute('open'));
 			break;
 		case 'group':
 			this.#group = newval;
@@ -167,14 +179,24 @@ export default class AMenu extends HTMLElement {
 	}
 
 	connectedCallback() {
-		// const labelNodes = this.#labelSlot.assignedNodes();
+		const labelNodes = this.#labelSlot.assignedNodes();
+		if (!this.hasAttribute('type')) this.setAttribute('type', this.#type);
+		if (! (this.parentElement instanceof AMenu)) {
+			this.top = true;
+		}
 
-		// if (this.#open) this.#menu.open = true;
+		if (this.parentElement instanceof AMenu && this.parentElement.top === true) {
+			switch (this.parentElement.type) {
+			case 'classic':
+				this.type = 'flydown';
+				break;
+			}
+		}
 
-		/*if (labelNodes.length === 0) {
-			this.#summary.classList.add('hidden');
-			this.#menu.open = true;
-		}*/
+
+		if (labelNodes.length === 0) {
+			this.toggleAttribute('open', true);
+		}
 
 		// this.#addListeners();
 	}
@@ -238,9 +260,11 @@ export default class AMenu extends HTMLElement {
 		const types = ['mobile', 'classic', 'ribbon', 'sitemap', 'flyout'];
 		types.forEach( type => {
 			this.#menu.classList.remove(type);
+			// this.classList.remove(type);
 		});
 
 		this.#menu.classList.add(value);
+		// this.classList.add(value);
 	}
 
 	// -- Getters / Setters
@@ -261,8 +285,9 @@ export default class AMenu extends HTMLElement {
 
 	get top() { return this.#top }
 	set top(value) { this.toggleAttribute('top', value !== false && value !== undefined)}
-	// get type() { return this.#type }
-	// set type(value) { this.setAttribute('type', value) }
+
+	get type() { return this.#type }
+	set type(value) { this.setAttribute('type', value) }
 
 	// get swipeThreshold() { return this.#swipeThreshold }
 	// set swipeThreshold(value) { this.setAttribute('swipe-threshold', Number(value))}

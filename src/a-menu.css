@@ -5,63 +5,72 @@ a-menu {
 	--border-color: silver;
 	--accent-color: dodgerblue;
 	--accent-text: white;
-	--radius: 5px;
-	--gap: 0;
-	--pad: 0 .5rem;
-	--dir: column;
 	--min: 35px;
 
-	display: inline-block;
+	/***** Background *****/
+
+	  &::part(label),
+	  &::part(items) {
+			background: var(--bg1-color);
+	  }
+
+	  & a:active,
+		& a:hover,
+		&::part(label):hover,
+		&[open]::part(label)
+		{ background: var(--accent-color) }
+
+	/***** Border *****/
+
+		&[type="mobile"] a,
+		& a-menu a,
+		& a-menu::part(label)
+		{ border-bottom: 1px solid var(--border-color) }
+
+	/***** Text *****/
+
+		& a:active,
+		& a:hover,
+		&::part(label):hover,
+		&[open]::part(label)
+		{ color: var(--accent-text) }
+
+		& a
+		{ text-decoration: none }
+
+	/***** Cursor *****/
+
+		& a,
+		& button,
+		& label,
+		&::part(label)
+		{ cursor: pointer }
+
+	/***** Misc *****/
+
+		& [slot="label"]::after {
+			align-items: center;
+			content: "▶";
+			display: inline-flex;
+			font-size: 1rem;
+			height: 1rem;
+			justify-content: center;
+			margin-left: .5rem;
+			rotate: 0deg;
+			transition: rotate .2s;
+			width: 1rem;
+		}
+
+		& [slot="label"]:hover::after {
+			rotate: 90deg;
+		}
 }
 
-a-menu[open] {
-	display: block;
-	box-shadow: 2px 2px 5px black;
-}
 
-a-menu > a-menu { padding-left: 1rem; }
 
-/***** Background *****/
 
-	a-menu a:active,
-	a-menu[open],
-	a-menu::part(label):hover,
-	a-menu[open]::part(label)
-	{ background: var(--accent-color) }
 
-	a-menu::part(label),
-	a-menu::part(items)
-	{ background: var(--bg1-color); }
 
-/***** Border *****/
 
-	a-menu[open]
-	{ border: 1px solid var(--border-color) }
 
-	a-menu a,
-	a-menu::part(label)
-	{ border-bottom: 1px solid var(--border-color) }
 
-/***** Text *****/
-
-	a-menu a:active,
-	a-menu::part(label):hover,
-	a-menu[open]::part(label)
-	{ color: var(--accent-text) }
-
-	a-menu a
-	{ text-decoration: none }
-
-	a-menu a:hover,
-	a-menu button:hover {
-		text-decoration: underline;
-		text-decoration-thickness: 3px;
-	}
-
-/***** Cursor *****/
-
-	a-menu a,
-	a-menu button,
-	a-menu label,
-	a-menu::part(label)
-	{ cursor: pointer }

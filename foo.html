@@ -9,36 +9,39 @@
 </head>
 <body>
 
-<me-nu>
-  <strong slot="label">XXX</strong>
-  <a href="#">foo</a>
-  <a href="#">bar</a>
+<style>
+  li > menu {
+    display: none;
+  }
 
-  <me-nu>
-    <b slot="label">Sub A</b>
+  li:hover > menu {
+    display: block;
+  }
+</style>
 
-    <a href="#">baz</a>
-    <a href="#">boom</a>
+<menu part="menu">
+  <li>
+    <strong>Label</strong>
 
-    <me-nu>
-      <b slot="label">Sub Sub A</b>
-      <a href="#">bing</a>
-      <a href="#">bang</a>
-    </me-nu>
-
-    <me-nu>
-      <b slot="label">Sub Sub B</b>
-      <a href="#">fee</a>
-      <a href="#">fie</a>
-    </me-nu>
-  </me-nu>
-
-  <me-nu>
-    <b slot="label">Sub B</b>
-    <a href="#">foe</a>
-    <a href="#">fum</a>
-  </me-nu>
-</me-nu>
+    <menu>
+      <li>
+        <a href="#">One</a>
+        <a href="#">Two</a>
+        <a href="#">Three</a>
+        <li>
+          <strong>Label</strong>
+          <menu>
+            <li>
+              <a href="#">One</a>
+              <a href="#">Two</a>
+              <a href="#">Three</a>
+            </li>
+          </menu>
+        </li>
+      </li>
+    </menu>
+  </li>
+</menu>
 
 </body>
 </html>
