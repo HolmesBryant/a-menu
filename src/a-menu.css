@@ -16,8 +16,8 @@ a-menu {
 
 	  & a:active,
 		& a:hover,
-		&::part(label):hover,
-		&[open]::part(label)
+		&[open]::part(label),
+		& [slot="label"]:focus
 		{ background: var(--accent-color) }
 
 	/***** Border *****/
@@ -31,7 +31,7 @@ a-menu {
 
 		& a:active,
 		& a:hover,
-		&::part(label):hover,
+		& [slot="label"]:focus,
 		&[open]::part(label)
 		{ color: var(--accent-text) }
 
@@ -61,7 +61,7 @@ a-menu {
 			width: 1rem;
 		}
 
-		& [slot="label"]:hover::after {
+		& [slot="label"]:focus::after {
 			rotate: 90deg;
 		}
 }

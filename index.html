@@ -18,24 +18,24 @@
 	<p>A custom element that renders a configurable, responsive menu.</p>
 </header>
 
-<a-menu>
+<a-menu type="mobile">
 	<a href="#one">One</a>
 	<a href="#two">Two</a>
 	<a href="#three">Three</a>
 
-	<a-menu group="menu">
+	<a-menu>
 		<strong slot="label">Group One</strong>
 		<a href="#">Four</a>
 		<a href="#">Five</a>
 		<a href="#">Six</a>
 
-		<a-menu type="flyout">
+		<a-menu>
 			<strong slot="label">Sub one</strong>
 			<a href="#">Seven</a>
 			<a href="#">Eight</a>
 			<a href="#">Nine</a>
 
-			<a-menu type="flyout">
+			<a-menu>
 				<strong slot="label">Sub Sub One</strong>
 				<a href="#">Twelve</a>
 				<a href="#">Thirteen</a>
@@ -44,7 +44,7 @@
 		</a-menu>
 	</a-menu>
 
-	<a-menu group="menu">
+	<a-menu>
 		<b slot="label">Group Two</b>
 		<a href="#">Seven</a>
 		<a href="#">Eight</a>
