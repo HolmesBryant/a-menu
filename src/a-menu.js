@@ -18,9 +18,9 @@ export default class AMenu extends HTMLElement {
 
 	// -- Private Properties --
 	#abortController;
-	#labelSlot;
+	#headerSlot;
 	#menu;
-	#label;
+	#header;
 	#swipeStart = 0;
 	#swipeEnd = 0;
 
@@ -49,118 +49,81 @@ export default class AMenu extends HTMLElement {
 		this.template.innerHTML = `
 			<style>
 				:host {
-					--min: 35px;
-
 					display: block;
-					interpolate-size: allow-keywords;
 				}
 
-				menu {
-					display: flex;
-					flex-direction: column;
-					list-style: none;
-					margin: 0;
-					padding: 0;
-					position: relative;
-					flex: 1;
+				details {
+          display: flex;
+          position: relative;
+        }
 
-					& li {
-						display: flex;
-						flex-direction: column;
-						height: min-content;
-						align-items: baseline;
-						min-width: max-content;
-					}
-
-					& #items {
-						height: 0;
-						top: 100%;
-						overflow: clip;
-						transition: all .25s allow-discrete;
-						min-width: 200px;
-						width: 100%;
-						z-index: 1;
-					}
-
-					&[open] #items {
-						height: auto;
-						overflow: visible;
-					}
-				}
-
-				::slotted(*),
-				#label {
-					align-items: center;
-					display: flex;
-					min-height: var(--min);
+        #items {
+          display: flex;
+					position: absolute;
+					z-index: 1;
 					width: 100%;
-					padding: 0 .5rem;
-				}
+        }
 
-				#items {
-					white-space: nowrap
-				}
-
-				menu.classic {
-					display: inline-flex;
-					flex-direction: row;
-
-					& li {
-						display: inline-flex;
-						flex-direction: row;
-						gap: 1rem;
-						position: absolute;
-					}
-				}
-
-				menu.flydown {
+				details.mobile {
 					flex-direction: column;
-					position: relative;
+					position: static;
 
 					& #items {
-						height: 0;
-						position: absolute;
-						top: 100%;
-						overflow: clip;
-						transition: all .25s allow-discrete;
-						min-width: 200px;
-						width: 100%;
-						z-index: 1;
-					}
-
-					&[open] #items {
-						height: auto;
-						overflow: visible;
+						flex-direction: column;
+						left: 0;
+						width: 100vw;
 					}
 				}
 
-				menu.flyout {
+				details.classic {
 					flex-direction: row;
-					position: relative;
 
 					& #items {
-						min-width: 0;
-						width: 0;
-						position: absolute;
-						left: 100%;
-						overflow: clip;
-						transition: all .25s allow-discrete;
-						z-index: 1;
-					}
-
-					&:hover #items {
-						width: auto;
-						min-width: 200px;
-						overflow: visible;
+						flex-direction: row;
 					}
 				}
+
+				details.ribbon {
+					position: static;
+					flex-direction: column;
+
+					& #items {
+						flex-direction: row;
+						left: 0;
+						width: 100vw;
+					}
+				}
+
+        details.flydown {
+          flex-direction: column;
+
+          & #items {
+						flex-direction: column;
+						z-index: 2;
+          }
+        }
+
+				details.flyout {
+          flex-direction: column;
+
+          & #items {
+						left: 100%;
+						top: 0;
+						flex-direction: column;
+						z-index: 2;
+          }
+        }
 			</style>
 
-			<menu part="menu">
-				<li part="label" id="label" tabindex="0">
-					<slot name="label"></slot>
-				</li>
-				<li part="items" id="items"><slot tabindex="0"></slot></li>
+			<details part="menu" id="menu">
+				<summary part="header" id="header">
+					<span part="label" id="label">
+						<slot name="label"></slot>
+					</span>
+				</summary>
+				<div part="items" id="items">
+					<slot></slot>
+				</div>
 			</menu>
 		`;
 	}
@@ -170,9 +133,9 @@ export default class AMenu extends HTMLElement {
 		this.attachShadow({ mode: 'open' });
 		this.#abortController = new AbortController();
 		this.shadowRoot.append(AMenu.template.content.cloneNode(true));
-		this.#menu = this.shadowRoot.querySelector('menu');
-		this.#label = this.shadowRoot.querySelector('#label');
-		this.#labelSlot = this.shadowRoot.querySelector('slot[name="label"]');
+		this.#menu = this.shadowRoot.querySelector('#menu');
+		this.#header = this.shadowRoot.querySelector('#header');
+		this.#headerSlot = this.shadowRoot.querySelector('slot[name="label"]');
 	}
 
 	// -- Lifecycle --
@@ -227,12 +190,9 @@ export default class AMenu extends HTMLElement {
 	// -- Private
 
 	#addListeners() {
-		this.#label.addEventListener('click', () => {
-
+		this.#header.addEventListener('click', () => {
 			if (this.#group) {
 				AMenu.openMenu(this.#group, this)
-			} else {
-				this.toggleAttribute('open', !this.#open);
 			}
 		}, { signal: this.#abortController.signal });
 
@@ -257,33 +217,26 @@ export default class AMenu extends HTMLElement {
 
 	async #init() {
 		const parent = this.parentElement;
-		const hasLabel = this.#labelSlot.assignedNodes().length > 0;
+		const hasLabel = this.#headerSlot.assignedNodes().length > 0;
 
-		if (this.top && !hasLabel) this.open = true;
-		if (this.#group) AMenu.register(this.#group, this.#menu);
-
-	  if (parent instanceof AMenu) {
-	  	await parent.whenConnected();
-	  }
-
-	  const mobile = this.closest('a-menu[type="mobile"]');
-	  const classic = this.closest('a-menu[type="classic"]');
-	  const labels = this.#labelSlot.assignedNodes();
-
-		if (classic && !this.hasAttribute('type')) {
-			if (parent.top === true) {
-				this.type = 'flydown';
-			} else if (parent instanceof AMenu) {
-				this.type = 'flyout';
-			}
+		if (!hasLabel) {
+			this.open = true;
+			this.#header.hidden = true;
 		}
 
-		this.#addListeners();
+		if (this.top) {
+			if (!this.hasAttribute('type')) this.type = this.#type;
+		} else {
+			if (!this.hasAttribute('type')) {
+				const top = this.closest('a-menu[top]');
+				this.type = top.type;
+			}
 
-		if (!this.#connected) {
-	    this.#connected = true;
-	    this.#resolveConnected();
-	  }
+		}
+
+		// if (this.#group) AMenu.register(this.#group, this.#menu);
+
+
 	}
 
 	#setType(value) {

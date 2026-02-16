@@ -6,64 +6,60 @@ a-menu {
 	--accent-color: dodgerblue;
 	--accent-text: white;
 	--min: 35px;
+	--pad: .5rem;
 
-	/***** Background *****/
+	min-height: var(--min);
 
-	  &::part(label),
-	  &::part(items) {
-			background: var(--bg1-color);
-	  }
+/***** Background *****/
 
-	  & a:active,
-		& a:hover,
-		&[open]::part(label),
-		& [slot="label"]:focus
-		{ background: var(--accent-color) }
+	&::part(items) {
+		background: var(--bg1-color);
+	}
 
-	/***** Border *****/
+/***** Border *****/
 
-		&[type="mobile"] a,
-		& a-menu a,
-		& a-menu::part(label)
-		{ border-bottom: 1px solid var(--border-color) }
+	&::part(items)
+	{ border: 1px solid var(--border-color) }
 
-	/***** Text *****/
+	& a,
+	& a-menu:not([top]) {
+		border-bottom: 1px solid var(--border-color);
+	}
 
-		& a:active,
-		& a:hover,
-		& [slot="label"]:focus,
-		&[open]::part(label)
-		{ color: var(--accent-text) }
+/***** Text *****/
 
-		& a
-		{ text-decoration: none }
+	& a,
+	&::part(label) {
+		color: var(--text-color);
+		font-weight: bold;
+		text-decoration: none
+	}
 
-	/***** Cursor *****/
+/***** Cursor *****/
 
-		& a,
-		& button,
-		& label,
-		&::part(label)
-		{ cursor: pointer }
+	& a,
+	&::part(header)
+	{ cursor: pointer }
 
-	/***** Misc *****/
+/***** Shadows *****/
 
-		& [slot="label"]::after {
-			align-items: center;
-			content: "▶";
-			display: inline-flex;
-			font-size: 1rem;
-			height: 1rem;
-			justify-content: center;
-			margin-left: .5rem;
-			rotate: 0deg;
-			transition: rotate .2s;
-			width: 1rem;
-		}
+	&[top]::part(items)
+	{ box-shadow: none }
 
-		& [slot="label"]:focus::after {
-			rotate: 90deg;
-		}
+	&::part(items)
+	{ box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); }
+
+/***** Misc *****/
+
+	&:not([top]) a-menu {
+		padding-left: var(--pad);
+	}
+
+	& a,
+	&::part(header) {
+		padding: var(--pad);
+	}
+
 }
 
 

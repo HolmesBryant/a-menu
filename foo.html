@@ -5,43 +5,73 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Foo</title>
 
-  <script type="module" src="src/me-nu.js"></script>
+  <script>
+    class CustomElement extends HTMLElement {
+      constructor() {
+        super();
+        this.attachShadow({mode:'open'})
+      }
+
+      connectedCallback() {
+        this.shadowRoot.innerHTML = `
+          <style>
+            details {
+              display: flex;
+              gap: 1rem;
+              position: relative;
+            }
+
+            .items {
+              background: snow;
+              display: flex;
+              gap: 1rem;
+            }
+
+
+            details.flydown {
+              flex-direction: column;
+
+              & .items {
+                border: 1px solid lime;
+                position: absolute;
+              }
+            }
+
+
+
+          </style>
+
+          <details open>
+            <summary>menu</summary>
+
+            <div class="items">
+              <details open class="flydown">
+                <summary>Foo</summary>
+                <div class="items">
+                  <strong>Foo Items</strong>
+                </div>
+              </details>
+
+              <details>
+                <summary>Bar</summary>
+                <div class="items">
+                  <strong>Bar Items</strong>
+                </div>
+              </details>
+            </div>
+          </details>
+        `;
+      }
+    }
+
+    customElements.define('custom-element', CustomElement);
+  </script>
 </head>
 <body>
 
-<style>
-  li > menu {
-    display: none;
-  }
+  <custom-element></custom-element>
 
-  li:hover > menu {
-    display: block;
-  }
-</style>
-
-<menu part="menu">
-  <li>
-    <strong>Label</strong>
-
-    <menu>
-      <li>
-        <a href="#">One</a>
-        <a href="#">Two</a>
-        <a href="#">Three</a>
-        <li>
-          <strong>Label</strong>
-          <menu>
-            <li>
-              <a href="#">One</a>
-              <a href="#">Two</a>
-              <a href="#">Three</a>
-            </li>
-          </menu>
-        </li>
-      </li>
-    </menu>
-  </li>
-</menu>
+  <p>Fugiat pariatur dolore qui ullamco officia ut veniam velit adipisicing anim ut dolore ex proident exercitation ullamco voluptate commodo sit ut eiusmod ullamco in qui laboris cillum id id anim nulla elit veniam dolore.</p>
 
 </body>
 </html>
