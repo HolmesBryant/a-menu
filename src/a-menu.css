@@ -16,6 +16,14 @@ a-menu {
 		background: var(--bg1-color);
 	}
 
+	& a:hover,
+	& a:active,
+	& a:focus,
+	&::part(header):hover,
+	&::part(header):active,
+	&::part(header):focus
+	{ background: var(--bg2-color) }
+
 /***** Border *****/
 
 	&::part(items)

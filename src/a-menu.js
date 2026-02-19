@@ -1,299 +1,317 @@
 export default class AMenu extends HTMLElement {
+  // -- Attributes --
+  _group;
+  _open = false;
+  _type = 'mobile';
 
-	// -- Attributes --
-	#group;
-	#open = false;
-	#top = false;
+  // -- Private --
 
-	/**
-	 * Number of pixels required to count as a swipe
-	 */
-	#swipeThreshold = 40;
+  _abortController;
+  _header;
+  _headerSlot;
+  _menu;
+  _staticType = false;
+  _swipeStart = 0;
+  _swipeEnd = 0;
+  _swipeThreshold = 40;
 
-	/**
-	 * @private
-	 * @type {String ['mobile', 'classic', 'ribbon', 'sitemap', 'flydown', 'flyout']}
-	 */
-	#type = 'mobile';
+  // -- connection --
+  _connected = false;
+  #resolveConnected;
+  #connectedPromise = new Promise(resolve => {
+    this.#resolveConnected = resolve;
+  });
 
-	// -- Private Properties --
-	#abortController;
-	#headerSlot;
-	#menu;
-	#header;
-	#swipeStart = 0;
-	#swipeEnd = 0;
+  // -- Static --
 
-	// -- connection --
-	#connected = false;
-	#resolveConnected;
-	#connectedPromise = new Promise(resolve => {
-	  this.#resolveConnected = resolve;
-	});
+  static _menus = new Map();
 
-	// -- Static --
-	static observedAttributes = [
-		// 'burger',
-		'group',
-		'min-width',
-		'open',
-		'swipe-threshold',
-		'type',
-		'top'
-	];
+  static observedAttributes = [
+    'group',
+    'open',
+    'type'
+  ];
 
-	static #menus = new Map();
+  static template = document.createElement('template');
+  static {
+    this.template.innerHTML = `
+      <style>
+        :host {
+          display: block;
+          box-sizing: border-box;
+          interpolate-size: allow-keywords;
+        }
 
-	static template = document.createElement('template');
-	static {
-		this.template.innerHTML = `
-			<style>
-				:host {
-					display: block;
-				}
-
-				details {
+        details {
+          background: inherit;
           display: flex;
           position: relative;
+          width: 100%;
         }
+
+        details::details-content {
+          display: block;
+          overflow: hidden;
+          height: 0;
+          transition: height 0.25s ease, content-visibility 0.4s allow-discrete;
+        }
+
+        details[open]::details-content
+        { height: auto; }
 
         #items {
+          background: inherit;
           display: flex;
-					position: absolute;
-					z-index: 1;
-					width: 100%;
+          flex: 1;
+          flex-wrap: wrap;
+          position: absolute;
+          z-index: 2;
         }
 
-				details.mobile {
-					flex-direction: column;
-					position: static;
-
-					& #items {
-						flex-direction: column;
-						left: 0;
-						width: 100vw;
-					}
-				}
-
-				details.classic {
-					flex-direction: row;
-
-					& #items {
-						flex-direction: row;
-					}
-				}
-
-				details.ribbon {
-					position: static;
-					flex-direction: column;
-
-					& #items {
-						flex-direction: row;
-						left: 0;
-						width: 100vw;
-					}
-				}
-
-        details.flydown {
+        /* --- Mobile --- */
+        details.mobile {
           flex-direction: column;
-
-          & #items {
-						flex-direction: column;
-						z-index: 2;
-          }
         }
 
-				details.flyout {
+        details.mobile #items {
+          position: relative;
           flex-direction: column;
-
-          & #items {
-						left: 100%;
-						top: 0;
-						flex-direction: column;
-						z-index: 2;
-          }
+          left: 0;
+          width: 100%;
         }
-			</style>
 
-			<details part="menu" id="menu">
-				<summary part="header" id="header">
-					<span part="label" id="label">
-						<slot name="label"></slot>
-					</span>
-				</summary>
-				<div part="items" id="items">
-					<slot></slot>
-				</div>
-			</menu>
-		`;
-	}
+        /* --- Classic --- */
+        details.classic {
 
-	constructor() {
-		super();
-		this.attachShadow({ mode: 'open' });
-		this.#abortController = new AbortController();
-		this.shadowRoot.append(AMenu.template.content.cloneNode(true));
-		this.#menu = this.shadowRoot.querySelector('#menu');
-		this.#header = this.shadowRoot.querySelector('#header');
-		this.#headerSlot = this.shadowRoot.querySelector('slot[name="label"]');
-	}
+        }
 
-	// -- Lifecycle --
+        details.classic #items {
+          flex-direction: row;
+        }
 
-	async attributeChangedCallback(attr, oldval, newval) {
-		if (newval === oldval) return;
+        /* --- Ribbon --- */
+        details.ribbon {
+          position: static;
+          flex-direction: column;
+        }
 
-		switch (attr) {
-		case 'open':
-			this.#open = this.hasAttribute('open');
-			this.#menu.toggleAttribute('open', this.hasAttribute('open'));
-			break;
-		case 'group':
-			this.#group = newval;
-			this.#menu.setAttribute('group', newval);
-			break;
-		case 'top':
-			this.#top = this.hasAttribute('top');
-			this.#menu.toggleAttribute('top', this.#top);
-			break;
-		case 'type':
-			this.#type = newval;
-			this.#setType(newval);
-			break;
-		case 'swipe-threshold':
-			this.#swipeThreshold = Number(newval);
-		}
-	}
+        details.ribbon #items {
+          flex-direction: row;
+          left: 0;
+          width: 100vw;
+          position: absolute;
+        }
 
-	connectedCallback() {
-		if (! (this.parentElement instanceof AMenu)) this.top = true;
+        /* --- Dropdown --- */
+        details.dropdown {
+          flex-direction: column;
+          width: max-content;
+        }
 
-		if (!this.hasAttribute('type') && this.top) {
-			this.setAttribute('type', this.#type);
-		}
+        details.dropdown #items {
+          top: 100%;
+          left: 0;
+          flex-direction: column;
+          min-width: 100%;
+          width: max-content;
+        }
 
-		this.#init();
-	}
+        /* --- Flyout --- */
+        details.flyout {
+          flex-direction: column;
+          width: max-content;
+        }
 
-	disconnectedCallback() {
-		if (this.#abortController) {
-			this.#abortController.abort();
-			this.#abortController = null;
-		}
+        details.flyout #items {
+          left: 100%;
+          top: 0;
+          flex-direction: column;
+          min-width: 200px;
+          width: max-content;
+        }
+      </style>
 
-		this.#connected = false;
-	  this.#connectedPromise = new Promise(resolve => {
-	    this.#resolveConnected = resolve;
-	  });
-	}
+      <details part="menu" id="menu" class="mobile">
+        <summary part="header" id="header">
+          <span part="label" id="label">
+            <slot name="label"></slot>
+          </span>
+        </summary>
+        <div part="items" id="items">
+          <slot></slot>
+        </div>
+      </details>
+    `;
+  }
 
-	// -- Private
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+  }
 
-	#addListeners() {
-		this.#header.addEventListener('click', () => {
-			if (this.#group) {
-				AMenu.openMenu(this.#group, this)
-			}
-		}, { signal: this.#abortController.signal });
+  // -- Lifecycle --
 
-		let startY = 0;
-		let endY = 0;
+  attributeChangedCallback(attr, oldval, newval) {
+    if (oldval === newval) return;
+    switch (attr) {
+      case 'group':
+        this._group = newval;
+        if (this._connected) {
+          this._menu.setAttribute('group', newval);
+          if (window.abind) abind.update(this, 'group', newval);
+        }
+        break;
 
-		this.addEventListener('touchstart', event => {
-			this.#swipeStart = event.touches[0].clientY;
-		}, { signal: this.#abortController.signal });
+      case 'open':
+        this._open = this.hasAttribute('open');
+        if (this._connected) {
+          this._menu.open = this._open;
+          if (window.abind) abind.update(this, 'open', this._open);
+        }
+        break;
 
-		this.addEventListener('touchend', event => {
-			this.#swipeEnd = event.changedTouches[0].clientY;
-			this.#handleSwipe();
-		}, { signal: this.#abortController.signal });
-	}
+      case 'swipe-threshold':
+        this._swipeThreshold = Number(newval);
+        if (this._connected) {
+          if (window.abind) abind.update(this, 'swipeThreshold', this._swipeThreshold);
+        }
+        break;
 
-	#handleSwipe() {
-		const delta = this.#swipeEnd - this.#swipeStart;
-		if (Math.abs(delta) < this.#swipeThreshold) return;
-		this.toggleAttribute('open', delta > 0);
-	}
+      case "type":
+        this._type = newval;
+        if (this._connected && !this._staticType) {
+          this.applyType(newval);
+          if (window.abind) abind.update(this, 'type', newval);
+        }
+        break;
+    }
+  }
 
-	async #init() {
-		const parent = this.parentElement;
-		const hasLabel = this.#headerSlot.assignedNodes().length > 0;
+  connectedCallback() {
+    this._abortController = new AbortController;
+    this.shadowRoot.append(AMenu.template.content.cloneNode(true));
+    this._menu = this.shadowRoot.querySelector('#menu');
+    this._header = this.shadowRoot.querySelector('#header');
+    this._headerSlot = this.shadowRoot.querySelector('slot[name="label"]');
+    this._connected = true;
+    if (
+      this.parentElement.closest('a-menu') !== null &&
+      this.hasAttribute('type')
+    ) {
+      this._staticType = true;
+    }
 
-		if (!hasLabel) {
-			this.open = true;
-			this.#header.hidden = true;
-		}
+    this.applyType(this._type);
+    this.maybeHideHeader();
+    this._menu.open = this._open;
+    this.addListeners();
+  }
 
-		if (this.top) {
-			if (!this.hasAttribute('type')) this.type = this.#type;
-		} else {
-			if (!this.hasAttribute('type')) {
-				const top = this.closest('a-menu[top]');
-				this.type = top.type;
-			}
+  disconnectedCallback() {
+    this._connected = false;
+  }
 
-		}
+  // -- Private --
 
-		// if (this.#group) AMenu.register(this.#group, this.#menu);
+  addListeners() {
+    if (this._group) {
+      AMenu.register(this._group, this._menu);
+      this._menu.addEventListener("toggle", () => {
+        if (this._menu.open) AMenu.openGroup(this._group, this._menu);
+      }, { signal: this._abortController.signal });
+    }
 
+    let startY = 0;
+    let endY = 0;
 
-	}
+    this.addEventListener('touchstart', event => {
+      this._swipeStart = event.touches[0].clientY;
+    }, { signal: this._abortController.signal });
 
-	#setType(value) {
-		const types = ['mobile', 'classic', 'ribbon', 'sitemap', 'flyout', 'flydown'];
-		types.forEach( type => {
-			this.#menu.classList.remove(type);
-		});
+    this.addEventListener('touchend', event => {
+      this._swipeEnd = event.changedTouches[0].clientY;
+      this.handleSwipe();
+    }, { signal: this._abortController.signal });
+  }
 
-		this.#menu.classList.add(value);
-	}
+  applyType(value) {
+    const types = ['mobile', 'classic', 'ribbon', 'dropdown', 'flyout'];
+    this._menu.classList.remove(...types);
+    this._menu.classList.add(value);
+    this.applyTypeToNested(value);
+  }
 
-	// -- Static Methods --
+  async applyTypeToNested(value) {
+    // wait for nested a-menu's to connect
+    await this.whenConnected();
+    const nested = Array.from(this.children).filter( item => item.localName === 'a-menu');
 
-	static openMenu(group, elem) {
-		this.#menus.get(group)?.forEach( other => {
-			if (other !== elem) other.open = false;
-		});
-	}
+    for (const child of nested) {
+      switch (this._type) {
+      case 'classic':
+        child.type = 'dropdown';
+        break;
+      case 'dropdown':
+        child.type = 'flyout';
+        break;
+      default:
+        child.type = value;
+      }
+    }
+  }
 
-	static register(group, elem) {
-		if (!this.#menus.has(group)) this.#menus.set(group, new Set());
-		this.#menus.get(group).add(elem);
-	}
+  handleSwipe() {
+    const delta = this._swipeEnd - this._swipeStart;
+    if (Math.abs(delta) < this._swipeThreshold) return;
+    this.toggleAttribute('open', delta > 0);
+  }
 
+  maybeHideHeader() {
+    const hasLabel = this._headerSlot.assignedNodes().length > 0;
 
-	// -- Public --
+    if (!hasLabel) {
+      this.open = true;
+      this._header.hidden = true;
+    }
+  }
 
-	async whenConnected() {
-	  if (this.#connected) return true;
-	  await this.#connectedPromise;
-	  return true;
-	}
+  // --- Public --
 
-	// -- Getters / Setters
+  async whenConnected() {
+    if (this._connected) return true;
+    await this.#connectedPromise;
+    return true;
+  }
 
-	get menu() { return this.#menu }
+  static openGroup(group, elem) {
+    this._menus.get(group)?.forEach( other => {
+      if (other !== elem) other.open = false;
+    });
+  }
 
-	/*get burger() { return this.#burger }
-	set burger(value) { this.toggleAttribute('burger', value !== false && value !== 'false') }*/
+  static register(group, elem) {
+    if (!this._menus.has(group)) this._menus.set(group, new Set());
+    this._menus.get(group).add(elem);
+  }
 
-	// get group() { return this.#group }
-	// set group(value) { this.setAttribute('group', value) }
+  // -- Getters / Setters --
 
-	// get minWidth() { return this.#minWidth }
-	// set minWidth(value) { this. setAttribute('min-width', value) }
+  get group() { return this._group }
+  set group(value) { this.setAttribute('group', value) }
 
-	get open() { return this.#open }
-	set open(value) { this.toggleAttribute('open', value !== false && value !== 'false')}
+  get open() { return this._open }
+  set open(value) {
+    this.toggleAttribute('open', value !== undefined && value !== false);
+  }
 
-	get top() { return this.#top }
-	set top(value) { this.toggleAttribute('top', value !== false && value !== undefined)}
+  get swipeThreshold() { return this._swipeThreshold }
+  set swipeThreshold(value) { this.setAttribute('swipe-threshold', value)}
 
-	get type() { return this.#type }
-	set type(value) { this.setAttribute('type', value) }
-
-	// get swipeThreshold() { return this.#swipeThreshold }
-	// set swipeThreshold(value) { this.setAttribute('swipe-threshold', Number(value))}
+  get type() { return this._type }
+  set type(value) {
+    if (this._staticType) return;
+    this.setAttribute('type', value)
+  }
 }
 
 if (!customElements.get('a-menu')) customElements.define('a-menu', AMenu);

@@ -5,7 +5,11 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>A-Menu</title>
 	<script type="module" src="src/a-menu.js"></script>
-	<script type="module" src="extra/a-bind.min.js"></script>
+	<!-- <script type="module" src="extra/a-bind.min.js"></script> -->
+	<script type="module">
+		import ABind from "./extra/a-bind.min.js";
+		window.abind = ABind;
+	</script>
 
 	<link rel="stylesheet" href="src/a-menu.css">
 	<style>
@@ -26,7 +30,7 @@
 			<a-bind prop="open">
 				<input id="demo-open" type="checkbox">
 			</a-bind>
-		</div><!-- /card -->
+		</div>
 
 		<div class="card flex column">
 			<label for="demo-type">type</label>
@@ -40,13 +44,90 @@
 					<option>flydown</option>
 				</select>
 			</a-bind>
-		</div><!-- /card -->
+		</div>
 	</div>
 </a-bindgroup>
 
 <hr>
 
-<a-menu id="demo" type="mobile">
+<a-menu id="demo" type="classic" open>
+	<a href="#">Foo</a>
+
+	<a-menu id="demo-A" group="level-1" open>
+		<strong slot="label">
+			Demo A:
+			<a-bind
+			model="dom:#demo-A"
+			prop="type">
+			<select>
+				<option>classic</option>
+				<option>mobile</option>
+				<option>ribbon</option>
+				<option>dropdown</option>
+				<option>flyout</option>
+			</select>
+		</a-bind>
+		</strong>
+		<a href="#">Bar</a>
+
+		<a-menu id="demo-Aa">
+			<strong slot="label">
+				Demo Aa:
+				<a-bind
+			model="dom:#demo-Aa"
+			prop="type">
+			<select>
+				<option>classic</option>
+				<option>mobile</option>
+				<option>ribbon</option>
+				<option>dropdown</option>
+				<option>flyout</option>
+			</select>
+		</a-bind>
+			</strong>
+			<a href="#">Baz</a>
+		</a-menu>
+	</a-menu>
+
+	<a-menu id="demo-B" group="level-1">
+		<strong slot="label">
+			Demo B:
+			<a-bind
+			model="dom:#demo-B"
+			prop="type">
+			<select>
+				<option>classic</option>
+				<option>mobile</option>
+				<option>ribbon</option>
+				<option>dropdown</option>
+				<option>flyout</option>
+			</select>
+		</a-bind>
+		</strong>
+		<a href="#">Boom</a>
+
+		<a-menu id="demo-Ba">
+			<strong slot="label">
+				Demo Ba:
+				<a-bind
+			model="dom:#demo-Ba"
+			prop="type">
+			<select>
+				<option>classic</option>
+				<option>mobile</option>
+				<option>ribbon</option>
+				<option>dropdown</option>
+				<option>flyout</option>
+			</select>
+		</a-bind>
+			</strong>
+			<a href="#">Bing</a>
+		</a-menu>
+	</a-menu>
+</a-menu>
+
+
+<!-- <a-menu id="demo" type="classic">
 	<a href="#one">One</a>
 	<a href="#two">Two</a>
 	<a href="#three">Three</a>
@@ -69,7 +150,7 @@
 
 		<a href="#">Four</a>
 
-		<a-menu id="demo-aa">
+		<a-menu id="demo-aa" open>
 			<strong slot="label">Menu Type:</strong>
 			<a-bind
 				slot="label"
@@ -135,7 +216,8 @@
 		<a href="#">Ten</a>
 		<a href="#">Eleven</a>
 	</a-menu>
-</a-menu>
+</a-menu> -->
+
 
 <p>Proident minim do voluptate incididunt ullamco dolore labore ex non enim quis ut commodo ea elit minim dolore esse ut dolor elit ut veniam id quis adipisicing in cillum velit incididunt dolore mollit qui ullamco in dolor eiusmod ut est labore sint ex fugiat reprehenderit in do dolore amet magna dolor fugiat aliqua ut culpa do culpa eu in dolore ut occaecat cupidatat in deserunt culpa sit nostrud veniam duis et dolor irure proident id nulla ut consectetur id ut excepteur ex dolor occaecat occaecat officia ut sit incididunt ex exercitation nostrud eu eiusmod dolor aliquip ullamco consectetur enim laborum nisi minim labore cupidatat est duis ex nisi ut velit dolore laborum in ut commodo reprehenderit sed veniam anim incididunt sit ullamco cillum incididunt sed ea ex magna reprehenderit sed laborum eu labore nulla in ut dolor nisi et elit consectetur irure in exercitation tempor in enim sint minim ad consectetur sed ex ad in consequat excepteur ad in cupidatat dolore sit ut consequat commodo aliqua do duis labore labore minim laboris et minim esse laboris reprehenderit dolor laborum in magna dolore dolor aliquip pariatur et qui nulla quis voluptate eu ut ex fugiat in pariatur reprehenderit dolor fugiat aliqua veniam culpa nulla non pariatur qui est magna excepteur magna ullamco tempor id dolor ut laborum sint ut labore consequat labore enim commodo adipisicing cillum pariatur veniam commodo est laborum dolor pariatur quis ad culpa sunt et nostrud sed sint commodo duis consectetur ut commodo laborum.</p>
 
