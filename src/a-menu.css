@@ -8,13 +8,10 @@ a-menu {
 	--min: 35px;
 	--pad: .5rem;
 
-	min-height: var(--min);
-
 /***** Background *****/
 
-	&::part(items) {
-		background: var(--bg1-color);
-	}
+	&::part(items)
+	{ background: var(--bg1-color) }
 
 	& a:hover,
 	& a:active,
@@ -30,9 +27,8 @@ a-menu {
 	{ border: 1px solid var(--border-color) }
 
 	& a,
-	& a-menu:not([top]) {
-		border-bottom: 1px solid var(--border-color);
-	}
+	& a-menu:not([top])
+	{ border-bottom: 1px solid var(--border-color) }
 
 /***** Text *****/
 
@@ -41,6 +37,11 @@ a-menu {
 		color: var(--text-color);
 		font-weight: bold;
 		text-decoration: none
+	}
+
+	& [icon] {
+		font-size: var(--min);
+		line-height: 2rem;
 	}
 
 /***** Cursor *****/
@@ -59,15 +60,23 @@ a-menu {
 
 /***** Misc *****/
 
-	&:not([top]) a-menu {
-		padding-left: var(--pad);
-	}
+	&:not([top]) a-menu
+	{ padding-left: var(--pad) }
 
 	& a,
-	&::part(header) {
-		padding: var(--pad);
-	}
+	&::part(header)
+	{ padding: 0 var(--pad) }
 
+	&:has([icon])::part(header) {}
+}
+
+@media (prefers-color-scheme: dark) {
+	a-menu {
+    --bg1-color: rgb(40, 40, 40);
+		--bg2-color: rgb(60,60,60);
+		--border-color: dimgray;
+		--text-color: snow;
+	}
 }
 
 

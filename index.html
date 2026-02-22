@@ -12,10 +12,7 @@
 	</script>
 
 	<link rel="stylesheet" href="src/a-menu.css">
-	<style>
-
-
-	</style>
+	<link rel="stylesheet" href="extra/styles.css">
 </head>
 <body>
 <header>
@@ -33,6 +30,14 @@
 		</div>
 
 		<div class="card flex column">
+			<label for="demo-icon">icon</label>
+
+			<a-bind prop="icon">
+				<input type="checkbox" id="demo-icon">
+			</a-bind>
+		</div>
+
+		<div class="card flex column">
 			<label for="demo-type">type</label>
 			<a-bind prop="type">
 				<select id="demo-type">
@@ -41,7 +46,7 @@
 					<option>ribbon</option>
 					<option>sitemap</option>
 					<option>flyout</option>
-					<option>flydown</option>
+					<option>dropdown</option>
 				</select>
 			</a-bind>
 		</div>
@@ -50,12 +55,13 @@
 
 <hr>
 
-<a-menu id="demo" type="classic" open>
+<a-menu id="demo" open>
+	<strong slot="label" icon>☰</strong>
 	<a href="#">Foo</a>
 
 	<a-menu id="demo-A" group="level-1" open>
 		<strong slot="label">
-			Demo A:
+			Group A:
 			<a-bind
 			model="dom:#demo-A"
 			prop="type">
@@ -72,7 +78,7 @@
 
 		<a-menu id="demo-Aa">
 			<strong slot="label">
-				Demo Aa:
+				Group Aa:
 				<a-bind
 			model="dom:#demo-Aa"
 			prop="type">
@@ -86,12 +92,14 @@
 		</a-bind>
 			</strong>
 			<a href="#">Baz</a>
+			<a href="#">Baz Two</a>
+			<a href="#">Baz Three</a>
 		</a-menu>
 	</a-menu>
 
 	<a-menu id="demo-B" group="level-1">
 		<strong slot="label">
-			Demo B:
+			Group B:
 			<a-bind
 			model="dom:#demo-B"
 			prop="type">
@@ -108,7 +116,7 @@
 
 		<a-menu id="demo-Ba">
 			<strong slot="label">
-				Demo Ba:
+				Group Ba:
 				<a-bind
 			model="dom:#demo-Ba"
 			prop="type">
@@ -144,7 +152,7 @@
 				<option>ribbon</option>
 				<option>sitemap</option>
 				<option>flyout</option>
-				<option>flydown</option>
+				<option>dropdown</option>
 			</select>
 		</a-bind>
 
@@ -162,7 +170,7 @@
 					<option>ribbon</option>
 					<option>sitemap</option>
 					<option>flyout</option>
-					<option>flydown</option>
+					<option>dropdown</option>
 				</select>
 			</a-bind>
 			<a href="#">Seven</a>
@@ -181,7 +189,7 @@
 						<option>ribbon</option>
 						<option>sitemap</option>
 						<option>flyout</option>
-						<option>flydown</option>
+						<option>dropdown</option>
 					</select>
 				</a-bind>
 				<a href="#">Twelve</a>
@@ -207,7 +215,7 @@
 				<option>ribbon</option>
 				<option>sitemap</option>
 				<option>flyout</option>
-				<option>flydown</option>
+				<option>dropdown</option>
 			</select>
 		</a-bind>
 		<a href="#">Seven</a>

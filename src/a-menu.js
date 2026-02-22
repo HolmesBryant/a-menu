@@ -1,6 +1,9 @@
+import styles from './a-menu-shadow.css' with {type: 'css'};
+
 export default class AMenu extends HTMLElement {
   // -- Attributes --
   _group;
+  _icon;
   _open = false;
   _type = 'mobile';
 
@@ -28,6 +31,7 @@ export default class AMenu extends HTMLElement {
 
   static observedAttributes = [
     'group',
+    'icon',
     'open',
     'type'
   ];
@@ -35,102 +39,6 @@ export default class AMenu extends HTMLElement {
   static template = document.createElement('template');
   static {
     this.template.innerHTML = `
-      <style>
-        :host {
-          display: block;
-          box-sizing: border-box;
-          interpolate-size: allow-keywords;
-        }
-
-        details {
-          background: inherit;
-          display: flex;
-          position: relative;
-          width: 100%;
-        }
-
-        details::details-content {
-          display: block;
-          overflow: hidden;
-          height: 0;
-          transition: height 0.25s ease, content-visibility 0.4s allow-discrete;
-        }
-
-        details[open]::details-content
-        { height: auto; }
-
-        #items {
-          background: inherit;
-          display: flex;
-          flex: 1;
-          flex-wrap: wrap;
-          position: absolute;
-          z-index: 2;
-        }
-
-        /* --- Mobile --- */
-        details.mobile {
-          flex-direction: column;
-        }
-
-        details.mobile #items {
-          position: relative;
-          flex-direction: column;
-          left: 0;
-          width: 100%;
-        }
-
-        /* --- Classic --- */
-        details.classic {
-
-        }
-
-        details.classic #items {
-          flex-direction: row;
-        }
-
-        /* --- Ribbon --- */
-        details.ribbon {
-          position: static;
-          flex-direction: column;
-        }
-
-        details.ribbon #items {
-          flex-direction: row;
-          left: 0;
-          width: 100vw;
-          position: absolute;
-        }
-
-        /* --- Dropdown --- */
-        details.dropdown {
-          flex-direction: column;
-          width: max-content;
-        }
-
-        details.dropdown #items {
-          top: 100%;
-          left: 0;
-          flex-direction: column;
-          min-width: 100%;
-          width: max-content;
-        }
-
-        /* --- Flyout --- */
-        details.flyout {
-          flex-direction: column;
-          width: max-content;
-        }
-
-        details.flyout #items {
-          left: 100%;
-          top: 0;
-          flex-direction: column;
-          min-width: 200px;
-          width: max-content;
-        }
-      </style>
-
       <details part="menu" id="menu" class="mobile">
         <summary part="header" id="header">
           <span part="label" id="label">
@@ -147,6 +55,7 @@ export default class AMenu extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+    this.shadowRoot.adoptedStyleSheets = [styles];
   }
 
   // -- Lifecycle --
@@ -159,6 +68,14 @@ export default class AMenu extends HTMLElement {
         if (this._connected) {
           this._menu.setAttribute('group', newval);
           if (window.abind) abind.update(this, 'group', newval);
+        }
+        break;
+
+      case 'icon':
+        this._icon = newval !== 'false' && newval !== null;
+        if (this._connected) {
+          this._menu.classList.toggle('icon', this._icon);
+          if (window.abind) abind.update(this, 'icon', this._icon);
         }
         break;
 
@@ -201,8 +118,14 @@ export default class AMenu extends HTMLElement {
       this._staticType = true;
     }
 
+    if (this.parentElement.closest('a-menu') === null) {
+      this.toggleAttribute('top', true);
+    }
+
+    if (this.hasIcon()) this.icon = true;
     this.applyType(this._type);
     this.maybeHideHeader();
+    if (this._group) AMenu.register(this._group, this._menu);
     this._menu.open = this._open;
     this.addListeners();
   }
@@ -214,12 +137,12 @@ export default class AMenu extends HTMLElement {
   // -- Private --
 
   addListeners() {
-    if (this._group) {
-      AMenu.register(this._group, this._menu);
-      this._menu.addEventListener("toggle", () => {
-        if (this._menu.open) AMenu.openGroup(this._group, this._menu);
-      }, { signal: this._abortController.signal });
-    }
+
+    this._menu.addEventListener("toggle", () => {
+      if (this._menu.open) AMenu.openGroup(this._group, this._menu);
+      // use setter
+      this.open = this._menu.open;
+    }, { signal: this._abortController.signal });
 
     let startY = 0;
     let endY = 0;
@@ -266,6 +189,15 @@ export default class AMenu extends HTMLElement {
     this.toggleAttribute('open', delta > 0);
   }
 
+  hasIcon() {
+    const slotted = this._headerSlot.assignedNodes();
+    for (const elem of slotted) {
+      if (elem.hasAttribute('icon')) {
+        return true;
+      }
+    }
+  }
+
   maybeHideHeader() {
     const hasLabel = this._headerSlot.assignedNodes().length > 0;
 
@@ -284,6 +216,7 @@ export default class AMenu extends HTMLElement {
   }
 
   static openGroup(group, elem) {
+    if (this._menus.size === 0) return;
     this._menus.get(group)?.forEach( other => {
       if (other !== elem) other.open = false;
     });
@@ -298,6 +231,11 @@ export default class AMenu extends HTMLElement {
 
   get group() { return this._group }
   set group(value) { this.setAttribute('group', value) }
+
+  get icon() { return this._icon }
+  set icon(value) {
+    this.toggleAttribute('icon', value !== undefined && value !== false )
+  }
 
   get open() { return this._open }
   set open(value) {

@@ -81,7 +81,7 @@ body {
 	input,
 	select,
 	textarea
-	{ background: var(--bg4-color); }
+	{ background: var(--bg3-color); }
 
   .button:hover,
   button:hover,
@@ -126,7 +126,7 @@ body {
   fieldset,
   textarea,
   .card
-  { border-radius: .5rem; }
+  { border-radius: .25rem; }
 
   details[open] > summary {
   	border-bottom-left-radius: 0;
@@ -150,14 +150,14 @@ body {
 	{ color: var(--accent-color) }
 
 	button,
-	.button
-	{ color: var(--text-color) }
-
-	button.primary,
-	.button.promary,
+	.button,
 	input,
 	select,
 	textarea
+	{ color: var(--text-color) }
+
+	button.primary,
+	.button.primary
 	{ color: var(--accent-text); }
 
 	input,
@@ -168,9 +168,7 @@ body {
 
 	button,
 	.button,
-	label,
-	select,
-	option
+	label
 	{ font-weight: bold; }
 
 	summary {

@@ -1,0 +1,148 @@
+/**
+ * @file a-menu-shadow.css
+ * CSS styles for a-menu custom element shadow dom
+ */
+:host {
+  --bg1-color: snow;
+  --min: 35px;
+  --transition-duration: .25s;
+
+  display: block;
+  box-sizing: border-box;
+  interpolate-size: allow-keywords;
+  position: relative;
+  /* reset immediately when closed */
+  transition: z-index 0s 0s;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --bg1-color: rgb(40,40,40);
+    --border-color: dimgray;
+    --text-color: snow;
+  }
+}
+
+:host([top]) {
+	& > details.mobile > #items { position: absolute; }
+}
+
+summary,
+::slotted(a) {
+  align-items: center;
+  background: var(--bg1-color);
+  display: flex;
+  min-height: var(--min);
+}
+
+details {
+  box-sizing: border-box;
+  position: relative;
+  width: 100%;
+  z-index: 1;
+}
+
+details::details-content {
+  content-visibility: visibile;
+  height: 0;
+  min-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  visibility: 0;
+  /* when closing, transition overflow immediately so content doesn't bleed out while shrinking */
+  transition:
+    content-visibility var(--transition-duration) ease allow-discrete,
+    height var(--transition-duration) ease,
+    opacity var(--transition-duration) ease,
+    overflow 0s 0s;
+}
+
+details[open]::details-content {
+  height: auto;
+  /* when open, set overflow:visible but wait 0.2s (transition duration) before applying it */
+  opacity: 1.0;
+  overflow: visible;
+  visibility: visible;
+  transition:
+    content-visibility var(--transition-duration) ease allow-discrete,
+    height var(--transition-duration) ease,
+    opacity var(--transition-duration) ease,
+    overflow 0s 0.5s;
+}
+
+details[open] { z-index: 1000 }
+
+details.icon > #header { display: block }
+
+#label {
+  align-items: center;
+  display: inline-flex;
+  min-height: var(--min);
+}
+
+#items {
+  align-items: stretch;
+  display: flex;
+  flex-wrap: wrap;
+  min-height: var(--min);
+}
+
+/* --- Mobile --- */
+
+details.mobile { flex-direction: column }
+details.mobile #items {
+  flex-direction: column;
+  width: 100%;
+}
+
+/* --- Classic --- */
+
+details.classic { display: block }
+
+details.classic #items { flex-direction: row }
+
+/* --- Ribbon --- */
+
+details.ribbon { display: block; }
+
+details.ribbon #items {
+  flex-direction: row;
+  left: 0;
+  min-width: 100%;
+  width: max-content;
+  position: absolute;
+}
+
+/* --- Dropdown --- */
+
+details.dropdown {
+  flex-direction: column;
+  width: max-content;
+}
+
+details.dropdown #items {
+  top: 100%;
+  left: 0;
+  flex-direction: column;
+  min-width: 100%;
+  position: absolute;
+  width: max-content;
+}
+
+/* --- Flyout --- */
+
+details.flyout {
+  flex-direction: column;
+  width: max-content;
+}
+
+/* details.flyout::details-content { overflow: visible } */
+
+details.flyout #items {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  flex-direction: column;
+  min-width: 200px;
+  width: max-content;
+}
