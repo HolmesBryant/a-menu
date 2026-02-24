@@ -3,12 +3,11 @@
  * CSS styles for a-menu custom element shadow dom
  */
 :host {
-  --bg-color: linen;
   --duration: 0.5s;
   --min-height: 35px;
   --pad: 0.5rem;
 
-
+  background: inherit;
   interpolate-size: allow-keywords;
   container-name: menu-system;
   display: block;
@@ -43,6 +42,7 @@
 }
 
 details {
+  background: inherit;
   box-sizing: border-box;
   position: relative;
   width: 100%;
@@ -84,6 +84,7 @@ summary {
   /* Pass type down to children */
   --inherited-type: var(--type);
 
+  background: inherit;
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;

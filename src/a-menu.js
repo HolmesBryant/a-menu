@@ -4,6 +4,7 @@ export default class AMenu extends HTMLElement {
   // -- Attributes --
   _group;
   _open = false;
+  _top = false;
   _type = 'classic';
 
   // -- Private --
@@ -26,8 +27,10 @@ export default class AMenu extends HTMLElement {
   });
 
   // -- nested updates
+  _rafDelay = 100;
   _rafHandle = null;
   _timeStart = null;
+  _token = null;
 
   // -- Static --
 
@@ -154,9 +157,8 @@ export default class AMenu extends HTMLElement {
       this._rafHandle = null;
     }
 
-    if (this._timeStart) {
-      this._timeStart = null;
-    }
+    if (this._timeStart) this._timeStart = null;
+    this._token = null;
 
     if (this._group) {
       AMenu._menus.get(this._group)?.delete(this._menu);
@@ -177,9 +179,6 @@ export default class AMenu extends HTMLElement {
       this.open = this._menu.open;
       this._header.setAttribute('aria-expanded', String(this._menu.open));
     }, { signal: this._abortController.signal });
-
-    let startY = 0;
-    let endY = 0;
 
     this.addEventListener('touchstart', event => {
       this._swipeStart = event.touches[0].clientY;
@@ -225,39 +224,10 @@ export default class AMenu extends HTMLElement {
     this.applyTypeToNested(value);
   }
 
-  /*async applyTypeToNested(value) {
-     await this.whenConnected();
-    // Critical: Ensure custom elements are defined so we can access class methods
-    await customElements.whenDefined('a-menu');
-
-    const nested = Array.from(this.children).filter(item => item.localName === 'a-menu');
-
-    for (const child of nested) {
-      // Critical: Wait for child upgrade and connection
-      if (typeof child.whenConnected === 'function') {
-        await child.whenConnected();
-      }
-
-      let type;
-      switch (this._type) {
-        case 'classic':
-          type = 'dropdown';
-          break;
-        case 'dropdown':
-          type = 'flyout';
-          break;
-        default:
-          type = value;
-      }
-
-      // Use setter to trigger child's own logic (ACC -> applyType)
-      if (child.type !== type) {
-        child.type = type;
-      }
-    }
-  }*/
-
   async applyTypeToNested(value) {
+    const invocationToken = Symbol('applyTypeToNested');
+    this._token = invocationToken;
+
     // Cancel any in-progress rAF debounce
     if (this._rafHandle) {
       cancelAnimationFrame(this._rafHandle);
@@ -271,52 +241,180 @@ export default class AMenu extends HTMLElement {
     const start = performance.now();
     this._timeStart = start;
 
+    return new Promise((resolve) => {
+      const tick = async (now) => {
+        // prevent race condition from overlapping calls
+        if (this._token !== invocationToken) {
+          this._rafHandle = null;
+          this._timeStart = null;
+          return resolve(false);
+        }
+
+        if (!this.isConnected) {
+          this._rafHandle = null;
+          this._timeStart = null;
+          return resolve(false);
+        }
+
+        // if another call started later, abort
+        if (this._timeStart !== start) {
+          return resolve(false);
+        }
+
+        if (now - start >= delay) {
+          this._rafHandle = null;
+          this._timeStart = null;
+
+          try {
+            // prevent stale updates after disconnection or new call
+            if (this._token !== invocationToken) {
+              return resolve(false);
+            }
+
+            await this.whenConnected();
+
+            if (this._token !== invocationToken || !this.isConnected) {
+              return resolve(false);
+            }
+
+            await customElements.whenDefined('a-menu');
+
+            if (this._token !== invocationToken || !this.isConnected) {
+              return resolve(false);
+            }
+
+            const nested = Array.from(this.children).filter(
+              item => item.localName === 'a-menu'
+            );
+
+            for (const child of nested) {
+              if (this._token !== invocationToken || !this.isConnected) {
+                return resolve(false);
+              }
+
+              if (typeof child.whenConnected === 'function') {
+                await child.whenConnected();
+              }
+
+              if (this._token !== invocationToken) {
+                return resolve(false);
+              }
+
+              let type;
+              switch (this._type) {
+                case 'classic':
+                  type = 'dropdown';
+                  break;
+                case 'dropdown':
+                  type = 'flyout';
+                  break;
+                default:
+                  type = value;
+              }
+
+              // Only update if this is still the latest invocation
+              if (child.type !== type && this._token === invocationToken) {
+                child.type = type;
+              }
+            }
+
+            resolve(true);
+          } catch (e) {
+            console.warn('Error in applyTypeToNested:', e);
+            resolve(false);
+          }
+        } else {
+          // prevent orphaned rAF callbacks from stale invocations
+          if (
+            this._token === invocationToken &&
+            this.isConnected
+          ) {
+            this._rafHandle = requestAnimationFrame(tick);
+          } else {
+            this._rafHandle = null;
+            resolve(false);
+          }
+        }
+      };
+
+      // Schedule initial tick
+      if (this.isConnected && this._token === invocationToken) {
+        this._rafHandle = requestAnimationFrame(tick);
+      } else {
+        resolve(false);
+      }
+    });
+  }
+
+  /*async applyTypeToNested(value) {
+    // Cancel in-progress debounces
+    if (this._rafHandle) {
+      cancelAnimationFrame(this._rafHandle);
+      this._rafHandle = null;
+    }
+
+    if (this._timeStart) this._timeStart = null;
+
+    const delay = Number(this._rafDelay ?? 100); // ms
+    const start = performance.now();
+    this._timeStart = start;
+
     return new Promise(resolve => {
       const tick = async (now) => {
-        // If another call started later, abort this run
+        if (!this.isConnected) {
+          this._rafHandle = null;
+          this._timeStart = null;
+          return resolve(false);
+        }
+
+        // If another call started later, abort
         if (this._timeStart !== start) return resolve(false);
 
         if (now - start >= delay) {
           this._rafHandle = null;
           this._timeStart = null;
 
-          await this.whenConnected();
-          await customElements.whenDefined('a-menu');
+          try {
+            await this.whenConnected();
+            await customElements.whenDefined('a-menu');
+            const nested = Array.from(this.children).filter(item => item.localName === 'a-menu');
 
-          const nested = Array.from(this.children).filter(item => item.localName === 'a-menu');
+            for (const child of nested) {
+              if (!this.isConnected) return resolve(false);
+              if (typeof child.whenConnected === 'function') await child.whenConnected();
 
-          for (const child of nested) {
-            if (typeof child.whenConnected === 'function') {
-              await child.whenConnected();
+              let type;
+              switch (this._type) {
+                case 'classic':
+                  type = 'dropdown';
+                  break;
+                case 'dropdown':
+                  type = 'flyout';
+                  break;
+                default:
+                  type = value;
+              }
+
+              if (child.type !== type) child.type = type;
             }
 
-            let type;
-            switch (this._type) {
-              case 'classic':
-                type = 'dropdown';
-                break;
-              case 'dropdown':
-                type = 'flyout';
-                break;
-              default:
-                type = value;
-            }
-
-            if (child.type !== type) {
-              child.type = type;
-            }
+            resolve(true);
+          } catch (error) {
+            console.warn('Error in applyTypeToNested:', error);
+            resolve(false);
           }
-
-          resolve(true);
         } else {
-          this._rafHandle = requestAnimationFrame(tick);
+          if (this.isConnected) {
+            this._rafHandle = requestAnimationFrame(tick);
+          } else {
+            resolve(false);
+          }
         }
       };
 
       this._rafHandle = requestAnimationFrame(tick);
     });
-
-  }
+  }*/
 
   handleSwipe() {
     const delta = this._swipeEnd - this._swipeStart;
