@@ -3,257 +3,299 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Container Query Navigation</title>
+  <title>Container Query Navigation (Web Component)</title>
 
-  <style>
-    :root {
-      interpolate-size: allow-keywords;
-    }
+  <script>
+    class AMenu extends HTMLElement {
+      static template = document.createElement('template');
+      static {
+        this.template.innerHTML = `
+          <style>
+            :host {
+              interpolate-size: allow-keywords;
+              container-name: menu-system;
 
-    a-menu {
-      container-name: menu-mode;
+              --bg-color: linen;
+              --duration: 0.5s;
+              --min-height: 35px;
+              --pad: 0.5rem;
 
-      /* DEFAULT: Nested menus act as dropdown */
-      --bg1-color: snow;
-      --border-color: silver;
-      --layout: flyout;
-      --duration: 0.5s;
-      --min: 35px;
-      --pad: .5rem;
+              /* Layout */
+              display: block;
+              box-sizing: border-box;
+              position: relative;
 
-      display: block;
-      box-sizing: border-box;
-      position: relative;
-      transition: z-index 0s 0s;
-    }
 
-    /* Top level menu defaults to classic */
-    a-menu[top]
-    { --layout: classic }
+              z-index: 1;
+              transition: z-index 0s linear var(--duration);
 
-    a-menu[top] > details > .items > a-menu
-    { --layout: dropdown; }
+              --type: var(--inherited-type, flyout);
+            }
 
-    @media (max-width: 640px) {
-      /* force ALL menus to be mobile */
-      a-menu, a-menu[top]
-      { --layout: mobile }
-    }
+            :host([open]) {
+              z-index: 100;
+              transition-delay: 0s;
+            }
 
-    summary,
-    .items {
-      background: var(--bg1-color);
-    }
+            :host(:focus-within),
+            :host(:hover) {
+              z-index: 1000;
+              transition-delay: 0s;
+            }
 
-    a {
-      align-items: center;
-      display: flex;
-      min-height: var(--min);
-      text-decoration: none;
-      white-space: nowrap;
-    }
+            /* --- TOP LEVEL DEFAULTS --- */
+            :host([top]) {
+              --type: classic;
+            }
 
-    a,
-    summary
-    { padding: 0 var(--pad); }
+            /* --- MOBILE OVERRIDES --- */
+            @media (max-width: 640px) {
+              :host, :host([top]) {
+                --type: mobile;
+              }
+            }
 
-    details {
-      box-sizing: border-box;
-      position: relative;
-      width: 100%;
-      z-index: 1;
-    }
+            /* --- INHERITANCE LOGIC --- */
+            #items {
+              /* Pass our type down to children by default */
+              --inherited-type: var(--type);
 
-    /* --- Transitions --- */
-    details::details-content {
-      content-visibility: visible;
-      min-height: 0;
-      height: 0;
-      opacity: 0;
-      overflow: hidden;
-      visibility: hidden;
+              background: var(--bg-color);
+              display: flex;
+              flex-wrap: wrap;
+              align-items: stretch;
+              min-height: var(--min-height);
+            }
 
-      transition:
-        height var(--duration) ease,
-        opacity var(--duration) ease,
-        content-visibility var(--duration) ease allow-discrete,
-        overflow 0s 0s;
-    }
+            /* Classic Bar -> Children become Dropdowns */
+            @container menu-system style(--type: classic) {
+              #items { --inherited-type: dropdown; }
+            }
 
-    details[open]::details-content {
-      height: auto;
-      opacity: 1.0;
-      overflow: visible;
-      visibility: visible;
+            /* Dropdowns -> Children become Flyouts */
+            @container menu-system style(--type: dropdown) {
+              #items { --inherited-type: flyout; }
+            }
 
-      /* Wait for height animation before allowing overflow to be visible */
-      transition:
-        height var(--duration) ease,
-        opacity var(--duration) ease,
-        content-visibility var(--duration) ease allow-discrete,
-        overflow 0s var(--duration);
-    }
+            /* --- STYLING --- */
 
-    details[open]
-    { z-index: 1000 }
+            summary {
+              background: var(--bg-color);
+              cursor: pointer;
+              padding: 0 var(--pad);
+              list-style: none;
+            }
 
-    summary
-    { cursor: pointer }
+            ::slotted(a) {
+              display: flex;
+              align-items: center;
+              min-height: var(--min-height);
+              text-decoration: none;
+              white-space: nowrap;
+              color: black;
+              padding: 0 var(--pad);
+              background: var(--bg-color);
+              width: 100%;
+              box-sizing: border-box;
+            }
 
-    .label {
-      align-items: center;
-      display: inline-flex;
-      min-height: var(--min);
-      font-weight: bold;
-    }
+            #label {
+              display: inline-flex;
+              align-items: center;
+              min-height: var(--min-height);
+              font-weight: bold;
+            }
 
-    .items {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: stretch;
-      min-height: var(--min);
-    }
+            details {
+              box-sizing: border-box;
+              position: relative;
+              width: 100%;
+            }
 
-    /* --- MOBILE --- */
-    @container menu-mode style(--layout: mobile) {
-      details {
-        display: flex;
-        flex-direction: column;
+            /* --- ANIMATIONS --- */
+            details::details-content {
+              content-visibility: visible;
+              height: 0;
+              opacity: 0;
+              overflow: hidden;
+
+              /* Standard transition: Animate height/opacity */
+              transition:
+                height var(--duration) ease,
+                opacity var(--duration) ease,
+                content-visibility var(--duration) ease allow-discrete,
+                overflow 0s 0s;
+            }
+
+            details[open]::details-content {
+              height: auto;
+              opacity: 1;
+              overflow: visible;
+
+              /*
+                 Delay overflow:visible until AFTER animation
+                 so scrollbars don't flicker
+              */
+              transition:
+                height var(--duration) ease,
+                opacity var(--duration) ease,
+                content-visibility var(--duration) ease allow-discrete,
+                overflow 0s var(--duration);
+            }
+
+            /* --- LAYOUTS --- */
+
+            /* Shared Vertical Traits */
+            @container menu-system style(--type: mobile) or style(--type: dropdown) or style(--type: flyout) {
+              details { display: flex; flex-direction: column; width: max-content; }
+              #items { flex-direction: column; width: max-content; }
+            }
+
+            /* Mobile */
+            @container menu-system style(--type: mobile) {
+              details, #items { width: 100%; }
+            }
+
+            /* Classic (Top Bar) */
+            @container menu-system style(--type: classic) {
+              details { display: block; width: 100%; }
+              #items { flex-direction: row; width: 100%; }
+              ::slotted(a) { width: auto; }
+            }
+
+            /* Dropdown (Below) */
+            @container menu-system style(--type: dropdown) {
+              #items {
+                position: absolute;
+                top: 100%; left: 0;
+                min-width: 100%;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Optional shadow for depth */
+              }
+            }
+
+            /* Flyout (Right) */
+            @container menu-system style(--type: flyout) {
+               #items {
+                position: absolute;
+                left: 100%; top: 0;
+                min-width: 200px;
+                box-shadow: 4px 4px 6px rgba(0,0,0,0.1);
+              }
+            }
+          </style>
+
+          <details part="menu" id="menu">
+            <summary part="header" id="header">
+              <span id="label">
+                <slot name="label"></slot>
+              </span>
+            </summary>
+            <div id="items">
+              <slot></slot>
+            </div>
+          </details>
+        `;
       }
-      .items {
-        flex-direction: column;
-        width: 100%;
+
+      static _menus = new Map();
+
+      constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+      }
+
+      connectedCallback() {
+        this.shadowRoot.appendChild(AMenu.template.content.cloneNode(true));
+
+        this._menu = this.shadowRoot.getElementById('menu');
+        this._group = this.getAttribute('group');
+
+        // Auto-detect Top Level
+        if (!this.parentElement.closest('a-menu')) {
+          this.toggleAttribute('top', true);
+          this._menu.open = true;
+        }
+
+        if(this.hasAttribute('open')) {
+            this._menu.open = true;
+        }
+
+        if (this._group) {
+          AMenu.register(this._group, this._menu);
+        }
+
+        this._menu.addEventListener("toggle", () => {
+          if(this._menu.open) {
+              // 1. Sync state to host for styling (:host([open]))
+              this.setAttribute('open', '');
+              // 2. Handle accordion logic
+              AMenu.openGroup(this._group, this._menu);
+          } else {
+              this.removeAttribute('open');
+          }
+        });
+      }
+
+      static register(group, elem) {
+        if (!this._menus.has(group)) this._menus.set(group, new Set());
+        this._menus.get(group).add(elem);
+      }
+
+      static openGroup(group, elem) {
+        if (!group || !this._menus.has(group)) return;
+        this._menus.get(group).forEach(other => {
+          if (other !== elem) other.open = false;
+        });
       }
     }
 
-    /* --- CLASSIC --- */
-    @container menu-mode style(--layout: classic) {
-      details { display: block; }
-      .items { flex-direction: row; }
-    }
-
-    /* --- DROPDOWN --- */
-    @container menu-mode style(--layout: dropdown) {
-      details {
-        display: flex;
-        flex-direction: column;
-        width: max-content;
-      }
-      .items {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        flex-direction: column;
-        min-width: 100%;
-        width: max-content;
-      }
-    }
-
-    /* --- FLYOUT --- */
-    @container menu-mode style(--layout: flyout) {
-      details {
-        display: flex;
-        flex-direction: column;
-        width: max-content;
-      }
-
-      .items {
-        position: absolute;
-        left: 100%;
-        top: 0;
-        flex-direction: column;
-        min-width: 200px;
-        width: max-content;
-      }
-    }
-
-    /* --- LAYOUT: RIBBON ---
-       Full width horizontal bar, Absolute position.
-    */
-    @container menu-mode style(--layout: ribbon) {
-      details { display: block; }
-      .items {
-        position: absolute;
-        left: 0;
-        flex-direction: row;
-        min-width: 100%;
-        width: max-content;
-      }
-    }
-
-  </style>
+    customElements.define('a-menu', AMenu);
+  </script>
 </head>
 <body>
 
-  <!--
-       role="navigation" is good accessibility practice.
-       We removed "class=mobile" because the CSS Variable now handles it.
-  -->
-  <a-menu top role="navigation">
-    <details open>
-
-      <summary class="header">
-        <span class="label">Demo</span>
-      </summary>
-
-      <div class="items">
-        <a href="#">Home</a>
-
-        <a-menu id="demo-a">
-          <details name="demo">
-            <summary class="header">
-              <span class="label">Demo A</span>
-            </summary>
-            <div class="items">
-              <a href="#">Bar</a>
-
-              <a-menu>
-                <details>
-                  <summary class="header">
-                    <span class="label">Demo Aa</span>
-                  </summary>
-                  <div class="items">
-                    <a href="#">Bar One</a>
-                    <a href="#">Bar Two</a>
-                    <a href="#">Bar Three</a>
-                  </div>
-                </details>
-              </a-menu>
-            </div>
-          </details>
-        </a-menu>
-
-        <a-menu id="demo-b">
-          <details name="demo">
-            <summary class="header">
-              <span class="label">Demo B</span>
-            </summary>
-            <div class="items">
-              <a href="#">Baz</a>
-
-              <a-menu>
-                <details>
-                  <summary class="header">
-                    <span class="label">Demo Ba</span>
-                  </summary>
-                  <div class="items">
-                    <a href="#">Baz One</a>
-                    <a href="#">Baz Two</a>
-                    <a href="#">Baz Three</a>
-                  </div>
-                </details>
-              </a-menu>
-            </div>
-          </details>
-        </a-menu>
-      </div>
-    </details>
+  <a-menu>
+    <strong slot="label">MENU</strong>
+    <a href="#">Home</a>
+    <a-menu open>
+      <strong slot="label">Products</strong>
+      <a href="#">Electronics</a>
+      <a-menu>
+        <strong slot="label">Software</strong>
+        <a href="#">Cloud</a>
+      </a-menu>
+    </a-menu>
   </a-menu>
 
-  <p style="margin-top: 20px;">
-    Resize the window to <strong>below 640px</strong> to see the layout switch from "Classic Bar + Flyouts" to "Mobile Stack" automatically.
-  </p>
-  <p>Fugiat pariatur dolore qui ullamco officia ut veniam velit adipisicing anim ut dolore ex proident exercitation ullamco voluptate commodo sit ut eiusmod ullamco in qui laboris cillum id id anim nulla elit veniam dolore.</p>
+  <p> ... </p>
+
+  <a-menu style="--type: mobile">
+    <strong slot="label">MOBILE ROOT</strong>
+    <a href="#">Link 1</a>
+    <a-menu>
+      <strong slot="label">Sub Menu (inherits Mobile)</strong>
+      <a href="#">Sub Link 1</a>
+      <a-menu>
+        <strong slot="label">Deep Menu (inherits Mobile)</strong>
+        <a href="#">Deep Link 1</a>
+      </a-menu>
+    </a-menu>
+  </a-menu>
+
+  <h3>3. Forced Flyout Tree (Inherited)</h3>
+  <!-- Top level forced to flyout. Children inherit flyout automatically -->
+  <div style="margin-left: 50px; position: relative; height: 100px;">
+    <a-menu style="--type: flyout;">
+      <strong slot="label">FLYOUT ROOT</strong>
+      <a href="#">Link 1</a>
+      <a-menu>
+        <strong slot="label">Sub Menu (inherits Flyout)</strong>
+        <a href="#">Sub Link 1</a>
+      </a-menu>
+    </a-menu>
+
+    <p>Fugiat est dolore ad culpa ea id nisi ea quis consequat et magna minim ut ad aute aute ut reprehenderit ad exercitation.</p>
+  </div>
 
 </body>
 </html>

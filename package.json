@@ -18,7 +18,7 @@
   ],
   "exports": {
     ".": "./dist/a-menu.js.min.js",
-    "./src/a-menu.js.js": "./src/a-menu.js.js"
+    "./src/a-menu.js": "./src/a-menu.js"
   },
   "files": [
     "dist",
@@ -33,8 +33,10 @@
   },
   "devDependencies": {
     "@roenlie/vite-plugin-import-css-sheet": "^0.0.7",
+    "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^0.4.4",
     "rollup": "^4.57.1",
+    "rollup-plugin-import-css": "^4.2.0",
     "vite": "^6.4.1"
   }
 }

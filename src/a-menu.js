@@ -3,9 +3,8 @@ import styles from './a-menu-shadow.css' with {type: 'css'};
 export default class AMenu extends HTMLElement {
   // -- Attributes --
   _group;
-  _icon;
   _open = false;
-  _type = 'mobile';
+  _type = 'classic';
 
   // -- Private --
 
@@ -13,10 +12,11 @@ export default class AMenu extends HTMLElement {
   _header;
   _headerSlot;
   _menu;
-  _staticType = false;
+  _lockedType = false;
   _swipeStart = 0;
   _swipeEnd = 0;
   _swipeThreshold = 40;
+  _typeStyle;
 
   // -- connection --
   _connected = false;
@@ -25,22 +25,27 @@ export default class AMenu extends HTMLElement {
     this.#resolveConnected = resolve;
   });
 
+  // -- nested updates
+  _rafHandle = null;
+  _timeStart = null;
+
   // -- Static --
 
   static _menus = new Map();
 
   static observedAttributes = [
     'group',
-    'icon',
     'open',
+    'swipe-threshold',
+    'top',
     'type'
   ];
 
   static template = document.createElement('template');
   static {
     this.template.innerHTML = `
-      <details part="menu" id="menu" class="mobile">
-        <summary part="header" id="header">
+      <details part="menu" id="menu">
+        <summary part="header" id="header" role="button" aria-expanded="false">
           <span part="label" id="label">
             <slot name="label"></slot>
           </span>
@@ -55,7 +60,14 @@ export default class AMenu extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    this.shadowRoot.adoptedStyleSheets = [styles];
+    this.shadowRoot.append(AMenu.template.content.cloneNode(true));
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(':host { --type: var(--inherited-type, flyout) }');
+    this.shadowRoot.adoptedStyleSheets = [sheet, styles];
+    this._typeStyle = sheet;
+    this._menu = this.shadowRoot.getElementById('menu');
+    this._header = this.shadowRoot.getElementById('header');
+    this._headerSlot = this.shadowRoot.querySelector('slot[name="label"]');
   }
 
   // -- Lifecycle --
@@ -64,18 +76,16 @@ export default class AMenu extends HTMLElement {
     if (oldval === newval) return;
     switch (attr) {
       case 'group':
+        if (this._connected && oldval) AMenu._menus.get(oldval)?.delete(this._menu);
         this._group = newval;
         if (this._connected) {
-          this._menu.setAttribute('group', newval);
+          if (newval) {
+            this._menu.setAttribute('group', newval);
+            AMenu.register(newval, this._menu);
+          } else {
+            this._menu.removeAttribute('group');
+          }
           if (window.abind) abind.update(this, 'group', newval);
-        }
-        break;
-
-      case 'icon':
-        this._icon = newval !== 'false' && newval !== null;
-        if (this._connected) {
-          this._menu.classList.toggle('icon', this._icon);
-          if (window.abind) abind.update(this, 'icon', this._icon);
         }
         break;
 
@@ -94,9 +104,13 @@ export default class AMenu extends HTMLElement {
         }
         break;
 
+      case 'top':
+        this._top = this.hasAttribute('top');
+        if (window.abind) abind.update(this, 'top', this._top);
+        break;
       case "type":
         this._type = newval;
-        if (this._connected && !this._staticType) {
+        if (this._connected && !this._lockedType) {
           this.applyType(newval);
           if (window.abind) abind.update(this, 'type', newval);
         }
@@ -106,23 +120,20 @@ export default class AMenu extends HTMLElement {
 
   connectedCallback() {
     this._abortController = new AbortController;
-    this.shadowRoot.append(AMenu.template.content.cloneNode(true));
-    this._menu = this.shadowRoot.querySelector('#menu');
-    this._header = this.shadowRoot.querySelector('#header');
-    this._headerSlot = this.shadowRoot.querySelector('slot[name="label"]');
     this._connected = true;
+    this.#resolveConnected();
+
+    if (this.parentElement?.closest('a-menu') === null) {
+      this.top = true;
+    }
+
     if (
-      this.parentElement.closest('a-menu') !== null &&
+      this.parentElement?.closest('a-menu') !== null &&
       this.hasAttribute('type')
     ) {
-      this._staticType = true;
+      this._lockedType = true;
     }
 
-    if (this.parentElement.closest('a-menu') === null) {
-      this.toggleAttribute('top', true);
-    }
-
-    if (this.hasIcon()) this.icon = true;
     this.applyType(this._type);
     this.maybeHideHeader();
     if (this._group) AMenu.register(this._group, this._menu);
@@ -132,16 +143,39 @@ export default class AMenu extends HTMLElement {
 
   disconnectedCallback() {
     this._connected = false;
+
+    if (this._abortController) {
+      this._abortController.abort();
+      this._abortController = null;
+    }
+
+    if (this._rafHandle) {
+      cancelAnimationFrame(this._rafHandle);
+      this._rafHandle = null;
+    }
+
+    if (this._timeStart) {
+      this._timeStart = null;
+    }
+
+    if (this._group) {
+      AMenu._menus.get(this._group)?.delete(this._menu);
+    }
+
+    this._menu = null;
+    this._header = null;
+    this._headerSlot = null;
+
   }
 
   // -- Private --
 
   addListeners() {
-
     this._menu.addEventListener("toggle", () => {
       if (this._menu.open) AMenu.openGroup(this._group, this._menu);
       // use setter
       this.open = this._menu.open;
+      this._header.setAttribute('aria-expanded', String(this._menu.open));
     }, { signal: this._abortController.signal });
 
     let startY = 0;
@@ -149,38 +183,139 @@ export default class AMenu extends HTMLElement {
 
     this.addEventListener('touchstart', event => {
       this._swipeStart = event.touches[0].clientY;
-    }, { signal: this._abortController.signal });
+    }, {
+      signal: this._abortController.signal,
+      passive: true
+    });
 
     this.addEventListener('touchend', event => {
       this._swipeEnd = event.changedTouches[0].clientY;
+      this.handleSwipe();
+    }, { signal: this._abortController.signal });
+
+    this._headerSlot.addEventListener('slotchange', () => {
+      this.maybeHideHeader()
+    }, { signal: this._abortController.signal });
+
+    this.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'touch') return;
+      this._swipeStart = e.clientY;
+    }, { signal: this._abortController.signal });
+
+    this.addEventListener('pointerup', e => {
+      if (e.pointerType === 'touch') return;
+      this._swipeEnd = e.clientY;
       this.handleSwipe();
     }, { signal: this._abortController.signal });
   }
 
   applyType(value) {
     const types = ['mobile', 'classic', 'ribbon', 'dropdown', 'flyout'];
-    this._menu.classList.remove(...types);
-    this._menu.classList.add(value);
+    for (const type of types) {
+      if (!this._lockedType && type !== value) this.removeAttribute(type);
+    }
+
+    // Guard: Only set attribute if different to prevent infinite recursion
+    if (!this._lockedType && this.getAttribute('type') !== value) {
+      this.setAttribute('type', value);
+      return; // Stop here, attributeChangedCallback will call applyType again
+    }
+
+    this.setStyle(value);
     this.applyTypeToNested(value);
   }
 
-  async applyTypeToNested(value) {
-    // wait for nested a-menu's to connect
-    await this.whenConnected();
-    const nested = Array.from(this.children).filter( item => item.localName === 'a-menu');
+  /*async applyTypeToNested(value) {
+     await this.whenConnected();
+    // Critical: Ensure custom elements are defined so we can access class methods
+    await customElements.whenDefined('a-menu');
+
+    const nested = Array.from(this.children).filter(item => item.localName === 'a-menu');
 
     for (const child of nested) {
+      // Critical: Wait for child upgrade and connection
+      if (typeof child.whenConnected === 'function') {
+        await child.whenConnected();
+      }
+
+      let type;
       switch (this._type) {
-      case 'classic':
-        child.type = 'dropdown';
-        break;
-      case 'dropdown':
-        child.type = 'flyout';
-        break;
-      default:
-        child.type = value;
+        case 'classic':
+          type = 'dropdown';
+          break;
+        case 'dropdown':
+          type = 'flyout';
+          break;
+        default:
+          type = value;
+      }
+
+      // Use setter to trigger child's own logic (ACC -> applyType)
+      if (child.type !== type) {
+        child.type = type;
       }
     }
+  }*/
+
+  async applyTypeToNested(value) {
+    // Cancel any in-progress rAF debounce
+    if (this._rafHandle) {
+      cancelAnimationFrame(this._rafHandle);
+      this._rafHandle = null;
+    }
+    if (this._timeStart) {
+      this._timeStart = null;
+    }
+
+    const delay = Number(this._applyTypeToNestedDelay ?? 100); // ms
+    const start = performance.now();
+    this._timeStart = start;
+
+    return new Promise(resolve => {
+      const tick = async (now) => {
+        // If another call started later, abort this run
+        if (this._timeStart !== start) return resolve(false);
+
+        if (now - start >= delay) {
+          this._rafHandle = null;
+          this._timeStart = null;
+
+          await this.whenConnected();
+          await customElements.whenDefined('a-menu');
+
+          const nested = Array.from(this.children).filter(item => item.localName === 'a-menu');
+
+          for (const child of nested) {
+            if (typeof child.whenConnected === 'function') {
+              await child.whenConnected();
+            }
+
+            let type;
+            switch (this._type) {
+              case 'classic':
+                type = 'dropdown';
+                break;
+              case 'dropdown':
+                type = 'flyout';
+                break;
+              default:
+                type = value;
+            }
+
+            if (child.type !== type) {
+              child.type = type;
+            }
+          }
+
+          resolve(true);
+        } else {
+          this._rafHandle = requestAnimationFrame(tick);
+        }
+      };
+
+      this._rafHandle = requestAnimationFrame(tick);
+    });
+
   }
 
   handleSwipe() {
@@ -189,22 +324,16 @@ export default class AMenu extends HTMLElement {
     this.toggleAttribute('open', delta > 0);
   }
 
-  hasIcon() {
-    const slotted = this._headerSlot.assignedNodes();
-    for (const elem of slotted) {
-      if (elem.hasAttribute('icon')) {
-        return true;
-      }
-    }
+  maybeHideHeader() {
+    const hasLabel = this._headerSlot.assignedElements().length > 0;
+    this._header.hidden = !hasLabel;
+    if (!hasLabel) this.open = true;
   }
 
-  maybeHideHeader() {
-    const hasLabel = this._headerSlot.assignedNodes().length > 0;
-
-    if (!hasLabel) {
-      this.open = true;
-      this._header.hidden = true;
-    }
+  setStyle(value) {
+    const sheet = this._typeStyle;
+    const css = `:host { --type: ${value} }`;
+    sheet.replaceSync(css);
   }
 
   // --- Public --
@@ -232,11 +361,6 @@ export default class AMenu extends HTMLElement {
   get group() { return this._group }
   set group(value) { this.setAttribute('group', value) }
 
-  get icon() { return this._icon }
-  set icon(value) {
-    this.toggleAttribute('icon', value !== undefined && value !== false )
-  }
-
   get open() { return this._open }
   set open(value) {
     this.toggleAttribute('open', value !== undefined && value !== false);
@@ -245,9 +369,16 @@ export default class AMenu extends HTMLElement {
   get swipeThreshold() { return this._swipeThreshold }
   set swipeThreshold(value) { this.setAttribute('swipe-threshold', value)}
 
+  get top() { return this._top }
+  set top(value) {
+    this.toggleAttribute('top', value !== undefined && value !== false )
+  }
+
   get type() { return this._type }
   set type(value) {
-    if (this._staticType) return;
+    if (this._lockedType) {
+      return console.warn('Attempting to set type on element whose type is locked because it has a "type" attribute', this);
+    }
     this.setAttribute('type', value)
   }
 }

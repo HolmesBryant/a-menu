@@ -70,6 +70,8 @@ a-menu {
 	&:has([icon])::part(header) {}
 }
 
+/* --- Media Queries --- */
+
 @media (prefers-color-scheme: dark) {
 	a-menu {
     --bg1-color: rgb(40, 40, 40);
@@ -77,6 +79,12 @@ a-menu {
 		--border-color: dimgray;
 		--text-color: snow;
 	}
+}
+
+@media (max-width: 640px) {
+  a-menu, a-menu[top] {
+    --type: mobile;
+  }
 }
 
 
