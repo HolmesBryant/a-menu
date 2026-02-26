@@ -17,7 +17,7 @@ export default class AMenu extends HTMLElement {
   _swipeStart = 0;
   _swipeEnd = 0;
   _swipeThreshold = 40;
-  _typeStyle;
+  _typeStyles;
 
   // -- connection --
   _connected = false;
@@ -66,8 +66,8 @@ export default class AMenu extends HTMLElement {
     this.shadowRoot.append(AMenu.template.content.cloneNode(true));
     const sheet = new CSSStyleSheet();
     sheet.replaceSync(':host { --type: var(--inherited-type, flyout) }');
-    this.shadowRoot.adoptedStyleSheets = [sheet, styles];
-    this._typeStyle = sheet;
+    this.shadowRoot.adoptedStyleSheets = [styles, sheet];
+    this._typeStyles = sheet;
     this._menu = this.shadowRoot.getElementById('menu');
     this._header = this.shadowRoot.getElementById('header');
     this._headerSlot = this.shadowRoot.querySelector('slot[name="label"]');
@@ -141,6 +141,7 @@ export default class AMenu extends HTMLElement {
     this.maybeHideHeader();
     if (this._group) AMenu.register(this._group, this._menu);
     this._menu.open = this._open;
+    // this._mediaQueries = this.getMediaQueries(this, '--type');
     this.addListeners();
   }
 
@@ -167,7 +168,6 @@ export default class AMenu extends HTMLElement {
     this._menu = null;
     this._header = null;
     this._headerSlot = null;
-
   }
 
   // -- Private --
@@ -346,75 +346,20 @@ export default class AMenu extends HTMLElement {
     });
   }
 
-  /*async applyTypeToNested(value) {
-    // Cancel in-progress debounces
-    if (this._rafHandle) {
-      cancelAnimationFrame(this._rafHandle);
-      this._rafHandle = null;
-    }
+  doMediaQuery(query) {
+    console.log(query);
+    // const mql = matchMedia("(max-width: 600px)");
 
-    if (this._timeStart) this._timeStart = null;
+    /*mql.addEventListener("change", e => {
+      if (e.matches) {
+        console.log("Now ≤ 600px");
+      } else {
+        console.log("Now > 600px");
+      }
+    });*/
+  }
 
-    const delay = Number(this._rafDelay ?? 100); // ms
-    const start = performance.now();
-    this._timeStart = start;
 
-    return new Promise(resolve => {
-      const tick = async (now) => {
-        if (!this.isConnected) {
-          this._rafHandle = null;
-          this._timeStart = null;
-          return resolve(false);
-        }
-
-        // If another call started later, abort
-        if (this._timeStart !== start) return resolve(false);
-
-        if (now - start >= delay) {
-          this._rafHandle = null;
-          this._timeStart = null;
-
-          try {
-            await this.whenConnected();
-            await customElements.whenDefined('a-menu');
-            const nested = Array.from(this.children).filter(item => item.localName === 'a-menu');
-
-            for (const child of nested) {
-              if (!this.isConnected) return resolve(false);
-              if (typeof child.whenConnected === 'function') await child.whenConnected();
-
-              let type;
-              switch (this._type) {
-                case 'classic':
-                  type = 'dropdown';
-                  break;
-                case 'dropdown':
-                  type = 'flyout';
-                  break;
-                default:
-                  type = value;
-              }
-
-              if (child.type !== type) child.type = type;
-            }
-
-            resolve(true);
-          } catch (error) {
-            console.warn('Error in applyTypeToNested:', error);
-            resolve(false);
-          }
-        } else {
-          if (this.isConnected) {
-            this._rafHandle = requestAnimationFrame(tick);
-          } else {
-            resolve(false);
-          }
-        }
-      };
-
-      this._rafHandle = requestAnimationFrame(tick);
-    });
-  }*/
 
   handleSwipe() {
     const delta = this._swipeEnd - this._swipeStart;
@@ -429,8 +374,11 @@ export default class AMenu extends HTMLElement {
   }
 
   setStyle(value) {
-    const sheet = this._typeStyle;
-    const css = `:host { --type: ${value} }`;
+    const sheet = this._typeStyles;
+    const css = (this._top) ?
+      `:host([top]) { --type: ${value} }` :
+      `:host { --type: ${value} }`;
+
     sheet.replaceSync(css);
   }
 

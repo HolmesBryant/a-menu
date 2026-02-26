@@ -17,7 +17,7 @@
   transition: z-index 0s linear var(--duration);
 }
 
-:host([top]) { --type: classic }
+/* :host([top]) { --type: ribbon } */
 
 :host([open]) {
   z-index: 100;
@@ -37,7 +37,6 @@
   text-decoration: none;
   white-space: nowrap;
   padding: 0 var(--pad);
-  width: 100%;
   box-sizing: border-box;
 }
 
@@ -123,8 +122,23 @@ summary {
 
   #items {
     flex-direction: column;
-    padding-left: var(--pad);
     width: 100%;
+  }
+}
+
+/* -- Ribbon -- */
+
+@container menu-system style(--type: ribbon) {
+  details { display: block; }
+
+   #items {
+    outline: 2px solid lime;
+
+    flex-direction: row;
+    left: 0;
+    min-width: 100%;
+    width: max-content;
+    position: absolute;
   }
 }
 
