@@ -3,16 +3,22 @@ import styles from './a-menu-shadow.css' with {type: 'css'};
 export default class AMenu extends HTMLElement {
   // -- Attributes --
   _group;
+  _showIcon = ['mobile', 'flyout', 'dropdown'];
   _open = false;
-  _top = false;
+  _justify = "center";
   _type = 'classic';
 
   // -- Private --
 
+  _top = false;
   _abortController;
+  _hasIcon = false;
+  _hasLabel = true;
   _header;
   _headerSlot;
+  _iconSlot;
   _menu;
+  _itemsSlot;
   _lockedType = false;
   _swipeStart = 0;
   _swipeEnd = 0;
@@ -39,6 +45,7 @@ export default class AMenu extends HTMLElement {
   static observedAttributes = [
     'group',
     'open',
+    'justify',
     'swipe-threshold',
     'top',
     'type'
@@ -49,6 +56,9 @@ export default class AMenu extends HTMLElement {
     this.template.innerHTML = `
       <details part="menu" id="menu">
         <summary part="header" id="header" role="button" aria-expanded="false">
+          <span part="icon" id="icon">
+            <slot name="icon"></slot>
+          </span>
           <span part="label" id="label">
             <slot name="label"></slot>
           </span>
@@ -69,8 +79,11 @@ export default class AMenu extends HTMLElement {
     this.shadowRoot.adoptedStyleSheets = [styles, sheet];
     this._typeStyles = sheet;
     this._menu = this.shadowRoot.getElementById('menu');
+    this._icon = this.shadowRoot.getElementById('icon');
     this._header = this.shadowRoot.getElementById('header');
+    this._itemsSlot = this.shadowRoot.querySelector('slot:not([name])');
     this._headerSlot = this.shadowRoot.querySelector('slot[name="label"]');
+    this._iconSlot = this.shadowRoot.querySelector('slot[name="icon"]');
   }
 
   // -- Lifecycle --
@@ -100,6 +113,12 @@ export default class AMenu extends HTMLElement {
         }
         break;
 
+      case 'justify':
+        this._justify = newval;
+        this.setJustify(newval);
+        if (window.abind) abind.update(this, 'justify', this._justify);
+        break;
+
       case 'swipe-threshold':
         this._swipeThreshold = Number(newval);
         if (this._connected) {
@@ -124,6 +143,8 @@ export default class AMenu extends HTMLElement {
   connectedCallback() {
     this._abortController = new AbortController;
     this._connected = true;
+    this._hasLabel = this._headerSlot.assignedElements().length > 0;
+    this._hasIcon = this._iconSlot.assignedElements().length > 0;
     this.#resolveConnected();
 
     if (this.parentElement?.closest('a-menu') === null) {
@@ -137,6 +158,7 @@ export default class AMenu extends HTMLElement {
       this._lockedType = true;
     }
 
+    if (this._hasIcon) this._header.style.listStyle = 'none';
     this.applyType(this._type);
     this.maybeHideHeader();
     if (this._group) AMenu.register(this._group, this._menu);
@@ -193,7 +215,10 @@ export default class AMenu extends HTMLElement {
     }, { signal: this._abortController.signal });
 
     this._headerSlot.addEventListener('slotchange', () => {
-      this.maybeHideHeader()
+      this._hasLabel = this._headerSlot.assignedElements().length > 0;
+      this._hasIcon = this._iconSlot.assignedElements().length > 0;
+      this.maybeHideHeader();
+      this.maybeShowIcon();
     }, { signal: this._abortController.signal });
 
     this.addEventListener('pointerdown', e => {
@@ -209,7 +234,7 @@ export default class AMenu extends HTMLElement {
   }
 
   applyType(value) {
-    const types = ['mobile', 'classic', 'ribbon', 'dropdown', 'flyout'];
+    const types = ['mobile', 'classic', 'ribbon', 'dropdown', 'flyout', 'sitemap'];
     for (const type of types) {
       if (!this._lockedType && type !== value) this.removeAttribute(type);
     }
@@ -220,7 +245,9 @@ export default class AMenu extends HTMLElement {
       return; // Stop here, attributeChangedCallback will call applyType again
     }
 
-    this.setStyle(value);
+    this.maybeHideHeader();
+    this.maybeShowIcon();
+    this.setTypeStyle(value);
     this.applyTypeToNested(value);
   }
 
@@ -359,8 +386,6 @@ export default class AMenu extends HTMLElement {
     });*/
   }
 
-
-
   handleSwipe() {
     const delta = this._swipeEnd - this._swipeStart;
     if (Math.abs(delta) < this._swipeThreshold) return;
@@ -368,12 +393,38 @@ export default class AMenu extends HTMLElement {
   }
 
   maybeHideHeader() {
-    const hasLabel = this._headerSlot.assignedElements().length > 0;
-    this._header.hidden = !hasLabel;
-    if (!hasLabel) this.open = true;
+    this._header.hidden = !this._hasLabel && !this.maybeShowIcon();
+    if (!this._hasLabel) this.open = true;
   }
 
-  setStyle(value) {
+  maybeShowIcon() {
+    const show = this._hasIcon && this._showIcon.includes(this.type);
+    if (show) {
+      this._icon.classList.remove('hidden');
+    } else {
+      this._icon.classList.add('hidden');
+    }
+
+    return show;
+  }
+
+  setJustify(value) {
+    const assigned = this._itemsSlot.assignedElements();
+    if (value === 'stretch') {
+      this.style.removeProperty('--justify');
+      for (const elem of assigned) {
+        elem.style.setProperty('flex', 1);
+      }
+    } else {
+      for (const elem of assigned) {
+        elem.style.removeProperty('flex');
+      }
+      this.style.setProperty('--justify', value);
+
+    }
+  }
+
+  setTypeStyle(value) {
     const sheet = this._typeStyles;
     const css = (this._top) ?
       `:host([top]) { --type: ${value} }` :
@@ -383,12 +434,6 @@ export default class AMenu extends HTMLElement {
   }
 
   // --- Public --
-
-  async whenConnected() {
-    if (this._connected) return true;
-    await this.#connectedPromise;
-    return true;
-  }
 
   static openGroup(group, elem) {
     if (this._menus.size === 0) return;
@@ -402,6 +447,12 @@ export default class AMenu extends HTMLElement {
     this._menus.get(group).add(elem);
   }
 
+  async whenConnected() {
+    if (this._connected) return true;
+    await this.#connectedPromise;
+    return true;
+  }
+
   // -- Getters / Setters --
 
   get group() { return this._group }
@@ -411,6 +462,9 @@ export default class AMenu extends HTMLElement {
   set open(value) {
     this.toggleAttribute('open', value !== undefined && value !== false);
   }
+
+  get justify() { return this._justify }
+  set justify(value) { this.setAttribute('justify', value) }
 
   get swipeThreshold() { return this._swipeThreshold }
   set swipeThreshold(value) { this.setAttribute('swipe-threshold', value)}

@@ -1,0 +1,9 @@
+a-color {}
+
+a-color::part(input) {
+	background: var(--bg3-color);
+	border: 1px solid var(--border-color);
+	border-radius: .25rem;
+	cursor: pointer;
+	min-height: var(--min);
+}

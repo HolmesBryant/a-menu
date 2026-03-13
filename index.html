@@ -5,14 +5,26 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>A-Menu</title>
 	<script type="module" src="src/a-menu.js"></script>
-	<!-- <script type="module" src="extra/a-bind.min.js"></script> -->
+	<script type="module" src="extra/a-color.min.js"></script>
 	<script type="module">
 		import ABind from "./extra/a-bind.min.js";
 		window.abind = ABind;
 	</script>
 
-	<link rel="stylesheet" href="dist/a-menu.css">
 	<link rel="stylesheet" href="extra/styles.css">
+	<link rel="stylesheet" href="dist/a-menu.css">
+	<link rel="stylesheet" href="extra/a-color.css">
+
+	<style>
+		#wrapper {
+			display: flex;
+			align-items: start;
+			gap: 1rem;
+		}
+
+		#wrapper > aside { flex: 1; }
+		#wrapper > section { flex: 3; }
+	</style>
 </head>
 <body>
 <header>
@@ -20,112 +32,249 @@
 	<p>A custom element that renders a configurable, responsive menu.</p>
 </header>
 
-<a-bindgroup model="#demo">
-	<div class="flex stretch">
-		<div class="card flex column">
-			<label for="demo-open">open</label>
-			<a-bind prop="open">
-				<input id="demo-open" type="checkbox">
-			</a-bind>
-		</div>
+<h2>Demo</h2>
 
-		<div class="card flex column">
-			<label for="demo-type">type</label>
-			<a-bind prop="type">
-				<select id="demo-type">
+<div id="wrapper">
+	<!-- Top Level Controls -->
+	<aside>
+		<a-bindgroup model="dom:#demo">
+			<a-menu type="mobile">
+				<!-- Attrs -->
+				<a-menu group="props-lvl1">
+					<strong slot="label">Attributes</strong>
+
+					<div class="flex space-between">
+						<label for="demo-open">open</label>
+						<a-bind prop="open" class="flex">
+							<input id="demo-open" type="checkbox">
+						</a-bind>
+					</div>
+
+					<div class="flex">
+						<label for="demo-type" class="flex1">
+							type
+						</label>
+						<a-bind prop="type" class="flex1">
+							<select id="demo-type">
+								<option>classic</option>
+								<option>mobile</option>
+								<option>ribbon</option>
+								<option>sitemap</option>
+								<option>flyout</option>
+								<option>dropdown</option>
+							</select>
+						</a-bind>
+					</div>
+
+					<div class="flex">
+						<label for="demo-justify" class="flex1">
+							justify
+						</label>
+						<a-bind prop="justify" class="flex1">
+							<select id="demo-justify">
+								<option>start</option>
+								<option>end</option>
+								<option>center</option>
+								<option>stretch</option>
+								<option>space-between</option>
+								<option>space-around</option>
+								<option>space-evenly</option>
+							</select>
+						</a-bind>
+					</div>
+				</a-menu>
+
+				<!-- CSS Vars -->
+				<a-bindgroup model="dom:#demo">
+					<a-menu group="props-lvl1" open>
+						<strong slot="label">CSS Vars</strong>
+
+						<div class="flex">
+							<label for="demo-duration" class="flex1 nowrap">
+								--duration
+							</label>
+							<a-bind prop="--duration" class="flex1">
+								<select id="demo-duration">
+									<option>0s</option>
+									<option>0.25s</option>
+									<option>0.5s</option>
+									<option>1s</option>
+								</select>
+							</a-bind>
+						</div>
+
+						<div class="flex">
+						  <label for="demo-min" class="flex1 nowrap">
+						  	--min
+						  </label>
+						  <a-bind prop="--min" class="flex1">
+								<select id="demo-min">
+									<option>auto</option>
+									<option>max-content</option>
+									<option>min-content</option>
+									<option>35px</option>
+									<option>2rem</option>
+								</select>
+							</a-bind>
+					  </div>
+
+					  <div class="flex">
+					  	<label for="demo-pad" class="flex1 nowrap">
+					  		--pad
+					  	</label>
+					  	<a-bind prop="--pad" class="flex1">
+								<select id="demo-pad">
+									<option>0</option>
+									<option>10px</option>
+									<option>.5rem</option>
+									<option>1rem</option>
+								</select>
+							</a-bind>
+						</div>
+
+						<div class="flex">
+							<label for="demo-bg1-color" class="flex1 nowrap">
+								--bg1-color
+							</label>
+							<a-bind prop="--bg1-color">
+								<a-color id="demo-bg1-color"></a-color>
+							</a-bind>
+						</div>
+
+						<div class="flex">
+							<label for="demo-bg2-color" class="flex1 nowrap">
+								--bg2-color
+							</label>
+							<a-bind prop="--bg2-color">
+								<a-color id="demo-bg2-color"></a-color>
+							</a-bind>
+						</div>
+
+						<div class="flex">
+							<label for="demo-text-color" class="flex1 nowrap">
+								--text-color
+							</label>
+							<a-bind prop="--text-color">
+								<a-color id="demo-text-color"></a-color>
+							</a-bind>
+						</div>
+
+						<div class="flex">
+							<label for="demo-border-color" class="flex1 nowrap">
+								--border-color
+							</label>
+							<a-bind prop="--border-color">
+								<a-color id="demo-border-color"></a-color>
+							</a-bind>
+						</div>
+
+						<div class="flex">
+							<label for="demo-accent-color" class="flex1 nowrap">
+								--accent-color
+							</label>
+							<a-bind prop="--accent-color">
+								<a-color id="demo-accent-color"></a-color>
+							</a-bind>
+						</div>
+
+						<div class="flex">
+							<label for="demo-accent-text" class="flex1 nowrap">
+								--accent-text
+							</label>
+							<a-bind prop="--accent-text">
+								<a-color id="demo-accent-text"></a-color>
+							</a-bind>
+						</div>
+					</a-menu>
+				</a-bindgroup>
+			</a-menu>
+		</a-bindgroup>
+	</aside>
+
+	<!-- Demo Menu -->
+	<section>
+		<a-menu id="demo" justify="stretch">
+		<strong slot="icon">☰</strong>
+		<a href="#">Foo</a>
+
+		<a-menu id="demo-A" group="level-1" open>
+			<strong slot="label">
+				Group A:
+				<a-bind
+				model="dom:#demo-A"
+				prop="type">
+				<select>
 					<option>classic</option>
 					<option>mobile</option>
 					<option>ribbon</option>
-					<option>sitemap</option>
-					<option>flyout</option>
 					<option>dropdown</option>
+					<option>flyout</option>
 				</select>
 			</a-bind>
-		</div>
-	</div>
-</a-bindgroup>
+			</strong>
+			<a href="#">Bar</a>
+
+			<a-menu id="demo-Aa" open>
+				<strong slot="label">
+					Group Aa:
+					<a-bind
+				model="dom:#demo-Aa"
+				prop="type">
+				<select>
+					<option>classic</option>
+					<option>mobile</option>
+					<option>ribbon</option>
+					<option>dropdown</option>
+					<option>flyout</option>
+				</select>
+			</a-bind>
+				</strong>
+				<a href="#">Baz</a>
+				<a href="#">Baz Two</a>
+				<a href="#">Baz Three</a>
+			</a-menu>
+		</a-menu>
+
+		<a-menu id="demo-B" group="level-1">
+			<strong slot="label">
+				Group B:
+				<a-bind
+				model="dom:#demo-B"
+				prop="type">
+				<select>
+					<option>classic</option>
+					<option>mobile</option>
+					<option>ribbon</option>
+					<option>dropdown</option>
+					<option>flyout</option>
+				</select>
+			</a-bind>
+			</strong>
+			<a href="#">Boom</a>
+
+			<a-menu id="demo-Ba">
+				<strong slot="label">
+					Group Ba:
+					<a-bind
+				model="dom:#demo-Ba"
+				prop="type">
+				<select>
+					<option>classic</option>
+					<option>mobile</option>
+					<option>ribbon</option>
+					<option>dropdown</option>
+					<option>flyout</option>
+				</select>
+			</a-bind>
+				</strong>
+				<a href="#">Bing</a>
+			</a-menu>
+		</a-menu>
+	</a-menu>
+	</section>
+</div>
 
 <hr>
-
-<a-menu id="demo" open>
-	<strong slot="label" icon>☰</strong>
-	<a href="#">Foo</a>
-
-	<a-menu id="demo-A" group="level-1" open>
-		<strong slot="label">
-			Group A:
-			<a-bind
-			model="dom:#demo-A"
-			prop="type">
-			<select>
-				<option>classic</option>
-				<option>mobile</option>
-				<option>ribbon</option>
-				<option>dropdown</option>
-				<option>flyout</option>
-			</select>
-		</a-bind>
-		</strong>
-		<a href="#">Bar</a>
-
-		<a-menu id="demo-Aa">
-			<strong slot="label">
-				Group Aa:
-				<a-bind
-			model="dom:#demo-Aa"
-			prop="type">
-			<select>
-				<option>classic</option>
-				<option>mobile</option>
-				<option>ribbon</option>
-				<option>dropdown</option>
-				<option>flyout</option>
-			</select>
-		</a-bind>
-			</strong>
-			<a href="#">Baz</a>
-			<a href="#">Baz Two</a>
-			<a href="#">Baz Three</a>
-		</a-menu>
-	</a-menu>
-
-	<a-menu id="demo-B" group="level-1">
-		<strong slot="label">
-			Group B:
-			<a-bind
-			model="dom:#demo-B"
-			prop="type">
-			<select>
-				<option>classic</option>
-				<option>mobile</option>
-				<option>ribbon</option>
-				<option>dropdown</option>
-				<option>flyout</option>
-			</select>
-		</a-bind>
-		</strong>
-		<a href="#">Boom</a>
-
-		<a-menu id="demo-Ba">
-			<strong slot="label">
-				Group Ba:
-				<a-bind
-			model="dom:#demo-Ba"
-			prop="type">
-			<select>
-				<option>classic</option>
-				<option>mobile</option>
-				<option>ribbon</option>
-				<option>dropdown</option>
-				<option>flyout</option>
-			</select>
-		</a-bind>
-			</strong>
-			<a href="#">Bing</a>
-		</a-menu>
-	</a-menu>
-</a-menu>
-
 
 <p>Proident minim do voluptate incididunt ullamco dolore labore ex non enim quis ut commodo ea elit minim dolore esse ut dolor elit ut veniam id quis adipisicing in cillum velit incididunt dolore mollit qui ullamco in dolor eiusmod ut est labore sint ex fugiat reprehenderit in do dolore amet magna dolor fugiat aliqua ut culpa do culpa eu in dolore ut occaecat cupidatat in deserunt culpa sit nostrud veniam duis et dolor irure proident id nulla ut consectetur id ut excepteur ex dolor occaecat occaecat officia ut sit incididunt ex exercitation nostrud eu eiusmod dolor aliquip ullamco consectetur enim laborum nisi minim labore cupidatat est duis ex nisi ut velit dolore laborum in ut commodo reprehenderit sed veniam anim incididunt sit ullamco cillum incididunt sed ea ex magna reprehenderit sed laborum eu labore nulla in ut dolor nisi et elit consectetur irure in exercitation tempor in enim sint minim ad consectetur sed ex ad in consequat excepteur ad in cupidatat dolore sit ut consequat commodo aliqua do duis labore labore minim laboris et minim esse laboris reprehenderit dolor laborum in magna dolore dolor aliquip pariatur et qui nulla quis voluptate eu ut ex fugiat in pariatur reprehenderit dolor fugiat aliqua veniam culpa nulla non pariatur qui est magna excepteur magna ullamco tempor id dolor ut laborum sint ut labore consequat labore enim commodo adipisicing cillum pariatur veniam commodo est laborum dolor pariatur quis ad culpa sunt et nostrud sed sint commodo duis consectetur ut commodo laborum.</p>
 

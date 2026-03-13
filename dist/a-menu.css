@@ -5,29 +5,57 @@ a-menu {
 	--border-color: silver;
 	--accent-color: dodgerblue;
 	--accent-text: white;
+  --duration: 0.5s;
 	--min: 35px;
 	--pad: .5rem;
+}
 
+@media (prefers-color-scheme: dark) {
+	a-menu {
+    --bg1-color: rgb(40, 40, 40);
+		--bg2-color: rgb(60,60,60);
+		--border-color: dimgray;
+		--text-color: snow;
+	}
+}
+
+a-menu {
 /***** Background *****/
 
 	&::part(items)
 	{ background: var(--bg1-color) }
 
 	& a:hover,
-	& a:active,
 	& a:focus,
+	& div:hover,
 	&::part(header):hover,
-	&::part(header):active,
 	&::part(header):focus
-	{ background: var(--bg2-color) }
+	{ background: var(--bg2-color); }
+
+	& a:active,
+	&::part(header):active
+	{ background: var(--accent-color) }
 
 /***** Border *****/
 
-	&::part(items)
+	&:not([top])::part(items)
 	{ border: 1px solid var(--border-color) }
 
+	/* &:not([top]) a,
+	&:not([top]) a-menu
+	{ border-bottom: 1px solid var(--border-color) } */
+
+	&:not([type="ribbon"]):not([top]) a,
+	&:not([top]):not([type="ribbon"]) a-menu
+	{ border-left: 4px solid var(--accent-color) }
+
 	& a,
-	& a-menu:not([top])
+	& a-menu
+	{ border: 1px solid var(--border-color) }
+
+	a,
+	a-menu,
+	&:not([top]) div
 	{ border-bottom: 1px solid var(--border-color) }
 
 /***** Text *****/
@@ -39,14 +67,11 @@ a-menu {
 		text-decoration: none
 	}
 
-	& [icon] {
-		font-size: var(--min);
-		line-height: 2rem;
-	}
+	& [icon]
+	{ font-size: var(--min) }
 
 /***** Cursor *****/
 
-	& a,
 	&::part(header)
 	{ cursor: pointer }
 
@@ -60,38 +85,8 @@ a-menu {
 
 /***** Misc *****/
 
-	&:not([top]) a-menu
-	{ padding-left: var(--pad) }
-
 	& a,
+	& div,
 	&::part(header)
 	{ padding: 0 var(--pad) }
-
-	&:has([icon])::part(header) {}
-}
-
-/* --- Media Queries --- */
-
-@media (prefers-color-scheme: dark) {
-	a-menu {
-    --bg1-color: rgb(40, 40, 40);
-		--bg2-color: rgb(60,60,60);
-		--border-color: dimgray;
-		--text-color: snow;
-	}
-}
-
-@media (max-width: 640px) {
-  a-menu, a-menu[top] {
-    --type: mobile;
-  }
-}
-
-
-
-
-
-
-
-
-
+} /* end a-menu */
