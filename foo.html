@@ -3,299 +3,92 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Container Query Navigation (Web Component)</title>
-
-  <script>
-    class AMenu extends HTMLElement {
-      static template = document.createElement('template');
-      static {
-        this.template.innerHTML = `
-          <style>
-            :host {
-              interpolate-size: allow-keywords;
-              container-name: menu-system;
-
-              --bg-color: linen;
-              --duration: 0.5s;
-              --min-height: 35px;
-              --pad: 0.5rem;
-
-              /* Layout */
-              display: block;
-              box-sizing: border-box;
-              position: relative;
-
-
-              z-index: 1;
-              transition: z-index 0s linear var(--duration);
-
-              --type: var(--inherited-type, flyout);
-            }
-
-            :host([open]) {
-              z-index: 100;
-              transition-delay: 0s;
-            }
-
-            :host(:focus-within),
-            :host(:hover) {
-              z-index: 1000;
-              transition-delay: 0s;
-            }
-
-            /* --- TOP LEVEL DEFAULTS --- */
-            :host([top]) {
-              --type: classic;
-            }
-
-            /* --- MOBILE OVERRIDES --- */
-            @media (max-width: 640px) {
-              :host, :host([top]) {
-                --type: mobile;
-              }
-            }
-
-            /* --- INHERITANCE LOGIC --- */
-            #items {
-              /* Pass our type down to children by default */
-              --inherited-type: var(--type);
-
-              background: var(--bg-color);
-              display: flex;
-              flex-wrap: wrap;
-              align-items: stretch;
-              min-height: var(--min-height);
-            }
-
-            /* Classic Bar -> Children become Dropdowns */
-            @container menu-system style(--type: classic) {
-              #items { --inherited-type: dropdown; }
-            }
-
-            /* Dropdowns -> Children become Flyouts */
-            @container menu-system style(--type: dropdown) {
-              #items { --inherited-type: flyout; }
-            }
-
-            /* --- STYLING --- */
-
-            summary {
-              background: var(--bg-color);
-              cursor: pointer;
-              padding: 0 var(--pad);
-              list-style: none;
-            }
-
-            ::slotted(a) {
-              display: flex;
-              align-items: center;
-              min-height: var(--min-height);
-              text-decoration: none;
-              white-space: nowrap;
-              color: black;
-              padding: 0 var(--pad);
-              background: var(--bg-color);
-              width: 100%;
-              box-sizing: border-box;
-            }
-
-            #label {
-              display: inline-flex;
-              align-items: center;
-              min-height: var(--min-height);
-              font-weight: bold;
-            }
-
-            details {
-              box-sizing: border-box;
-              position: relative;
-              width: 100%;
-            }
-
-            /* --- ANIMATIONS --- */
-            details::details-content {
-              content-visibility: visible;
-              height: 0;
-              opacity: 0;
-              overflow: hidden;
-
-              /* Standard transition: Animate height/opacity */
-              transition:
-                height var(--duration) ease,
-                opacity var(--duration) ease,
-                content-visibility var(--duration) ease allow-discrete,
-                overflow 0s 0s;
-            }
-
-            details[open]::details-content {
-              height: auto;
-              opacity: 1;
-              overflow: visible;
-
-              /*
-                 Delay overflow:visible until AFTER animation
-                 so scrollbars don't flicker
-              */
-              transition:
-                height var(--duration) ease,
-                opacity var(--duration) ease,
-                content-visibility var(--duration) ease allow-discrete,
-                overflow 0s var(--duration);
-            }
-
-            /* --- LAYOUTS --- */
-
-            /* Shared Vertical Traits */
-            @container menu-system style(--type: mobile) or style(--type: dropdown) or style(--type: flyout) {
-              details { display: flex; flex-direction: column; width: max-content; }
-              #items { flex-direction: column; width: max-content; }
-            }
-
-            /* Mobile */
-            @container menu-system style(--type: mobile) {
-              details, #items { width: 100%; }
-            }
-
-            /* Classic (Top Bar) */
-            @container menu-system style(--type: classic) {
-              details { display: block; width: 100%; }
-              #items { flex-direction: row; width: 100%; }
-              ::slotted(a) { width: auto; }
-            }
-
-            /* Dropdown (Below) */
-            @container menu-system style(--type: dropdown) {
-              #items {
-                position: absolute;
-                top: 100%; left: 0;
-                min-width: 100%;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Optional shadow for depth */
-              }
-            }
-
-            /* Flyout (Right) */
-            @container menu-system style(--type: flyout) {
-               #items {
-                position: absolute;
-                left: 100%; top: 0;
-                min-width: 200px;
-                box-shadow: 4px 4px 6px rgba(0,0,0,0.1);
-              }
-            }
-          </style>
-
-          <details part="menu" id="menu">
-            <summary part="header" id="header">
-              <span id="label">
-                <slot name="label"></slot>
-              </span>
-            </summary>
-            <div id="items">
-              <slot></slot>
-            </div>
-          </details>
-        `;
-      }
-
-      static _menus = new Map();
-
-      constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-      }
-
-      connectedCallback() {
-        this.shadowRoot.appendChild(AMenu.template.content.cloneNode(true));
-
-        this._menu = this.shadowRoot.getElementById('menu');
-        this._group = this.getAttribute('group');
-
-        // Auto-detect Top Level
-        if (!this.parentElement.closest('a-menu')) {
-          this.toggleAttribute('top', true);
-          this._menu.open = true;
-        }
-
-        if(this.hasAttribute('open')) {
-            this._menu.open = true;
-        }
-
-        if (this._group) {
-          AMenu.register(this._group, this._menu);
-        }
-
-        this._menu.addEventListener("toggle", () => {
-          if(this._menu.open) {
-              // 1. Sync state to host for styling (:host([open]))
-              this.setAttribute('open', '');
-              // 2. Handle accordion logic
-              AMenu.openGroup(this._group, this._menu);
-          } else {
-              this.removeAttribute('open');
-          }
-        });
-      }
-
-      static register(group, elem) {
-        if (!this._menus.has(group)) this._menus.set(group, new Set());
-        this._menus.get(group).add(elem);
-      }
-
-      static openGroup(group, elem) {
-        if (!group || !this._menus.has(group)) return;
-        this._menus.get(group).forEach(other => {
-          if (other !== elem) other.open = false;
-        });
-      }
-    }
-
-    customElements.define('a-menu', AMenu);
-  </script>
+  <title>Foo</title>
 </head>
 <body>
 
-  <a-menu>
-    <strong slot="label">MENU</strong>
-    <a href="#">Home</a>
-    <a-menu open>
-      <strong slot="label">Products</strong>
-      <a href="#">Electronics</a>
-      <a-menu>
-        <strong slot="label">Software</strong>
-        <a href="#">Cloud</a>
-      </a-menu>
-    </a-menu>
-  </a-menu>
+  <style>
+    :root { interpolate-size: allow-keywords }
 
-  <p> ... </p>
+    details { display: block }
 
-  <a-menu style="--type: mobile">
-    <strong slot="label">MOBILE ROOT</strong>
-    <a href="#">Link 1</a>
-    <a-menu>
-      <strong slot="label">Sub Menu (inherits Mobile)</strong>
-      <a href="#">Sub Link 1</a>
-      <a-menu>
-        <strong slot="label">Deep Menu (inherits Mobile)</strong>
-        <a href="#">Deep Link 1</a>
-      </a-menu>
-    </a-menu>
-  </a-menu>
+    .items {
+      transition: height 400ms ease-in-out, opacity 400ms;
+    }
 
-  <h3>3. Forced Flyout Tree (Inherited)</h3>
-  <!-- Top level forced to flyout. Children inherit flyout automatically -->
-  <div style="margin-left: 50px; position: relative; height: 100px;">
-    <a-menu style="--type: flyout;">
-      <strong slot="label">FLYOUT ROOT</strong>
-      <a href="#">Link 1</a>
-      <a-menu>
-        <strong slot="label">Sub Menu (inherits Flyout)</strong>
-        <a href="#">Sub Link 1</a>
-      </a-menu>
-    </a-menu>
+    details > .items {
+      opacity: 0;
+    }
 
-    <p>Fugiat est dolore ad culpa ea id nisi ea quis consequat et magna minim ut ad aute aute ut reprehenderit ad exercitation.</p>
-  </div>
+    details.open > .items { opacity: 1 }
+
+    .float {
+      background: tan;
+      display: block;
+      position: absolute;
+      z-index: 2;
+    }
+
+    @supports (interpolate-size: allow-keywords) {
+      details > .items {
+        height: 0;
+        overflow: hidden;
+      }
+      details.open > .items { height: auto; }
+    }
+  </style>
+
+  <script type="module">
+    const menus = document.querySelectorAll('details');
+
+    function closeOthers(elem, group) {
+      for (const menu of menus) {
+        if (menu === elem || menu.getAttribute('group') !== group) continue;
+        menu.classList.remove('open');
+        menu.addEventListener('transitionend', () => {menu.open = false}, { once:true });
+      }
+    }
+
+    function showHide(event) {
+      if (!event.target.closest('summary')) return;
+      event.preventDefault();
+      const menu = event.target.closest('details');
+      const group = menu.getAttribute('group');
+      const div = menu.querySelector('.items');
+      if (menu.open) {
+        menu.classList.remove('open')
+        div.addEventListener('transitionend', () => {menu.open = false}, { once: true });
+      } else {
+        menu.open = true;
+        menu.classList.add('open');
+        closeOthers(menu, group)
+      }
+    }
+
+    for (const menu of menus) {
+      menu.addEventListener('click', showHide);
+    }
+  </script>
+
+  <details group="one" class="first">
+    <summary>One</summary>
+    <div class="items first">
+        <select>
+          <option>one</option>
+          <option>two</option>
+        </select>
+        <p>Fugiat est dolore ad culpa ea id nisi ea quis consequat et magna minim ut ad aute aute ut reprehenderit ad exercitation.</p>
+    </div>
+  </details>
+
+  <details group="one" class="second">
+    <summary>Two</summary>
+    <div class="items float second">
+      <p>Fugiat est dolore ad culpa ea id nisi ea quis consequat et magna minim ut ad aute aute ut reprehenderit ad exercitation.</p>
+    </div>
+  </details>
+
+  <p>In quis nulla in mollit pariatur esse irure dolor sint commodo amet deserunt tempor do ullamco excepteur sint dolore nisi nisi nulla in in elit reprehenderit laboris laborum dolore sunt.</p>
 
 </body>
 </html>

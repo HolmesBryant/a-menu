@@ -1,30 +1,10 @@
-/**
- * @file src/a-menu-shadow.css
- * CSS styles for a-menu custom element shadow dom
- */
+/* a-menu-shadow.css */
+
 :host {
-  --duration: 0.5s;
-  --justify: center;
-  --min: 35px;
-  --pad: 0.5rem;
-  background: inherit;
+  display: flex;
   interpolate-size: allow-keywords;
-  container-name: menu-system;
-  display: block;
-  box-sizing: border-box;
-  position: relative;
-  z-index: 1;
-  transition: z-index 0s linear var(--duration);
 }
-:host([open]) {
-  z-index: 2;
-  transition-delay: 0s;
-}
-:host(:focus-within),
-:host(:hover) {
-  z-index: 1000;
-  transition-delay: 0s;
-}
+
 ::slotted(a) {
   align-items: center;
   box-sizing: border-box;
@@ -33,126 +13,118 @@
   white-space: nowrap;
   width: 100%;
 }
-details {
-  background: inherit;
+
+::slotted(a),
+::slotted(a-menu) { min-height: var(--min) }
+
+details { display: block }
+
+#icon { font-size: var(--min) }
+
+#items {
+  align-items: baseline;
+  display: flex;
   box-sizing: border-box;
   position: relative;
-  width: 100%;
+  transition:
+    height 400ms ease-in-out,
+    max-height 400ms ease-in-out,
+    opacity 400ms;
 }
-details::details-content {
-  content-visibility: visible;
-  height: 0;
+
+details > #items {
+  height: auto;
+  max-height: 0;
   opacity: 0;
   overflow: hidden;
-
-  transition:
-    height var(--duration) ease,
-    opacity var(--duration) ease,
-    content-visibility var(--duration) ease allow-discrete,
-    overflow 0s 0s;
 }
-details[open]::details-content {
-  height: auto;
+
+details.open > #items {
+  max-height: 100svh;
   opacity: 1;
   overflow: visible;
-  /* Delay overflow:visible until AFTER animation so scrollbars don't flicker */
-  transition:
-    height var(--duration) ease,
-    opacity var(--duration) ease,
-    content-visibility var(--duration) ease allow-discrete,
-    overflow 0s var(--duration);
+  position: relative;
 }
 
-summary { cursor: pointer }
-.hidden { display: none; }
-#icon { font-size: var(--min) }
-#items {
-  /* Pass type down to children */
-  --inherited-type: var(--type);
-  align-items: stretch;
-  background: inherit;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: var(--justify);
-  min-height: var(--min);
-}
-#label {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--min);
-  font-weight: bold;
+@supports (interpolate-size: allow-keywords) {
+  details > #items {
+    height: 0;
+    max-height: unset;
+  }
+
+  details.open > #items {
+    height: auto;
+  }
 }
 
 /* --- Classic --- */
-@container menu-system style(--type: classic) {
-  ::slotted(a) { width: auto; }
-  details { display: block; width: 100%; }
-  summary { list-style: none; }
-  #items {
-    --inherited-type: dropdown;
-    flex-direction: row;
-    width: 100%;
-  }
+:host([type="classic"]) ::slotted(a) { width: auto; }
+
+:host([type="classic"]) details {
+  display: block;
+  width: 100%;
+}
+
+:host([type="classic"]) summary
+{ list-style: none; }
+
+:host([type="classic"]) #items {
+  flex-direction: row;
+  width: 100%;
 }
 
 /* --- Mobile --- */
-@container menu-system style(--type: mobile) {
-  details {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-  }
-  :host[top] summary { list-style: none; }
-  #items {
-    flex-direction: column;
-    width: 100%;
-  }
+:host([type="mobile"]) details {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+:host([top][type="mobile"]) summary { list-style: none; }
+:host([type="mobile"]) #items {
+  flex-direction: column;
+  width: 100%;
 }
 
 /* -- Ribbon -- */
-@container menu-system style(--type: ribbon) {
-  details { display: block; }
-  ::slotted(a) { width: auto; }
-  #items {
-    flex-direction: row;
-    left: 0;
-    min-width: 100%;
-    width: max-content;
-    position: absolute;
-  }
+:host([type="ribbon"]) details { display: block; }
+:host([type="ribbon"]) ::slotted(a) { width: auto; }
+:host([type="ribbon"]) #items {
+  flex-direction: row;
+  left: 0;
+  min-width: 100%;
+  width: max-content;
+  position: absolute;
 }
 
 /* --- Dropdown --- */
-@container menu-system style(--type: dropdown) {
-  details {
-    display: flex;
-    flex-direction: column;
-    width: max-content;
-  }
-  #items {
-    --inherited-type: flyout;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Optional shadow for depth */
-    flex-direction: column;
-    min-width: 100%;
-    position: absolute;
-    top: 100%; left: 0;
-    width: max-content;
-  }
+:host([type="dropdown"]) details {
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+}
+
+:host([type="dropdown"]) #items {
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  flex-direction: column;
+  max-width: 100%;
+  position: absolute;
 }
 
 /* --- Flyout --- */
-@container menu-system style(--type: flyout) {
-  details {
-    display: flex;
-    flex-direction: column;
-    width: max-content;
-  }
-  #items {
-    box-shadow: 4px 4px 6px rgba(0,0,0,0.1);
-    flex-direction: column;
-    position: absolute;
-    left: 100%; top: 0;
-    min-width: 200px;
-    width: max-content;
-  }
+:host([type="flyout"]) details {
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+}
+
+:host([type="flyout"]) #items {
+  border: 1px solid lime;
+  box-shadow: 4px 4px 6px rgba(0,0,0,0.1);
+  flex-direction: column;
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  min-width: 200px;
+  width: max-content;
 }

@@ -17,16 +17,25 @@
 
 	<style>
 		#wrapper {
-			align-items: start;
 			display: flex;
-			flex-wrap: wrap;
+			align-items: start;
 			gap: 1rem;
 		}
 
-		/* #wrapper > aside { flex-basis: 40% } */
-		#wrapper > section { min-width: 505px; }
-		#demo-props::part(items) { background: var(--bg2-color) }
-		#demo-props div:hover { filter: brightness(1.25); }
+		#wrapper > aside {
+			/* flex: 1; */
+			flex-basis: 40%;
+		}
+		#wrapper > section {
+			/* flex: 3; */
+			flex-basis: 60%;
+		}
+
+		#demo-props::part(items)
+		{ background: var(--bg2-color) }
+
+		#demo-props div:hover
+		{ filter: brightness(1.25); }
 	</style>
 </head>
 <body>
@@ -41,7 +50,7 @@
 	<!-- Top Level Controls -->
 	<aside>
 		<a-bindgroup model="dom:#demo">
-			<a-menu type="mobile" id="demo-props" open>
+			<a-menu type="mobile" id="demo-props">
 
 				<!-- Attrs -->
 				<a-menu group="top-lvl">
@@ -141,7 +150,7 @@
 
 	<!-- Demo Menu -->
 	<div>
-		<a-menu id="demo" justify="stretch" open>
+		<a-menu id="demo" justify="stretch">
 			<strong slot="icon">☰</strong>
 			<a href="#">Foo</a>
 
@@ -162,7 +171,7 @@
 				</strong>
 				<a href="#">Bar</a>
 
-				<a-menu id="demo-Aa">
+				<a-menu id="demo-Aa" open>
 					<strong slot="label">
 						Group Aa:
 						<a-bind
@@ -225,6 +234,15 @@
 <hr>
 
 <p>Proident minim do voluptate incididunt ullamco dolore labore ex non enim quis ut commodo ea elit minim dolore esse ut dolor elit ut veniam id quis adipisicing in cillum velitlaborum.</p>
+
+<a-menu>
+	<a href="#">Foo</a>
+	<a href="#">Bar</a>
+	<a-menu>
+		<a href="#">Baz</a>
+		<a href="#">Boom</a>
+	</a-menu>
+</a-menu>
 
 </body>
 </html>

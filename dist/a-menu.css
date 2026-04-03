@@ -22,28 +22,27 @@ a-menu {
 a-menu {
 /***** Background *****/
 
-	&::part(items)
+	&:not([top]) a,
+	&:not([top]) label,
+	&:not([top])::part(items)
 	{ background: var(--bg1-color) }
+
+	&:not([top]) a-menu::part(label)
+	{ background: var(--bg2-color) }
 
 	& a:hover,
 	& a:focus,
-	& div:hover,
-	&::part(header):hover,
-	&::part(header):focus
-	{ background: var(--bg2-color); }
+	&::part(label):hover,
+	&::part(label):focus {
+		background: var(--bg1-color);
+		filter: brightness(1.25);
+	}
 
 	& a:active,
-	&::part(header):active
+	&::part(label):active
 	{ background: var(--accent-color) }
 
 /***** Border *****/
-
-	&:not([top])::part(items)
-	{ border: 1px solid var(--border-color) }
-
-	/* &:not([top]) a,
-	&:not([top]) a-menu
-	{ border-bottom: 1px solid var(--border-color) } */
 
 	&:not([type="ribbon"]):not([top]) a,
 	&:not([top]):not([type="ribbon"]) a-menu
@@ -51,7 +50,7 @@ a-menu {
 
 	& a,
 	& a-menu
-	{ border: 1px solid var(--border-color) }
+	{ border-bottom: 1px solid var(--border-color) }
 
 	a,
 	a-menu,
@@ -72,7 +71,7 @@ a-menu {
 
 /***** Cursor *****/
 
-	&::part(header)
+	&::part(label)
 	{ cursor: pointer }
 
 /***** Shadows *****/
@@ -87,6 +86,6 @@ a-menu {
 
 	& a,
 	& div,
-	&::part(header)
+	&::part(label)
 	{ padding: 0 var(--pad) }
 } /* end a-menu */

@@ -2,47 +2,41 @@ import styles from './a-menu-shadow.css' with {type: 'css'};
 
 export default class AMenu extends HTMLElement {
   // -- Attributes --
+  _breakpoint = 768;
   _group;
-  _showIcon = ['mobile', 'flyout', 'dropdown'];
+  _showIcon = "mobile, flyout, dropdown";
   _open = false;
   _justify = "center";
+  _top = false;
   _type = 'classic';
 
   // -- Private --
 
-  _top = false;
   _abortController;
+  _applyNestedTimeout;
+  _connected;
+  _debug = false;
   _hasIcon = false;
-  _hasLabel = true;
-  _header;
-  _headerSlot;
+  _hasLabel = false;
+  _icon;
   _iconSlot;
-  _menu;
+  _items;
   _itemsSlot;
+  _labelSlot;
   _lockedType = false;
-  _swipeStart = 0;
-  _swipeEnd = 0;
-  _swipeThreshold = 40;
-  _typeStyles;
-
-  // -- connection --
-  _connected = false;
-  #resolveConnected;
-  #connectedPromise = new Promise(resolve => {
-    this.#resolveConnected = resolve;
-  });
-
-  // -- nested updates
-  _rafDelay = 100;
-  _rafHandle = null;
-  _timeStart = null;
-  _token = null;
+  _menu;
+  _mql;
+  _mqlHandler;
+  _originalType;
+  _summary;
 
   // -- Static --
 
   static _menus = new Map();
 
   static observedAttributes = [
+    'breakpoint',
+    'debug',
     'group',
     'open',
     'justify',
@@ -55,11 +49,11 @@ export default class AMenu extends HTMLElement {
   static {
     this.template.innerHTML = `
       <details part="menu" id="menu">
-        <summary part="header" id="header" role="button" aria-expanded="false">
+        <summary part="label" id="summary" role="button" aria-expanded="false">
           <span part="icon" id="icon">
             <slot name="icon"></slot>
           </span>
-          <span part="label" id="label">
+          <span id="label">
             <slot name="label"></slot>
           </span>
         </summary>
@@ -74,16 +68,14 @@ export default class AMenu extends HTMLElement {
     super();
     this.attachShadow({ mode: 'open' });
     this.shadowRoot.append(AMenu.template.content.cloneNode(true));
-    const sheet = new CSSStyleSheet();
-    sheet.replaceSync(':host { --type: var(--inherited-type, flyout) }');
-    this.shadowRoot.adoptedStyleSheets = [styles, sheet];
-    this._typeStyles = sheet;
+    this.shadowRoot.adoptedStyleSheets = [styles];
     this._menu = this.shadowRoot.getElementById('menu');
     this._icon = this.shadowRoot.getElementById('icon');
-    this._header = this.shadowRoot.getElementById('header');
-    this._itemsSlot = this.shadowRoot.querySelector('slot:not([name])');
-    this._headerSlot = this.shadowRoot.querySelector('slot[name="label"]');
     this._iconSlot = this.shadowRoot.querySelector('slot[name="icon"]');
+    this._items = this.shadowRoot.getElementById('items');
+    this._itemsSlot = this.shadowRoot.querySelector('slot:not([name])');
+    this._labelSlot = this.shadowRoot.querySelector('slot[name="label"]');
+    this._summary = this.shadowRoot.querySelector('summary');
   }
 
   // -- Lifecycle --
@@ -91,313 +83,172 @@ export default class AMenu extends HTMLElement {
   attributeChangedCallback(attr, oldval, newval) {
     if (oldval === newval) return;
     switch (attr) {
-      case 'group':
-        if (this._connected && oldval) AMenu._menus.get(oldval)?.delete(this._menu);
-        this._group = newval;
-        if (this._connected) {
-          if (newval) {
-            this._menu.setAttribute('group', newval);
-            AMenu.register(newval, this._menu);
-          } else {
-            this._menu.removeAttribute('group');
-          }
-          if (window.abind) abind.update(this, 'group', newval);
-        }
-        break;
-
-      case 'open':
-        this._open = this.hasAttribute('open');
-        if (this._connected) {
-          this._menu.open = this._open;
-          if (window.abind) abind.update(this, 'open', this._open);
-        }
-        break;
-
-      case 'justify':
-        this._justify = newval;
-        this.setJustify(newval);
-        if (window.abind) abind.update(this, 'justify', this._justify);
-        break;
-
-      case 'swipe-threshold':
-        this._swipeThreshold = Number(newval);
-        if (this._connected) {
-          if (window.abind) abind.update(this, 'swipeThreshold', this._swipeThreshold);
-        }
-        break;
-
-      case 'top':
-        this._top = this.hasAttribute('top');
-        if (window.abind) abind.update(this, 'top', this._top);
-        break;
-      case "type":
-        this._type = newval;
-        if (this._connected && !this._lockedType) {
-          this.applyType(newval);
-          if (window.abind) abind.update(this, 'type', newval);
-        }
-        break;
+    case 'breakpoint':
+      this._setupMediaQuery(newval);
+      break;
+    case 'debug':
+      this._debug = this.hasAttribute('debug');
+      break;
+    case 'group':
+      this._group = newval;
+      if (oldval) AMenu._menus.get(oldval)?.delete(this);
+      if (newval) AMenu.register(newval, this);
+      if (window.abind) abind.update(this, 'group', newval);
+      break;
+    case 'open':
+      this._open = this.hasAttribute('open');
+      if (this._connected) this._toggleMenu();
+      if (window.abind) abind.update(this, 'open', newval);
+      break;
+    case 'top':
+      this._top = this.hasAttribute('top');
+      if (window.abind) abind.update(this, 'top', this._top);
+      break;
+    case 'type':
+      this._type = newval;
+      if (!this._connected) return;
+      if (this._lockedType) return;
+      this._applyType(newval);
+      if (window.abind) abind.update(this, 'type', newval);
+      break;
     }
   }
 
   connectedCallback() {
-    this._abortController = new AbortController;
     this._connected = true;
-    this._hasLabel = this._headerSlot.assignedElements().length > 0;
-    this._hasIcon = this._iconSlot.assignedElements().length > 0;
-    this.#resolveConnected();
-
+    if (this.id) this._menu.dataset.parent = this.id;
+    this._abortController = new AbortController();
     if (this.parentElement?.closest('a-menu') === null) {
       this.top = true;
     }
 
-    if (
-      this.parentElement?.closest('a-menu') !== null &&
-      this.hasAttribute('type')
-    ) {
+    if (this.parentElement?.closest('a-menu') !== null && this.hasAttribute('type') ) {
       this._lockedType = true;
     }
 
-    if (this._hasIcon) this._header.style.listStyle = 'none';
-    this.applyType(this._type);
-    this.maybeHideHeader();
-    if (this._group) AMenu.register(this._group, this._menu);
-    this._menu.open = this._open;
-    // this._mediaQueries = this.getMediaQueries(this, '--type');
-    this.addListeners();
+    this._applyType(this._type);
+    this._addListeners();
+    this._setupMediaQuery(this.breakpoint);
+    if (this._open) this._toggleMenu();
   }
 
   disconnectedCallback() {
-    this._connected = false;
-
     if (this._abortController) {
       this._abortController.abort();
       this._abortController = null;
     }
 
-    if (this._rafHandle) {
-      cancelAnimationFrame(this._rafHandle);
-      this._rafHandle = null;
-    }
-
-    if (this._timeStart) this._timeStart = null;
-    this._token = null;
-
     if (this._group) {
-      AMenu._menus.get(this._group)?.delete(this._menu);
+      const groupSet = AMenu._menus.get(this._group);
+      if (groupSet) groupSet.delete(this);
     }
 
-    this._menu = null;
-    this._header = null;
-    this._headerSlot = null;
+    if (this._mql && this._mqlHandler) {
+      this._mqlHandler.removeEventListener('change', this._mqlHandler);
+    }
   }
 
   // -- Private --
 
-  addListeners() {
-    this._menu.addEventListener("toggle", () => {
-      if (this._menu.open) AMenu.openGroup(this._group, this._menu);
-      // use setter
-      this.open = this._menu.open;
-      this._header.setAttribute('aria-expanded', String(this._menu.open));
-    }, { signal: this._abortController.signal });
+  _addListeners() {
+    this._menu.addEventListener('click', (event) => {
+      const path = event.composedPath();
+      if (path.includes(this._summary)) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.target.tabIndex < 0) {
+          this.open = !this.open;
+        }
+      }
+    }, { signal:this._abortController.signal });
 
-    this.addEventListener('touchstart', event => {
-      this._swipeStart = event.touches[0].clientY;
-    }, {
-      signal: this._abortController.signal,
-      passive: true
-    });
-
-    this.addEventListener('touchend', event => {
-      this._swipeEnd = event.changedTouches[0].clientY;
-      this.handleSwipe();
-    }, { signal: this._abortController.signal });
-
-    this._headerSlot.addEventListener('slotchange', () => {
-      this._hasLabel = this._headerSlot.assignedElements().length > 0;
+    this._labelSlot.addEventListener('slotchange', () => {
+      this._hasLabel = this._labelSlot.assignedElements().length > 0;
       this._hasIcon = this._iconSlot.assignedElements().length > 0;
-      this.maybeHideHeader();
-      this.maybeShowIcon();
-    }, { signal: this._abortController.signal });
-
-    this.addEventListener('pointerdown', e => {
-      if (e.pointerType === 'touch') return;
-      this._swipeStart = e.clientY;
-    }, { signal: this._abortController.signal });
-
-    this.addEventListener('pointerup', e => {
-      if (e.pointerType === 'touch') return;
-      this._swipeEnd = e.clientY;
-      this.handleSwipe();
+      this._maybeHideHeader();
+      this._maybeShowIcon();
     }, { signal: this._abortController.signal });
   }
 
-  applyType(value) {
+  _applyType(value) {
+    if (this._lockedType) return;
+
     const types = ['mobile', 'classic', 'ribbon', 'dropdown', 'flyout', 'sitemap'];
     for (const type of types) {
-      if (!this._lockedType && type !== value) this.removeAttribute(type);
+      if (type !== value && this.hasAttribute(type)) {
+        this.removeAttribute(type);
+      }
     }
 
     // Guard: Only set attribute if different to prevent infinite recursion
-    if (!this._lockedType && this.getAttribute('type') !== value) {
+    if (this.getAttribute('type') !== value) {
       this.setAttribute('type', value);
       return; // Stop here, attributeChangedCallback will call applyType again
     }
 
-    this.maybeHideHeader();
-    this.maybeShowIcon();
-    this.setTypeStyle(value);
-    this.applyTypeToNested(value);
+    this._maybeHideHeader();
+    this._applyTypeToNested(value);
   }
 
-  async applyTypeToNested(value) {
-    const invocationToken = Symbol('applyTypeToNested');
-    this._token = invocationToken;
+  async _applyTypeToNested(value) {
+    clearTimeout(this._applyNestedTimeout);
 
-    // Cancel any in-progress rAF debounce
-    if (this._rafHandle) {
-      cancelAnimationFrame(this._rafHandle);
-      this._rafHandle = null;
-    }
-    if (this._timeStart) {
-      this._timeStart = null;
-    }
+    this._applyNestedTimeout = setTimeout(async () => {
+      if (!this.isConnected) return;
 
-    const delay = Number(this._applyTypeToNestedDelay ?? 100); // ms
-    const start = performance.now();
-    this._timeStart = start;
+      const nested = Array.from(this.children).filter(item => item.localName === 'a-menu');
+      if (!nested.length) return;
 
-    return new Promise((resolve) => {
-      const tick = async (now) => {
-        // prevent race condition from overlapping calls
-        if (this._token !== invocationToken) {
-          this._rafHandle = null;
-          this._timeStart = null;
-          return resolve(false);
+      await customElements.whenDefined('a-menu');
+
+      for (const child of nested) {
+        let type = value;
+        if (this._type === 'classic') type = 'dropdown';
+        if (this._type === 'dropdown') type = 'flyout';
+
+        if (child.type !== type) {
+          child.type = type;
         }
-
-        if (!this.isConnected) {
-          this._rafHandle = null;
-          this._timeStart = null;
-          return resolve(false);
-        }
-
-        // if another call started later, abort
-        if (this._timeStart !== start) {
-          return resolve(false);
-        }
-
-        if (now - start >= delay) {
-          this._rafHandle = null;
-          this._timeStart = null;
-
-          try {
-            // prevent stale updates after disconnection or new call
-            if (this._token !== invocationToken) {
-              return resolve(false);
-            }
-
-            await this.whenConnected();
-
-            if (this._token !== invocationToken || !this.isConnected) {
-              return resolve(false);
-            }
-
-            await customElements.whenDefined('a-menu');
-
-            if (this._token !== invocationToken || !this.isConnected) {
-              return resolve(false);
-            }
-
-            const nested = Array.from(this.children).filter(
-              item => item.localName === 'a-menu'
-            );
-
-            for (const child of nested) {
-              if (this._token !== invocationToken || !this.isConnected) {
-                return resolve(false);
-              }
-
-              if (typeof child.whenConnected === 'function') {
-                await child.whenConnected();
-              }
-
-              if (this._token !== invocationToken) {
-                return resolve(false);
-              }
-
-              let type;
-              switch (this._type) {
-                case 'classic':
-                  type = 'dropdown';
-                  break;
-                case 'dropdown':
-                  type = 'flyout';
-                  break;
-                default:
-                  type = value;
-              }
-
-              // Only update if this is still the latest invocation
-              if (child.type !== type && this._token === invocationToken) {
-                child.type = type;
-              }
-            }
-
-            resolve(true);
-          } catch (e) {
-            console.warn('Error in applyTypeToNested:', e);
-            resolve(false);
-          }
-        } else {
-          // prevent orphaned rAF callbacks from stale invocations
-          if (
-            this._token === invocationToken &&
-            this.isConnected
-          ) {
-            this._rafHandle = requestAnimationFrame(tick);
-          } else {
-            this._rafHandle = null;
-            resolve(false);
-          }
-        }
-      };
-
-      // Schedule initial tick
-      if (this.isConnected && this._token === invocationToken) {
-        this._rafHandle = requestAnimationFrame(tick);
-      } else {
-        resolve(false);
       }
-    });
+    }, 100);
   }
 
-  doMediaQuery(query) {
-    console.log(query);
-    // const mql = matchMedia("(max-width: 600px)");
-
-    /*mql.addEventListener("change", e => {
-      if (e.matches) {
-        console.log("Now ≤ 600px");
-      } else {
-        console.log("Now > 600px");
-      }
-    });*/
+  _closeOthers(elem, group) {
+    const set = AMenu._menus.get(group);
+    if (!set) return console.warn(`the group "${group}" was not registered.`);
+    for (const menu of set) {
+      if (menu === elem) continue;
+      if (menu.open) menu.open = false;
+    }
   }
 
-  handleSwipe() {
-    const delta = this._swipeEnd - this._swipeStart;
-    if (Math.abs(delta) < this._swipeThreshold) return;
-    this.toggleAttribute('open', delta > 0);
+  _closeWithTransition(menu, items) {
+    menu.classList.remove('open');
+
+    const duration = parseFloat(getComputedStyle(items).transitionDuration) * 1000 || 0;
+    const fallbackDelay = duration > 0 ? duration + 50 : 50;
+    let isClosed = false;
+
+    const closeMenu = (event) => {
+      if (event && event.target !== items) return;
+      if (isClosed) return;
+
+      isClosed = true;
+      menu.open = false;
+      items.removeEventListener('transitionend', closeMenu);
+      clearTimeout(fallbackTimeout);
+    };
+
+    items.addEventListener('transitionend', closeMenu);
+    const fallbackTimeout = setTimeout(closeMenu, fallbackDelay);
   }
 
-  maybeHideHeader() {
-    this._header.hidden = !this._hasLabel && !this.maybeShowIcon();
+  _maybeHideHeader() {
+    this._summary.hidden = !this._hasLabel && !this._maybeShowIcon();
     if (!this._hasLabel) this.open = true;
   }
 
-  maybeShowIcon() {
+  _maybeShowIcon() {
     const show = this._hasIcon && this._showIcon.includes(this.type);
     if (show) {
       this._icon.classList.remove('hidden');
@@ -408,79 +259,85 @@ export default class AMenu extends HTMLElement {
     return show;
   }
 
-  setJustify(value) {
-    const assigned = this._itemsSlot.assignedElements();
-    if (value === 'stretch') {
-      this.style.removeProperty('--justify');
-      for (const elem of assigned) {
-        elem.style.setProperty('flex', 1);
-      }
-    } else {
-      for (const elem of assigned) {
-        elem.style.removeProperty('flex');
-      }
-      this.style.setProperty('--justify', value);
+  _setupMediaQuery(maxWidth) {
+    if (this._mql && this._mqlHandler) {
+      this._mql.removeEventListener('change', this._mqlHandler);
+    }
 
+    if (!maxWidth) return;
+    this._mql = window.matchMedia(`max-width: ${maxWidth}px`);
+
+    this._mqlHandler = (event) => {
+      if (event.matches) {
+        if (this.type !== 'mobile') {
+          this._originalType = this.type;
+          this.type = 'mobile';
+        }
+      } else {
+        // screen is larger
+        if (this._originalType && this.type === 'mobile') {
+          this.type = this._originalType;
+          this._originalType = null;
+        }
+      }
+    };
+
+    this._mql.addEventListener('change', this._mqlHandler);
+    this._mqlHandler(this._mql);
+  }
+
+  _toggleMenu() {
+    if (this.debug) console.log(this._open, this._menu.open);
+    if (this._open && !this._menu.open) {
+      this._menu.open = true;
+      this._menu.classList.add('open');
+      if (this._group) this._closeOthers(this, this._group);
+    } else if (!this.open && this._menu.open) {
+      this._closeWithTransition(this._menu, this._items);
     }
   }
 
-  setTypeStyle(value) {
-    const sheet = this._typeStyles;
-    const css = (this._top) ?
-      `:host([top]) { --type: ${value} }` :
-      `:host { --type: ${value} }`;
-
-    sheet.replaceSync(css);
-  }
-
-  // --- Public --
-
-  static openGroup(group, elem) {
-    if (this._menus.size === 0) return;
-    this._menus.get(group)?.forEach( other => {
-      if (other !== elem) other.open = false;
-    });
-  }
+  // -- Public --
 
   static register(group, elem) {
     if (!this._menus.has(group)) this._menus.set(group, new Set());
     this._menus.get(group).add(elem);
   }
 
-  async whenConnected() {
-    if (this._connected) return true;
-    await this.#connectedPromise;
-    return true;
+  // -- Getters / Setters --
+
+  get breakpoint() { return this.getAttribute('breakpoint') }
+  set breakpoint(value) {
+    if (value) {
+      this.setAttribute('breakpoint', value);
+    } else {
+      this.removeAttribute('breakpoint');
+    }
   }
 
-  // -- Getters / Setters --
+  get debug() { return this._debug }
+  set debug(value) {
+    const isOpen = value !== null && value !== false && value !== "false";
+    this.toggleAttribute('debug', isOpen);
+  }
 
   get group() { return this._group }
   set group(value) { this.setAttribute('group', value) }
 
   get open() { return this._open }
   set open(value) {
-    this.toggleAttribute('open', value !== undefined && value !== false);
+    const isOpen = value !== null && value !== false && value !== "false";
+    this.toggleAttribute('open', isOpen);
   }
-
-  get justify() { return this._justify }
-  set justify(value) { this.setAttribute('justify', value) }
-
-  get swipeThreshold() { return this._swipeThreshold }
-  set swipeThreshold(value) { this.setAttribute('swipe-threshold', value)}
 
   get top() { return this._top }
   set top(value) {
-    this.toggleAttribute('top', value !== undefined && value !== false )
+    const isTop = value !== null && value !== false && value !== "false";
+    this.toggleAttribute('top', isTop);
   }
 
   get type() { return this._type }
-  set type(value) {
-    if (this._lockedType) {
-      return console.warn('Attempting to set type on element whose type is locked because it has a "type" attribute', this);
-    }
-    this.setAttribute('type', value)
-  }
+  set type(value) { this.setAttribute('type', value) }
 }
 
 if (!customElements.get('a-menu')) customElements.define('a-menu', AMenu);
