@@ -16,6 +16,11 @@
 	<link rel="stylesheet" href="extra/a-color.css">
 
 	<style>
+		section {
+			flex: 1;
+			position: relative;
+		}
+
 		#wrapper {
 			align-items: start;
 			display: flex;
@@ -23,10 +28,13 @@
 			gap: 1rem;
 		}
 
-		/* #wrapper > aside { flex-basis: 40% } */
-		#wrapper > section { min-width: 505px; }
-		#demo-props::part(items) { background: var(--bg2-color) }
-		#demo-props div:hover { filter: brightness(1.25); }
+		#demo-props::part(items) {
+			background: var(--bg2-color)
+		}
+
+		#demo-props div:hover {
+			filter: brightness(1.25);
+		}
 	</style>
 </head>
 <body>
@@ -44,7 +52,7 @@
 			<a-menu type="mobile" id="demo-props" open>
 
 				<!-- Attrs -->
-				<a-menu group="top-lvl">
+				<a-menu group="top-lvl" open>
 					<strong slot="label">Attributes</strong>
 
 					<div class="flex space-between">
@@ -89,7 +97,7 @@
 				</a-menu>
 
 				<!-- CSS Vars -->
-					<a-menu group="top-lvl" open>
+					<a-menu group="top-lvl">
 						<strong slot="label">CSS Vars</strong>
 
 						<div class="flex stretch">
@@ -139,13 +147,13 @@
 		</a-bindgroup>
 	</aside>
 
-	<!-- Demo Menu -->
-	<div>
-		<a-menu id="demo" justify="stretch" open>
+	<section>
+		<!-- Demo Menu -->
+		<a-menu id="demo" type="ribbon" justify="center">
 			<strong slot="icon">☰</strong>
 			<a href="#">Foo</a>
 
-			<a-menu id="demo-A" group="level-1" open>
+			<a-menu id="demo-A" group="level-1">
 				<strong slot="label">
 					Group A:
 					<a-bind
@@ -157,6 +165,7 @@
 						<option>ribbon</option>
 						<option>dropdown</option>
 						<option>flyout</option>
+						<option>sitemap</option>
 					</select>
 				</a-bind>
 				</strong>
@@ -174,6 +183,7 @@
 						<option>ribbon</option>
 						<option>dropdown</option>
 						<option>flyout</option>
+						<option>sitemap</option>
 					</select>
 				</a-bind>
 					</strong>
@@ -183,20 +193,21 @@
 				</a-menu>
 			</a-menu>
 
-			<a-menu id="demo-B" group="level-1">
+			<a-menu id="demo-B" group="level-1" debug>
 				<strong slot="label">
 					Group B:
 					<a-bind
-					model="dom:#demo-B"
-					prop="type">
-					<select>
-						<option>classic</option>
-						<option>mobile</option>
-						<option>ribbon</option>
-						<option>dropdown</option>
-						<option>flyout</option>
-					</select>
-				</a-bind>
+						model="dom:#demo-B"
+						prop="type">
+						<select>
+							<option>classic</option>
+							<option>mobile</option>
+							<option>ribbon</option>
+							<option>dropdown</option>
+							<option>flyout</option>
+							<option>sitemap</option>
+						</select>
+					</a-bind>
 				</strong>
 				<a href="#">Boom</a>
 
@@ -212,6 +223,7 @@
 						<option>ribbon</option>
 						<option>dropdown</option>
 						<option>flyout</option>
+						<option>sitemap</option>
 					</select>
 				</a-bind>
 					</strong>
@@ -219,7 +231,7 @@
 				</a-menu>
 			</a-menu>
 		</a-menu>
-	</div>
+	</section>
 </div>
 
 <hr>

@@ -2,7 +2,7 @@ import styles from './a-menu-shadow.css' with {type: 'css'};
 
 export default class AMenu extends HTMLElement {
   // -- Attributes --
-  _breakpoint = 768;
+  _breakpoint = 600;
   _group;
   _showIcon = "mobile, flyout, dropdown";
   _open = false;
@@ -13,8 +13,7 @@ export default class AMenu extends HTMLElement {
   // -- Private --
 
   _abortController;
-  _applyNestedTimeout;
-  _connected;
+  _connected = false;
   _debug = false;
   _hasIcon = false;
   _hasLabel = false;
@@ -84,6 +83,7 @@ export default class AMenu extends HTMLElement {
     if (oldval === newval) return;
     switch (attr) {
     case 'breakpoint':
+      this._breakpoint = (newval) ? parseFloat(newval) : null;
       this._setupMediaQuery(newval);
       break;
     case 'debug':
@@ -99,6 +99,10 @@ export default class AMenu extends HTMLElement {
       this._open = this.hasAttribute('open');
       if (this._connected) this._toggleMenu();
       if (window.abind) abind.update(this, 'open', newval);
+      break;
+    case 'justify':
+      this._justify = newval;
+      this._setJustify(newval);
       break;
     case 'top':
       this._top = this.hasAttribute('top');
@@ -126,10 +130,13 @@ export default class AMenu extends HTMLElement {
       this._lockedType = true;
     }
 
+    if (this._group) AMenu.register(this._group, this);
+
     this._applyType(this._type);
     this._addListeners();
     this._setupMediaQuery(this.breakpoint);
     if (this._open) this._toggleMenu();
+    if (this.debug) this.logVars(false);
   }
 
   disconnectedCallback() {
@@ -144,7 +151,7 @@ export default class AMenu extends HTMLElement {
     }
 
     if (this._mql && this._mqlHandler) {
-      this._mqlHandler.removeEventListener('change', this._mqlHandler);
+      this._mql.removeEventListener('change', this._mqlHandler);
     }
   }
 
@@ -186,31 +193,25 @@ export default class AMenu extends HTMLElement {
       return; // Stop here, attributeChangedCallback will call applyType again
     }
 
+    if (value === 'sitemap') this.open = true;
     this._maybeHideHeader();
     this._applyTypeToNested(value);
   }
 
   async _applyTypeToNested(value) {
-    clearTimeout(this._applyNestedTimeout);
+    if (!this.isConnected) return;
+    await customElements.whenDefined('a-menu');
+    // wait a micro-tick to wait for nested elements to be parsed
+    await Promise.resolve();
+    const nested = Array.from(this.children).filter(item => item.localName === 'a-menu');
+    if (!nested.length) return;
 
-    this._applyNestedTimeout = setTimeout(async () => {
-      if (!this.isConnected) return;
-
-      const nested = Array.from(this.children).filter(item => item.localName === 'a-menu');
-      if (!nested.length) return;
-
-      await customElements.whenDefined('a-menu');
-
-      for (const child of nested) {
-        let type = value;
-        if (this._type === 'classic') type = 'dropdown';
-        if (this._type === 'dropdown') type = 'flyout';
-
-        if (child.type !== type) {
-          child.type = type;
-        }
-      }
-    }, 100);
+    for (const child of nested) {
+      let type = value;
+      if (this._type === 'classic') type = 'dropdown';
+      if (this._type === 'dropdown') type = 'flyout';
+      if (child.type !== type) child.type = type;
+    }
   }
 
   _closeOthers(elem, group) {
@@ -245,7 +246,7 @@ export default class AMenu extends HTMLElement {
 
   _maybeHideHeader() {
     this._summary.hidden = !this._hasLabel && !this._maybeShowIcon();
-    if (!this._hasLabel) this.open = true;
+    if (!this._hasLabel && this._top) this.open = true;
   }
 
   _maybeShowIcon() {
@@ -259,13 +260,18 @@ export default class AMenu extends HTMLElement {
     return show;
   }
 
+  _setJustify(value) {
+    console.log(value);
+  }
+
   _setupMediaQuery(maxWidth) {
     if (this._mql && this._mqlHandler) {
       this._mql.removeEventListener('change', this._mqlHandler);
     }
 
     if (!maxWidth) return;
-    this._mql = window.matchMedia(`max-width: ${maxWidth}px`);
+    // this._mql = window.matchMedia(`max-width: ${maxWidth}px`);
+    this._mql = window.matchMedia(`(max-width: ${maxWidth}px)`);
 
     this._mqlHandler = (event) => {
       if (event.matches) {
@@ -287,17 +293,53 @@ export default class AMenu extends HTMLElement {
   }
 
   _toggleMenu() {
-    if (this.debug) console.log(this._open, this._menu.open);
     if (this._open && !this._menu.open) {
       this._menu.open = true;
       this._menu.classList.add('open');
-      if (this._group) this._closeOthers(this, this._group);
+      if (this._group && this.type !== 'sitemap') this._closeOthers(this, this._group);
     } else if (!this.open && this._menu.open) {
       this._closeWithTransition(this._menu, this._items);
     }
   }
 
   // -- Public --
+
+  logVars(isOpen = false) {
+
+    if (isOpen) {
+      console.group(this);
+    } else {
+      console.groupCollapsed(this);
+    }
+
+    console.log('------ Attributes ------');
+    console.log('breakpoint', this.breakpoint);
+    console.log('group', this.group);
+    console.log('showIcon', this.showIcon);
+    console.log('open', this.open);
+    console.log('justify', this.justify);
+    console.log('top', this.top);
+    console.log('type', this.type);
+
+    console.log('------ Properties ------');
+    console.log('_connected', this._connected);
+    console.log('_debug', this._debug);
+    console.log('_hasIcon', this._hasIcon);
+    console.log('_hasLabel', this._hasLabel);
+    console.log('_icon', this._icon);
+    console.log('_iconSlot', this._iconSlot);
+    console.log('_items', this._items);
+    console.log('_itemsSlot', this._itemsSlot);
+    console.log('_labelSlot', this._labelSlot);
+    console.log('_lockedType', this._lockedType);
+    console.log('_menu', this._menu);
+    console.log('_mql', this._mql);
+    console.log('_mqlHandler', this._mqlHandler);
+    console.log('_originalType', this._originalType);
+    console.log('_summary', this._summary);
+
+    console.groupEnd();
+  }
 
   static register(group, elem) {
     if (!this._menus.has(group)) this._menus.set(group, new Set());
@@ -306,7 +348,7 @@ export default class AMenu extends HTMLElement {
 
   // -- Getters / Setters --
 
-  get breakpoint() { return this.getAttribute('breakpoint') }
+  get breakpoint() { return this._breakpoint }
   set breakpoint(value) {
     if (value) {
       this.setAttribute('breakpoint', value);
@@ -316,19 +358,16 @@ export default class AMenu extends HTMLElement {
   }
 
   get debug() { return this._debug }
-  set debug(value) {
-    const isOpen = value !== null && value !== false && value !== "false";
-    this.toggleAttribute('debug', isOpen);
-  }
+  set debug(value) { this.toggleAttribute('debug', !!value) }
 
   get group() { return this._group }
   set group(value) { this.setAttribute('group', value) }
 
+  get justify() { return this._justify }
+  set justify(value) { this.setAttribute('justify', value) }
+
   get open() { return this._open }
-  set open(value) {
-    const isOpen = value !== null && value !== false && value !== "false";
-    this.toggleAttribute('open', isOpen);
-  }
+  set open(value) { this.toggleAttribute('open', !!value) }
 
   get top() { return this._top }
   set top(value) {

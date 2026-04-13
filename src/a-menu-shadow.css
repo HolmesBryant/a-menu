@@ -1,6 +1,7 @@
 /* a-menu-shadow.css */
 
 :host {
+  --indent: .5rem;
   display: flex;
   interpolate-size: allow-keywords;
 }
@@ -127,4 +128,30 @@ details.open > #items {
   top: 50%;
   min-width: 200px;
   width: max-content;
+}
+
+/* --- Sitemap --- */
+:host([type="sitemap"]) { width: auto }
+
+:host([type="sitemap"]) details {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+:host([type="sitemap"]) summary::-webkit-details-marker { display: none }
+:host([type="sitemap"]) summary {
+  list-style: none;
+  pointer-events: none;
+}
+
+:host([type="sitemap"]) #items {
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+}
+
+:host([type="sitemap"]) ::slotted(a-menu) {
+  margin-inline-start: var(--indent, 1rem);
+  width: calc(100% - var(--indent, 1rem));
 }
