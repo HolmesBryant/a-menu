@@ -8,8 +8,15 @@ a-menu {
   --duration: 0.5s;
 	--min: 35px;
 	--pad: .5rem;
+
+	/* set to 1 if you want everything the same width */
+	--flex: initial;
+
+	/* same possible values as justify-content */
+	--justify: initial;
 }
 
+/* For users who prefer dark theme */
 @media (prefers-color-scheme: dark) {
 	a-menu {
     --bg1-color: rgb(40, 40, 40);
@@ -20,27 +27,28 @@ a-menu {
 }
 
 a-menu {
+
 /***** Background *****/
 
-	&:not([top]) a,
-	&:not([top]) label,
-	&:not([top])::part(items)
-	{ background: var(--bg1-color) }
+	background: var(--bg1-color);
 
-	&:not([top]) a-menu::part(label)
-	{ background: var(--bg2-color) }
+	& a,
+	&::part(label)
+	{ background: var(--bg1-color); }
 
 	& a:hover,
 	& a:focus,
 	&::part(label):hover,
-	&::part(label):focus {
-		background: var(--bg1-color);
-		filter: brightness(1.25);
-	}
+	&::part(label):focus
+	{ filter: brightness(1.25) }
 
 	& a:active,
-	&::part(label):active
+	&::part(label):active,
+	&[open] [slot="icon"]
 	{ background: var(--accent-color) }
+
+	& [slot="icon"]
+	{ background: transparent; }
 
 /***** Border *****/
 
@@ -49,13 +57,13 @@ a-menu {
 	{ border-left: 4px solid var(--accent-color) }
 
 	& a,
-	& a-menu
-	{ border-bottom: 1px solid var(--border-color) }
+	& a-menu:not([top])
+	{ border: 1px solid var(--border-color) }
 
 	a,
 	a-menu,
 	&:not([top]) div
-	{ border-bottom: 1px solid var(--border-color) }
+	{ border: 1px solid var(--border-color) }
 
 /***** Text *****/
 
@@ -66,7 +74,7 @@ a-menu {
 		text-decoration: none
 	}
 
-	& [icon]
+	& [slot="icon"]
 	{ font-size: var(--min) }
 
 /***** Cursor *****/
@@ -87,5 +95,10 @@ a-menu {
 	& a,
 	& div,
 	&::part(label)
-	{ padding: 0 var(--pad) }
+	{ padding: 0 var(--pad); }
+
+	& [slot="icon"] {
+		display: block;
+		border: 1px solid lime;
+	}
 } /* end a-menu */

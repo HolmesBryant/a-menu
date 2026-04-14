@@ -1,31 +1,44 @@
 /* a-menu-shadow.css */
 
 :host {
-  --indent: .5rem;
+  --pad: .5rem;
+  --min: 40px;
+  --justify: initial;
+  --flex: initial;
   display: flex;
   interpolate-size: allow-keywords;
 }
 
 ::slotted(a) {
   align-items: center;
-  box-sizing: border-box;
   display: flex;
   text-decoration: none;
   white-space: nowrap;
-  width: 100%;
 }
 
 ::slotted(a),
-::slotted(a-menu) { min-height: var(--min) }
+::slotted(a-menu) {
+  flex: var(--flex);
+  min-height: var(--min);
+  padding: 0 var(--pad);
+}
 
-details { display: block }
+details {
+  display: block;
+  position: relative;
+}
 
-#icon { font-size: var(--min) }
+#icon {
+  align-items: center;
+  display: inline-flex;
+  line-height: 0;
+  justify-content: center;
+}
 
 #items {
-  align-items: baseline;
+  align-items: stretch;
   display: flex;
-  box-sizing: border-box;
+  justify-content: var(--justify);
   position: relative;
   transition:
     height 400ms ease-in-out,
@@ -59,6 +72,7 @@ details.open > #items {
 }
 
 /* --- Classic --- */
+
 :host([type="classic"]) ::slotted(a) { width: auto; }
 
 :host([type="classic"]) details {
@@ -70,49 +84,57 @@ details.open > #items {
 { list-style: none; }
 
 :host([type="classic"]) #items {
+  align-items: start;
   flex-direction: row;
   width: 100%;
 }
 
 /* --- Mobile --- */
+
 :host([type="mobile"]) details {
   display: flex;
   flex-direction: column;
   width: 100%;
 }
 
-:host([top][type="mobile"]) summary { list-style: none; }
+:host([top][type="mobile"]) summary {
+  display: block;
+  list-style: none;
+}
+
 :host([type="mobile"]) #items {
   flex-direction: column;
   width: 100%;
 }
 
 /* -- Ribbon -- */
+
 :host([type="ribbon"]) details { display: block; }
 :host([type="ribbon"]) ::slotted(a) { width: auto; }
 :host([type="ribbon"]) #items {
   flex-direction: row;
-  left: 0;
-  min-width: 100%;
   width: max-content;
   position: absolute;
 }
 
 /* --- Dropdown --- */
+
 :host([type="dropdown"]) details {
   display: flex;
   flex-direction: column;
-  width: max-content;
 }
 
 :host([type="dropdown"]) #items {
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   flex-direction: column;
-  max-width: 100%;
+  width: max-content;
   position: absolute;
 }
 
 /* --- Flyout --- */
+
+:host([type="flyout"]) { display: inline-flex; }
+
 :host([type="flyout"]) details {
   display: flex;
   flex-direction: column;
@@ -120,7 +142,6 @@ details.open > #items {
 }
 
 :host([type="flyout"]) #items {
-  border: 1px solid lime;
   box-shadow: 4px 4px 6px rgba(0,0,0,0.1);
   flex-direction: column;
   position: absolute;
@@ -131,10 +152,11 @@ details.open > #items {
 }
 
 /* --- Sitemap --- */
+
 :host([type="sitemap"]) { width: auto }
 
 :host([type="sitemap"]) details {
-  display: flex;
+  /* display: flex; */
   flex-direction: column;
   width: 100%;
 }
@@ -147,11 +169,11 @@ details.open > #items {
 
 :host([type="sitemap"]) #items {
   flex-direction: column;
-  position: relative;
-  width: 100%;
+  /* position: relative; */
+  /* width: 100%; */
 }
 
 :host([type="sitemap"]) ::slotted(a-menu) {
-  margin-inline-start: var(--indent, 1rem);
-  width: calc(100% - var(--indent, 1rem));
+  /* margin-inline-start: var(--pad, 1rem); */
+  /* width: calc(100% - var(--pad, 1rem)); */
 }

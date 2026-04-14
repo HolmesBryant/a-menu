@@ -6,10 +6,7 @@
 	<title>A-Menu</title>
 	<script type="module" src="src/a-menu.js"></script>
 	<script type="module" src="extra/a-color.min.js"></script>
-	<script type="module">
-		import ABind from "./extra/a-bind.min.js";
-		window.abind = ABind;
-	</script>
+	<script type="module" src="./extra/a-bind.min.js"></script>
 
 	<link rel="stylesheet" href="extra/styles.css">
 	<link rel="stylesheet" href="dist/a-menu.css">
@@ -22,7 +19,7 @@
 		}
 
 		#wrapper {
-			align-items: start;
+			align-items: stretch;
 			display: flex;
 			flex-wrap: wrap;
 			gap: 1rem;
@@ -74,23 +71,6 @@
 								<option>sitemap</option>
 								<option>flyout</option>
 								<option>dropdown</option>
-							</select>
-						</a-bind>
-					</div>
-
-					<div class="flex">
-						<label for="demo-justify" class="flex1">
-							justify
-						</label>
-						<a-bind prop="justify" class="flex1">
-							<select id="demo-justify">
-								<option>start</option>
-								<option>end</option>
-								<option>center</option>
-								<option>stretch</option>
-								<option>space-between</option>
-								<option>space-around</option>
-								<option>space-evenly</option>
 							</select>
 						</a-bind>
 					</div>
@@ -149,7 +129,7 @@
 
 	<section>
 		<!-- Demo Menu -->
-		<a-menu id="demo" type="ribbon" justify="center">
+		<a-menu id="demo" type="dropdown">
 			<strong slot="icon">☰</strong>
 			<a href="#">Foo</a>
 
@@ -193,7 +173,7 @@
 				</a-menu>
 			</a-menu>
 
-			<a-menu id="demo-B" group="level-1" debug>
+			<a-menu id="demo-B" group="level-1" open>
 				<strong slot="label">
 					Group B:
 					<a-bind
@@ -211,7 +191,7 @@
 				</strong>
 				<a href="#">Boom</a>
 
-				<a-menu id="demo-Ba">
+				<a-menu id="demo-Ba" open>
 					<strong slot="label">
 						Group Ba:
 						<a-bind

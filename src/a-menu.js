@@ -1,12 +1,14 @@
 import styles from './a-menu-shadow.css' with {type: 'css'};
 
+const abindUpdate = Symbol.for('abind.update');
+
 export default class AMenu extends HTMLElement {
   // -- Attributes --
   _breakpoint = 600;
   _group;
   _showIcon = "mobile, flyout, dropdown";
   _open = false;
-  _justify = "center";
+  _swipe = 40;
   _top = false;
   _type = 'classic';
 
@@ -28,6 +30,8 @@ export default class AMenu extends HTMLElement {
   _mqlHandler;
   _originalType;
   _summary;
+  _swipeEnd;
+  _swipeStart;
 
   // -- Static --
 
@@ -38,8 +42,7 @@ export default class AMenu extends HTMLElement {
     'debug',
     'group',
     'open',
-    'justify',
-    'swipe-threshold',
+    'swipe',
     'top',
     'type'
   ];
@@ -85,6 +88,7 @@ export default class AMenu extends HTMLElement {
     case 'breakpoint':
       this._breakpoint = (newval) ? parseFloat(newval) : null;
       this._setupMediaQuery(newval);
+      globalThis[abindUpdate]?.(this, 'breakpoint', newval);
       break;
     case 'debug':
       this._debug = this.hasAttribute('debug');
@@ -93,27 +97,27 @@ export default class AMenu extends HTMLElement {
       this._group = newval;
       if (oldval) AMenu._menus.get(oldval)?.delete(this);
       if (newval) AMenu.register(newval, this);
-      if (window.abind) abind.update(this, 'group', newval);
+      globalThis[abindUpdate]?.(this, 'group', newval);
       break;
     case 'open':
       this._open = this.hasAttribute('open');
       if (this._connected) this._toggleMenu();
-      if (window.abind) abind.update(this, 'open', newval);
-      break;
-    case 'justify':
-      this._justify = newval;
-      this._setJustify(newval);
+      globalThis[abindUpdate]?.(this, 'open', this._open);
       break;
     case 'top':
       this._top = this.hasAttribute('top');
-      if (window.abind) abind.update(this, 'top', this._top);
+      globalThis[abindUpdate]?.(this, 'top', this._top);
+      break;
+    case 'swipe':
+      this._swipe = Number(newval);
+      globalThis[abindUpdate]?.(this, 'swipe', this._swipe);
       break;
     case 'type':
       this._type = newval;
       if (!this._connected) return;
       if (this._lockedType) return;
       this._applyType(newval);
-      if (window.abind) abind.update(this, 'type', newval);
+      globalThis[abindUpdate]?.(this, 'type', newval);
       break;
     }
   }
@@ -129,6 +133,9 @@ export default class AMenu extends HTMLElement {
     if (this.parentElement?.closest('a-menu') !== null && this.hasAttribute('type') ) {
       this._lockedType = true;
     }
+
+    this._hasLabel = this._labelSlot.assignedElements().length > 0;
+    this._hasIcon = this._iconSlot.assignedElements().length > 0;
 
     if (this._group) AMenu.register(this._group, this);
 
@@ -174,6 +181,18 @@ export default class AMenu extends HTMLElement {
       this._hasIcon = this._iconSlot.assignedElements().length > 0;
       this._maybeHideHeader();
       this._maybeShowIcon();
+    }, { signal: this._abortController.signal });
+
+    this.addEventListener('touchstart', event => {
+      this._swipeStart = event.touches[0].clientY;
+    }, {
+      signal: this._abortController.signal,
+      passive: true
+    });
+
+    this.addEventListener('touchend', event => {
+      this._swipeEnd = event.changedTouches[0].clientY;
+      this._handleSwipe();
     }, { signal: this._abortController.signal });
   }
 
@@ -244,6 +263,12 @@ export default class AMenu extends HTMLElement {
     const fallbackTimeout = setTimeout(closeMenu, fallbackDelay);
   }
 
+  _handleSwipe() {
+    const delta = this._swipeEnd - this._swipeStart;
+    if (Math.abs(delta) < this._swipe) return;
+    this.toggleAttribute('open', delta > 0);
+  }
+
   _maybeHideHeader() {
     this._summary.hidden = !this._hasLabel && !this._maybeShowIcon();
     if (!this._hasLabel && this._top) this.open = true;
@@ -253,15 +278,13 @@ export default class AMenu extends HTMLElement {
     const show = this._hasIcon && this._showIcon.includes(this.type);
     if (show) {
       this._icon.classList.remove('hidden');
+      this._summary.style.setProperty('list-style', 'none');
     } else {
       this._icon.classList.add('hidden');
+      this._summary.style.removeProperty('list-style');
     }
 
     return show;
-  }
-
-  _setJustify(value) {
-    console.log(value);
   }
 
   _setupMediaQuery(maxWidth) {
@@ -318,6 +341,7 @@ export default class AMenu extends HTMLElement {
     console.log('showIcon', this.showIcon);
     console.log('open', this.open);
     console.log('justify', this.justify);
+    console.log('swipe', this.swipe);
     console.log('top', this.top);
     console.log('type', this.type);
 
@@ -363,11 +387,11 @@ export default class AMenu extends HTMLElement {
   get group() { return this._group }
   set group(value) { this.setAttribute('group', value) }
 
-  get justify() { return this._justify }
-  set justify(value) { this.setAttribute('justify', value) }
-
   get open() { return this._open }
   set open(value) { this.toggleAttribute('open', !!value) }
+
+  get swipe() { return this._swipe }
+  set swipe(value) { this.setAttribute('swipe', value) }
 
   get top() { return this._top }
   set top(value) {
