@@ -43,26 +43,18 @@ a-menu {
 	{ filter: brightness(1.25) }
 
 	& a:active,
-	&::part(label):active,
-	&[open] [slot="icon"]
+	&::part(label):active
 	{ background: var(--accent-color) }
-
-	& [slot="icon"]
-	{ background: transparent; }
 
 /***** Border *****/
 
-	&:not([type="ribbon"]):not([top]) a,
-	&:not([top]):not([type="ribbon"]) a-menu
+	&:not([type="ribbon"]):not([type="sitemap"]):not([top]) a,
+	&:not([top]):not([type="ribbon"]):not([type="sitemap"]) a-menu
 	{ border-left: 4px solid var(--accent-color) }
 
-	& a,
-	& a-menu:not([top])
-	{ border: 1px solid var(--border-color) }
-
-	a,
-	a-menu,
-	&:not([top]) div
+	&:not([type="sitemap"]) a,
+	&:not([top]):not([type="sitemap"]) div,
+	&:not([type="sitemap"]) a-menu:not([top])
 	{ border: 1px solid var(--border-color) }
 
 /***** Text *****/
@@ -74,8 +66,16 @@ a-menu {
 		text-decoration: none
 	}
 
+	& a:hover
+	{ text-decoration: underline; }
+
 	& [slot="icon"]
 	{ font-size: var(--min) }
+
+	&[type="sitemap"] a {
+		font-weight: normal;
+		text-decoration: underline;
+	}
 
 /***** Cursor *****/
 
@@ -87,18 +87,12 @@ a-menu {
 	&[top]::part(items)
 	{ box-shadow: none }
 
-	&::part(items)
+	&:not([type="sitemap"])::part(items)
 	{ box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); }
 
 /***** Misc *****/
 
-	& a,
-	& div,
-	&::part(label)
-	{ padding: 0 var(--pad); }
+	& > * { padding: 0 var(--pad); }
+	&[type="sitemap"] > * { padding: 0; }
 
-	& [slot="icon"] {
-		display: block;
-		border: 1px solid lime;
-	}
 } /* end a-menu */

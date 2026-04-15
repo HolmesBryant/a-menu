@@ -20,30 +20,11 @@
 ::slotted(a-menu) {
   flex: var(--flex);
   min-height: var(--min);
-  padding: 0 var(--pad);
 }
 
 details {
   display: block;
   position: relative;
-}
-
-#icon {
-  align-items: center;
-  display: inline-flex;
-  line-height: 0;
-  justify-content: center;
-}
-
-#items {
-  align-items: stretch;
-  display: flex;
-  justify-content: var(--justify);
-  position: relative;
-  transition:
-    height 400ms ease-in-out,
-    max-height 400ms ease-in-out,
-    opacity 400ms;
 }
 
 details > #items {
@@ -60,6 +41,32 @@ details.open > #items {
   position: relative;
 }
 
+summary {
+  box-sizing: border-box;
+  min-height: var(--min);
+}
+
+.no-arrow {
+  align-items: center;
+  display: flex;
+}
+
+::slotted([slot="icon"]) { display: block }
+
+#icon:not(.hidden) {
+}
+
+#items {
+  align-items: stretch;
+  display: flex;
+  justify-content: var(--justify);
+  position: relative;
+  transition:
+    height 400ms ease-in-out,
+    max-height 400ms ease-in-out,
+    opacity 400ms;
+}
+
 @supports (interpolate-size: allow-keywords) {
   details > #items {
     height: 0;
@@ -73,7 +80,8 @@ details.open > #items {
 
 /* --- Classic --- */
 
-:host([type="classic"]) ::slotted(a) { width: auto; }
+:host([type="classic"])
+{ padding: 0; }
 
 :host([type="classic"]) details {
   display: block;
@@ -84,7 +92,6 @@ details.open > #items {
 { list-style: none; }
 
 :host([type="classic"]) #items {
-  align-items: start;
   flex-direction: row;
   width: 100%;
 }
@@ -146,22 +153,28 @@ details.open > #items {
   flex-direction: column;
   position: absolute;
   left: 100%;
-  top: 50%;
+  top: 0;
   min-width: 200px;
   width: max-content;
 }
 
 /* --- Sitemap --- */
 
-:host([type="sitemap"]) { width: auto }
+:host([type="sitemap"]) {
+  display: block;
+  box-sizing: border-box;
+  padding: 0;
+  break-inside: avoid;
+}
 
-:host([type="sitemap"]) details {
-  /* display: flex; */
-  flex-direction: column;
+:host([type="sitemap"][top]) {
+  column-width: 220px;
+  column-gap: 2rem;
+  margin: 0;
+  padding: 0;
   width: 100%;
 }
 
-:host([type="sitemap"]) summary::-webkit-details-marker { display: none }
 :host([type="sitemap"]) summary {
   list-style: none;
   pointer-events: none;
@@ -169,11 +182,5 @@ details.open > #items {
 
 :host([type="sitemap"]) #items {
   flex-direction: column;
-  /* position: relative; */
-  /* width: 100%; */
-}
-
-:host([type="sitemap"]) ::slotted(a-menu) {
-  /* margin-inline-start: var(--pad, 1rem); */
-  /* width: calc(100% - var(--pad, 1rem)); */
+  margin-left: 1rem;
 }

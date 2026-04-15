@@ -116,6 +116,9 @@ export default class AMenu extends HTMLElement {
       this._type = newval;
       if (!this._connected) return;
       if (this._lockedType) return;
+      if (oldval === 'sitemap' && !this.top) {
+        this.open = false;
+      }
       this._applyType(newval);
       globalThis[abindUpdate]?.(this, 'type', newval);
       break;
@@ -212,7 +215,10 @@ export default class AMenu extends HTMLElement {
       return; // Stop here, attributeChangedCallback will call applyType again
     }
 
-    if (value === 'sitemap') this.open = true;
+    if (value === 'sitemap') {
+      this.open = true;
+    }
+
     this._maybeHideHeader();
     this._applyTypeToNested(value);
   }
@@ -278,10 +284,12 @@ export default class AMenu extends HTMLElement {
     const show = this._hasIcon && this._showIcon.includes(this.type);
     if (show) {
       this._icon.classList.remove('hidden');
-      this._summary.style.setProperty('list-style', 'none');
+      this._summary.classList.add('no-arrow');
+      // this._summary.style.setProperty('list-style', 'none');
     } else {
       this._icon.classList.add('hidden');
-      this._summary.style.removeProperty('list-style');
+      this._summary.classList.remove('no-arrow');
+      // this._summary.style.removeProperty('list-style');
     }
 
     return show;

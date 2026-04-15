@@ -129,11 +129,11 @@
 
 	<section>
 		<!-- Demo Menu -->
-		<a-menu id="demo" type="dropdown">
+		<a-menu id="demo">
 			<strong slot="icon">☰</strong>
 			<a href="#">Foo</a>
 
-			<a-menu id="demo-A" group="level-1">
+			<a-menu id="demo-A" group="level-1" open>
 				<strong slot="label">
 					Group A:
 					<a-bind
@@ -173,7 +173,7 @@
 				</a-menu>
 			</a-menu>
 
-			<a-menu id="demo-B" group="level-1" open>
+			<a-menu id="demo-B" group="level-1">
 				<strong slot="label">
 					Group B:
 					<a-bind
@@ -191,7 +191,7 @@
 				</strong>
 				<a href="#">Boom</a>
 
-				<a-menu id="demo-Ba" open>
+				<a-menu id="demo-Ba">
 					<strong slot="label">
 						Group Ba:
 						<a-bind
