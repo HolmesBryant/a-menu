@@ -1,10 +1,6 @@
 /* a-menu-shadow.css */
 
 :host {
-  --pad: .5rem;
-  --min: 40px;
-  --justify: initial;
-  --flex: initial;
   display: flex;
   interpolate-size: allow-keywords;
 }
@@ -18,12 +14,12 @@
 
 ::slotted(a),
 ::slotted(a-menu) {
-  flex: var(--flex);
-  min-height: var(--min);
+  flex: var(--flex, center);
+  min-height: var(--min, 35px);
 }
 
 details {
-  display: block;
+  display: flex;
   position: relative;
 }
 
@@ -38,12 +34,11 @@ details.open > #items {
   max-height: 100svh;
   opacity: 1;
   overflow: visible;
-  position: relative;
 }
 
 summary {
   box-sizing: border-box;
-  min-height: var(--min);
+  min-height: var(--min, 35px);
 }
 
 .no-arrow {
@@ -59,12 +54,11 @@ summary {
 #items {
   align-items: stretch;
   display: flex;
-  justify-content: var(--justify);
-  position: relative;
+  justify-content: var(--flex, center);
   transition:
-    height 400ms ease-in-out,
-    max-height 400ms ease-in-out,
-    opacity 400ms;
+    height var(--duration, 400ms) ease-in-out,
+    max-height var(--duration, 400ms) ease-in-out,
+    opacity var(--duration, 400ms);
 }
 
 @supports (interpolate-size: allow-keywords) {
@@ -116,8 +110,15 @@ summary {
 
 /* -- Ribbon -- */
 
-:host([type="ribbon"]) details { display: block; }
-:host([type="ribbon"]) ::slotted(a) { width: auto; }
+:host([type="ribbon"]) details {
+  display: block;
+  width: 100%;
+}
+
+:host([type="ribbon"][top]) #items {
+  width: 100%;
+}
+
 :host([type="ribbon"]) #items {
   flex-direction: row;
   width: max-content;
@@ -168,11 +169,15 @@ summary {
 }
 
 :host([type="sitemap"][top]) {
-  column-width: 220px;
+  column-width: 200px;
   column-gap: 2rem;
   margin: 0;
   padding: 0;
   width: 100%;
+}
+
+:host([type="sitemap"]) details {
+  flex-direction: column;
 }
 
 :host([type="sitemap"]) summary {
@@ -182,5 +187,6 @@ summary {
 
 :host([type="sitemap"]) #items {
   flex-direction: column;
-  margin-left: 1rem;
+  /* margin-left: 1rem; */
+  margin-left: var(--pad, 1rem);
 }

@@ -1,28 +1,27 @@
-a-menu {
-	--bg1-color: snow;
-	--bg2-color: linen;
-	--text-color: rgb(60,60,60);
-	--border-color: silver;
-	--accent-color: dodgerblue;
-	--accent-text: white;
-  --duration: 0.5s;
-	--min: 35px;
-	--pad: .5rem;
+:root {
+	--amenu-background: snow;
+	--amenu-text: rgb(60,60,60);
+	--amenu-border: silver;
+	/* minimum height of elements */
+	--amenu-min: 35px;
 
-	/* set to 1 if you want everything the same width */
-	--flex: initial;
+	/* left/right padding of all items */
+	--amenu-pad: .5rem;
 
-	/* same possible values as justify-content */
-	--justify: initial;
+	/* transition duration */
+  --amenu-duration: 400ms;
+
+	/* Set to 1 if you want everything the same width. */
+	/* Otherwise, use same values as justify-content*/
+	--amenu-flex: center;
 }
 
 /* For users who prefer dark theme */
 @media (prefers-color-scheme: dark) {
-	a-menu {
-    --bg1-color: rgb(40, 40, 40);
-		--bg2-color: rgb(60,60,60);
-		--border-color: dimgray;
-		--text-color: snow;
+	:root {
+    --amenu-background: rgb(40, 40, 40);
+		--amenu-border: dimgray;
+		--amenu-text: snow;
 	}
 }
 
@@ -30,38 +29,36 @@ a-menu {
 
 /***** Background *****/
 
-	background: var(--bg1-color);
+	background: var(--amenu-background);
 
 	& a,
 	&::part(label)
-	{ background: var(--bg1-color); }
+	{ background: var(--amenu-background); }
 
 	& a:hover,
 	& a:focus,
-	&::part(label):hover,
-	&::part(label):focus
-	{ filter: brightness(1.25) }
-
 	& a:active,
+	&::part(label):hover,
+	&::part(label):focus,
 	&::part(label):active
-	{ background: var(--accent-color) }
+	{ filter: brightness(1.25) }
 
 /***** Border *****/
 
 	&:not([type="ribbon"]):not([type="sitemap"]):not([top]) a,
 	&:not([top]):not([type="ribbon"]):not([type="sitemap"]) a-menu
-	{ border-left: 4px solid var(--accent-color) }
+	{ border-left: 4px solid var(--amenu-border) }
 
 	&:not([type="sitemap"]) a,
 	&:not([top]):not([type="sitemap"]) div,
 	&:not([type="sitemap"]) a-menu:not([top])
-	{ border: 1px solid var(--border-color) }
+	{ border: 1px solid var(--amenu-border) }
 
 /***** Text *****/
 
 	& a,
 	&::part(label) {
-		color: var(--text-color);
+		color: var(--amenu-text);
 		font-weight: bold;
 		text-decoration: none
 	}
@@ -70,7 +67,7 @@ a-menu {
 	{ text-decoration: underline; }
 
 	& [slot="icon"]
-	{ font-size: var(--min) }
+	{ font-size: var(--amenu-min) }
 
 	&[type="sitemap"] a {
 		font-weight: normal;
@@ -87,12 +84,12 @@ a-menu {
 	&[top]::part(items)
 	{ box-shadow: none }
 
-	&:not([type="sitemap"])::part(items)
-	{ box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); }
+	&:not([top])&:not([type="sitemap"])::part(items)
+	{ box-shadow: 2px 2px 5px black; }
 
 /***** Misc *****/
 
-	& > * { padding: 0 var(--pad); }
+	& > * { padding: 0 var(--amenu-pad); }
 	&[type="sitemap"] > * { padding: 0; }
 
 } /* end a-menu */

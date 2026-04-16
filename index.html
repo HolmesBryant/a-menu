@@ -13,7 +13,15 @@
 	<link rel="stylesheet" href="extra/a-color.css">
 
 	<style>
-		section {
+		a-menu[type="sitemap"] select {
+			display: none;
+		}
+
+		aside {
+			width: 250px;
+		}
+
+		#demo-section {
 			flex: 1;
 			position: relative;
 		}
@@ -25,11 +33,8 @@
 			gap: 1rem;
 		}
 
-		#demo-props::part(items) {
-			background: var(--bg2-color)
-		}
-
-		#demo-props div:hover {
+		#demo-props div:hover,
+		#demo-props div:active {
 			filter: brightness(1.25);
 		}
 	</style>
@@ -46,9 +51,10 @@
 	<!-- Top Level Controls -->
 	<aside>
 		<a-bindgroup model="dom:#demo">
-			<a-menu type="mobile" id="demo-props" open>
+			<a-menu type="mobile" id="demo-props">
 
 				<!-- Attrs -->
+
 				<a-menu group="top-lvl" open>
 					<strong slot="label">Attributes</strong>
 
@@ -76,66 +82,109 @@
 					</div>
 				</a-menu>
 
-				<!-- CSS Vars -->
-					<a-menu group="top-lvl">
-						<strong slot="label">CSS Vars</strong>
+				<!-- Theme -->
 
-						<div class="flex stretch">
-							<label for="demo-duration" class="flex1 nowrap">
-								--duration
+				<a-menu group="top-lvl">
+					<strong slot="label">Theme</strong>
+					<div class="flex stretch space-between">
+							<label for="demo-amenu-background">
+								--amenu-background
 							</label>
-							<a-bind prop="--duration" class="flex1">
-								<select id="demo-duration">
-									<option>0s</option>
-									<option>0.25s</option>
-									<option>0.5s</option>
-									<option>1s</option>
-								</select>
+							<a-bind prop="--amenu-background">
+								<a-color id="demo-amenu-background"></a-color>
 							</a-bind>
 						</div>
 
-						<div class="flex stretch">
-						  <label for="demo-min" class="flex1 nowrap">
-						  	--min
-						  </label>
-						  <a-bind prop="--min" class="flex1">
-								<select id="demo-min">
-									<option>auto</option>
-									<option>max-content</option>
-									<option>min-content</option>
-									<option>35px</option>
-									<option>2rem</option>
-								</select>
-							</a-bind>
-					  </div>
-
-					  <div class="flex stretch">
-					  	<label for="demo-pad" class="flex1 nowrap">
-					  		--pad
-					  	</label>
-					  	<a-bind prop="--pad" class="flex1">
-								<select id="demo-pad">
-									<option>0</option>
-									<option>10px</option>
-									<option>.5rem</option>
-									<option>1rem</option>
-								</select>
+						<div class="flex stretch space-between">
+							<label for="demo-amenu-border">
+								--amenu-border
+							</label>
+							<a-bind prop="--amenu-border">
+								<a-color id="demo-amenu-border"></a-color>
 							</a-bind>
 						</div>
-					</a-menu>
+
+						<div class="flex stretch space-between">
+							<label for="demo-amenu-text">--amenu-text</label>
+							<a-bind prop="--amenu-text">
+								<a-color id="demo-amenu-text"></a-color>
+							</a-bind>
+						</div>
+				</a-menu>
+
+				<!-- CSS Vars -->
+
+				<a-menu group="top-lvl">
+					<strong slot="label">CSS Vars</strong>
+
+					<div class="flex stretch space-between">
+						<label for="demo-flex">--amenu-flex</label>
+
+						<a-bind prop="--amenu-flex">
+							<select id="demo-flex">
+								<option>1</option>
+								<option>start</option>
+								<option>end</option>
+								<option>center</option>
+								<option>space-around</option>
+								<option>space-between</option>
+							</select>
+						</a-bind>
+					</div>
+
+					<div class="flex stretch">
+					  <label for="demo-min" class="flex1 nowrap">
+					  	--amenu-min
+					  </label>
+					  <a-bind prop="--amenu-min" class="flex1">
+							<select id="demo-min">
+								<option>auto</option>
+								<option>35px</option>
+								<option>3rem</option>
+								<option>4em</option>
+							</select>
+						</a-bind>
+				  </div>
+
+				  <div class="flex stretch">
+				  	<label for="demo-pad" class="flex1 nowrap">
+				  		--amenu-pad
+				  	</label>
+				  	<a-bind prop="--amenu-pad" class="flex1">
+							<select id="demo-pad">
+								<option>0</option>
+								<option>10px</option>
+								<option>.5rem</option>
+								<option>1rem</option>
+							</select>
+						</a-bind>
+					</div>
+
+					<div class="flex stretch">
+						<label for="demo-duration" class="flex1 nowrap"> --amenu-duration </label>
+						<a-bind prop="--amenu-duration" class="flex1">
+							<select id="demo-duration">
+								<option>0s</option>
+								<option>0.25s</option>
+								<option>400ms</option>
+								<option>1s</option>
+							</select>
+						</a-bind>
+					</div>
+				</a-menu>
 			</a-menu>
 		</a-bindgroup>
 	</aside>
 
-	<section>
+	<section id="demo-section">
 		<!-- Demo Menu -->
-		<a-menu id="demo">
+		<a-menu id="demo" type="sitemap">
 			<strong slot="icon">☰</strong>
 			<a href="#">Foo</a>
 
 			<a-menu id="demo-A" group="level-1" open>
 				<strong slot="label">
-					Group A:
+					Bloc A:
 					<a-bind
 					model="dom:#demo-A"
 					prop="type">
@@ -150,10 +199,12 @@
 				</a-bind>
 				</strong>
 				<a href="#">Bar</a>
+				<a href="#">Bar Two</a>
+				<a href="#">Bar Three</a>
 
-				<a-menu id="demo-Aa">
+				<a-menu id="demo-Aa" open>
 					<strong slot="label">
-						Group Aa:
+						Bloc Aa:
 						<a-bind
 					model="dom:#demo-Aa"
 					prop="type">
@@ -175,7 +226,7 @@
 
 			<a-menu id="demo-B" group="level-1">
 				<strong slot="label">
-					Group B:
+					Bloc B:
 					<a-bind
 						model="dom:#demo-B"
 						prop="type">
@@ -189,11 +240,10 @@
 						</select>
 					</a-bind>
 				</strong>
-				<a href="#">Boom</a>
 
 				<a-menu id="demo-Ba">
 					<strong slot="label">
-						Group Ba:
+						Bloc Ba:
 						<a-bind
 					model="dom:#demo-Ba"
 					prop="type">
@@ -208,7 +258,14 @@
 				</a-bind>
 					</strong>
 					<a href="#">Bing</a>
+					<a href="#">Bing Two</a>
+					<a href="#">Bing Three</a>
 				</a-menu>
+
+				<a href="#">Boom</a>
+				<a href="#">Boom Two</a>
+				<a href="#">Boom Three</a>
+
 			</a-menu>
 		</a-menu>
 	</section>
