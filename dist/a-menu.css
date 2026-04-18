@@ -13,7 +13,7 @@
 
 	/* Set to 1 if you want everything the same width. */
 	/* Otherwise, use same values as justify-content*/
-	--amenu-flex: center;
+	--amenu-flex: start;
 }
 
 /* For users who prefer dark theme */

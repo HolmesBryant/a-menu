@@ -1,38 +1,133 @@
-const sheet = new CSSStyleSheet();sheet.replaceSync("/** * @file src/a-menu-shadow.css * CSS styles for a-menu custom element shadow dom */:host {  --bg-color: linen;  --duration: 0.5s;  --min-height: 35px;  --pad: 0.5rem;  interpolate-size: allow-keywords;  container-name: menu-system;  display: block;  box-sizing: border-box;  position: relative;  z-index: 1;  transition: z-index 0s linear var(--duration);}:host([top]) { --type: classic }:host([open]) {  z-index: 100;  transition-delay: 0s;}:host(:focus-within),:host(:hover) {  z-index: 1000;  transition-delay: 0s;}::slotted(a) {  display: flex;  align-items: center;  min-height: var(--min-height);  text-decoration: none;  white-space: nowrap;  padding: 0 var(--pad);  width: 100%;  box-sizing: border-box;}details {  box-sizing: border-box;  position: relative;  width: 100%;}details::details-content {  content-visibility: visible;  height: 0;  opacity: 0;  overflow: hidden;  transition:    height var(--duration) ease,    opacity var(--duration) ease,    content-visibility var(--duration) ease allow-discrete,    overflow 0s 0s;}details[open]::details-content {  height: auto;  opacity: 1;  overflow: visible;  /* Delay overflow:visible until AFTER animation so scrollbars don't flicker */  transition:    height var(--duration) ease,    opacity var(--duration) ease,    content-visibility var(--duration) ease allow-discrete,    overflow 0s var(--duration);}summary {  cursor: pointer;  padding: 0 var(--pad);  list-style: none;}#items {  /* Pass type down to children */  --inherited-type: var(--type);  display: flex;  flex-wrap: wrap;  align-items: stretch;  min-height: var(--min-height);}#label {  display: inline-flex;  align-items: center;  min-height: var(--min-height);  font-weight: bold;}/* --- Classic --- */@container menu-system style(--type: classic) {  details { display: block; width: 100%; }  ::slotted(a) { width: auto; }  #items {    --inherited-type: dropdown;    flex-direction: row;    width: 100%;  }}/* --- Mobile --- */@container menu-system style(--type: mobile) {  details {    display: flex;    flex-direction: column;    width: 100%;  }  #items {    flex-direction: column;    padding-left: var(--pad);    width: 100%;  }}/* --- Dropdown --- */@container menu-system style(--type: dropdown) {  details {    display: flex;    flex-direction: column;    width: max-content;  }  #items {    --inherited-type: flyout;    box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Optional shadow for depth */    flex-direction: column;    min-width: 100%;    position: absolute;    top: 100%; left: 0;    width: max-content;  }}/* --- Flyout --- */@container menu-system style(--type: flyout) {  details {    display: flex;    flex-direction: column;    width: max-content;  }  #items {    box-shadow: 4px 4px 6px rgba(0,0,0,0.1);    flex-direction: column;    position: absolute;    left: 100%; top: 0;    min-width: 200px;    width: max-content;  }}");
+const sheet = new CSSStyleSheet();sheet.replaceSync("/* a-menu-shadow.css */\r\n\r\n:host {\r\n  display: flex;\r\n  interpolate-size: allow-keywords;\r\n}\r\n\r\n::slotted(a) {\r\n  align-items: center;\r\n  display: flex;\r\n  text-decoration: none;\r\n  white-space: nowrap;\r\n}\r\n\r\n::slotted(a),\r\n::slotted(a-menu) {\r\n  flex: var(--amenu-flex, center);\r\n  min-height: var(--amenu-min, 35px);\r\n}\r\n\r\ndetails {\r\n  display: flex;\r\n  position: relative;\r\n}\r\n\r\ndetails > #items {\r\n  height: auto;\r\n  max-height: 0;\r\n  opacity: 0;\r\n  overflow: hidden;\r\n}\r\n\r\ndetails.open > #items {\r\n  max-height: 100svh;\r\n  opacity: 1;\r\n  overflow: visible;\r\n}\r\n\r\nsummary {\r\n  box-sizing: border-box;\r\n  min-height: var(--amenu-min, 35px);\r\n}\r\n\r\n.no-arrow {\r\n  align-items: center;\r\n  display: flex;\r\n}\r\n\r\n::slotted([slot=\"icon\"]) { display: block }\r\n\r\n#icon:not(.hidden) {\r\n}\r\n\r\n#items {\r\n  align-items: stretch;\r\n  display: flex;\r\n  justify-content: var(--amenu-flex, center);\r\n  transition:\r\n    height var(--amenu-duration, 400ms) ease-in-out,\r\n    max-height var(--amenu-duration, 400ms) ease-in-out,\r\n    opacity var(--amenu-duration, 400ms) 200ms;\r\n}\r\n\r\n@supports (interpolate-size: allow-keywords) {\r\n  details > #items {\r\n    height: 0;\r\n    max-height: unset;\r\n  }\r\n\r\n  details.open > #items {\r\n    height: auto;\r\n  }\r\n}\r\n\r\n/* --- Classic --- */\r\n\r\n:host([type=\"classic\"])\r\n{ padding: 0; }\r\n\r\n:host([type=\"classic\"]) details {\r\n  display: block;\r\n  width: 100%;\r\n}\r\n\r\n:host([type=\"classic\"]) summary\r\n{ list-style: none; }\r\n\r\n:host([type=\"classic\"]) #items {\r\n  flex-direction: row;\r\n  width: 100%;\r\n}\r\n\r\n/* --- Mobile --- */\r\n\r\n:host([type=\"mobile\"]) details {\r\n  display: flex;\r\n  flex-direction: column;\r\n  width: 100%;\r\n}\r\n\r\n:host([top][type=\"mobile\"]) summary {\r\n  display: block;\r\n  list-style: none;\r\n}\r\n\r\n:host([type=\"mobile\"]) #items {\r\n  flex-direction: column;\r\n  width: 100%;\r\n}\r\n\r\n/* -- Ribbon -- */\r\n\r\n:host([type=\"ribbon\"]) details {\r\n  display: block;\r\n  width: 100%;\r\n}\r\n\r\n:host([type=\"ribbon\"][top]) #items {\r\n  width: 100%;\r\n}\r\n\r\n:host([type=\"ribbon\"]) #items {\r\n  flex-direction: row;\r\n  width: max-content;\r\n  position: absolute;\r\n}\r\n\r\n/* --- Dropdown --- */\r\n\r\n:host([type=\"dropdown\"]) details {\r\n  display: flex;\r\n  flex-direction: column;\r\n}\r\n\r\n:host([type=\"dropdown\"]) #items {\r\n  box-shadow: 0 4px 6px rgba(0,0,0,0.1);\r\n  flex-direction: column;\r\n  width: max-content;\r\n  position: absolute;\r\n  top: 100%;\r\n}\r\n\r\n/* --- Flyout --- */\r\n\r\n:host([type=\"flyout\"]) { display: inline-flex; }\r\n\r\n:host([type=\"flyout\"]) details {\r\n  display: flex;\r\n  flex-direction: column;\r\n  width: max-content;\r\n}\r\n\r\n:host([type=\"flyout\"]) #items {\r\n  box-shadow: 4px 4px 6px rgba(0,0,0,0.1);\r\n  flex-direction: column;\r\n  position: absolute;\r\n  left: 100%;\r\n  top: 0;\r\n  min-width: 200px;\r\n  width: max-content;\r\n}\r\n\r\n/* --- Sitemap --- */\r\n\r\n:host([type=\"sitemap\"]) {\r\n  display: block;\r\n  box-sizing: border-box;\r\n  padding: 0;\r\n  break-inside: avoid;\r\n}\r\n\r\n:host([type=\"sitemap\"][top]) {\r\n  column-width: 200px;\r\n  column-gap: 2rem;\r\n  margin: 0;\r\n  padding: 0;\r\n  width: 100%;\r\n}\r\n\r\n:host([type=\"sitemap\"]) details {\r\n  flex-direction: column;\r\n}\r\n\r\n:host([type=\"sitemap\"]) summary {\r\n  list-style: none;\r\n  pointer-events: none;\r\n}\r\n\r\n:host([type=\"sitemap\"]) #items {\r\n  flex-direction: column;\r\n  /* margin-left: 1rem; */\r\n  margin-left: var(--amenu-pad, 1rem);\r\n}\r\n");
+
+/**
+ * @file a-menu.js
+ * @description A custom element that renders a configurable, responsive menu.
+ * @author Holmes Bryant <Holmes Bryant <https://github.com/HolmesBryant>
+ * @version 1.0.0
+ * @license GPL-3.0
+ */
+
+const abindUpdate = Symbol.for('abind.update');
+
 class AMenu extends HTMLElement {
-  _group;
-  _open = false;
-  _type = 'classic';
-  _abortController;
-  _header;
-  _headerSlot;
-  _menu;
-  _lockedType = false;
-  _swipeStart = 0;
-  _swipeEnd = 0;
-  _swipeThreshold = 40;
-  _typeStyle;
-  _connected = false;
-  #resolveConnected;
-  #connectedPromise = new Promise(resolve => {
-    this.#resolveConnected = resolve;
-  });
-  _rafHandle = null;
-  _timeStart = null;
-  static _menus = new Map();
+  // -- Attributes --
+
+  /** @type {number} The maximum width in pixels before switching to mobile view. */
+  #breakpoint = 600;
+
+  /** @type {string|undefined} The name of the group this menu belongs to for accordion-like behavior. */
+  #group;
+
+  /** @type {string} Comma-separated list of menu types that display an icon. */
+  #showIcon = "mobile, flyout, dropdown";
+
+  /** @type {boolean} Indicates if the menu is currently expanded. */
+  #open = false;
+
+  /** @type {number} The swipe distance threshold in pixels. */
+  #swipe = 40;
+
+  /** @type {boolean} Indicates if this is the top-level menu in a nested structure. */
+  #top = false;
+
+  /** @type {string} The visual style type of the menu (e.g., 'classic', 'mobile', 'ribbon'). */
+  #type = 'classic';
+
+  // -- Private --
+
+  /** @type {AbortController} Controller to manage event listener lifecycle. */
+  #abortController;
+
+  /** @type {boolean} Tracks if the element is appended to the DOM. */
+  #connected = false;
+
+  /** @type {boolean} Enables debug logging. */
+  #debug = false;
+
+  /** @type {boolean} Indicates if an icon is assigned to the icon slot. */
+  #hasIcon = false;
+
+  /** @type {boolean} Indicates if a label is assigned to the label slot. */
+  #hasLabel = false;
+
+  /** @type {HTMLElement} The span element wrapping the icon. */
+  #icon;
+
+  /** @type {HTMLSlotElement} The slot for the menu icon. */
+  #iconSlot;
+
+  /** @type {boolean} Prevents overlapping transition events during close. */
+  #isClosing;
+
+  /** @type {HTMLElement} The container for the menu items. */
+  #items;
+
+  /** @type {HTMLSlotElement} The default slot for menu content. */
+  #itemsSlot;
+
+  /** @type {HTMLSlotElement} The slot for the menu label. */
+  #labelSlot;
+
+  /** @type {boolean} Locks the menu type if defined by a parent menu. */
+  #lockedType = false;
+
+  /** @type {HTMLDetailsElement} The core details element serving as the menu. */
+  #menu;
+
+  /** @type {MediaQueryList} The active media query list for the responsive breakpoint. */
+  #mql;
+
+  /** @type {Function} The handler for media query changes. */
+  #mqlHandler;
+
+  /** @type {string|null} Stores the original type when temporarily switching to mobile. */
+  #originalType;
+
+  /** @type {HTMLElement} The summary element acting as the menu toggle. */
+  #summary;
+
+  /** @type {number} The Y-coordinate where a touch ends. */
+  #swipeEnd;
+
+  /** @type {number} The Y-coordinate where a touch begins. */
+  #swipeStart;
+
+  // -- Static --
+
+  /**
+   * Global registry of menu groups mapped to sets of menu elements.
+   * @type {Map<string, Set<AMenu>>}
+   */
+  static #menus = new Map();
+
+  /**
+   * Attributes to observe for changes.
+   * @type {string[]}
+   */
   static observedAttributes = [
+    'breakpoint',
+    'debug',
     'group',
     'open',
-    'swipe-threshold',
+    'swipe',
     'top',
     'type'
   ];
+
+  /**
+   * The template representing the internal shadow DOM structure.
+   * @type {HTMLTemplateElement}
+   */
   static template = document.createElement('template');
   static {
     this.template.innerHTML = `
       <details part="menu" id="menu">
-        <summary part="header" id="header" role="button" aria-expanded="false">
-          <span part="label" id="label">
+        <summary part="label" id="summary" role="button" aria-expanded="false">
+          <span part="icon" id="icon">
+            <slot name="icon"></slot>
+          </span>
+          <span id="label">
             <slot name="label"></slot>
           </span>
         </summary>
@@ -42,165 +137,498 @@ class AMenu extends HTMLElement {
       </details>
     `;
   }
+
+  /**
+   * Creates an instance of AMenu, attaches the shadow DOM, and initializes selectors.
+   */
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
     this.shadowRoot.append(AMenu.template.content.cloneNode(true));
-    const sheet$1 = new CSSStyleSheet();
-    sheet$1.replaceSync(':host { --type: var(--inherited-type, flyout) }');
-    this.shadowRoot.adoptedStyleSheets = [sheet$1, sheet];
-    this._typeStyle = sheet$1;
-    this._menu = this.shadowRoot.getElementById('menu');
-    this._header = this.shadowRoot.getElementById('header');
-    this._headerSlot = this.shadowRoot.querySelector('slot[name="label"]');
+    this.shadowRoot.adoptedStyleSheets = [sheet];
+    this.#menu = this.shadowRoot.getElementById('menu');
+    this.#icon = this.shadowRoot.getElementById('icon');
+    this.#iconSlot = this.shadowRoot.querySelector('slot[name="icon"]');
+    this.#items = this.shadowRoot.getElementById('items');
+    this.#itemsSlot = this.shadowRoot.querySelector('slot:not([name])');
+    this.#labelSlot = this.shadowRoot.querySelector('slot[name="label"]');
+    this.#summary = this.shadowRoot.querySelector('summary');
   }
+
+  // -- Lifecycle --
+
+  /**
+   * Invoked when one of the custom element's observed attributes is added, removed, or changed.
+   * @param {string} attr - The name of the changed attribute.
+   * @param {string|null} oldval - The previous value of the attribute.
+   * @param {string|null} newval - The new value of the attribute.
+   */
   attributeChangedCallback(attr, oldval, newval) {
     if (oldval === newval) return;
     switch (attr) {
-      case 'group':
-        if (this._connected && oldval) AMenu._menus.get(oldval)?.delete(this._menu);
-        this._group = newval;
-        if (this._connected) {
-          if (newval) {
-            this._menu.setAttribute('group', newval);
-            AMenu.register(newval, this._menu);
-          } else {
-            this._menu.removeAttribute('group');
-          }
-          if (window.abind) abind.update(this, 'group', newval);
-        }
-        break;
-      case 'open':
-        this._open = this.hasAttribute('open');
-        if (this._connected) {
-          this._menu.open = this._open;
-          if (window.abind) abind.update(this, 'open', this._open);
-        }
-        break;
-      case 'swipe-threshold':
-        this._swipeThreshold = Number(newval);
-        if (this._connected) {
-          if (window.abind) abind.update(this, 'swipeThreshold', this._swipeThreshold);
-        }
-        break;
-      case 'top':
-        this._top = this.hasAttribute('top');
-        if (window.abind) abind.update(this, 'top', this._top);
-        break;
-      case "type":
-        this._type = newval;
-        if (this._connected && !this._lockedType) {
-          this.applyType(newval);
-          if (window.abind) abind.update(this, 'type', newval);
-        }
-        break;
+    case 'breakpoint':
+      this.#breakpoint = (newval) ? parseFloat(newval) : null;
+      this.#setupMediaQuery(newval);
+      globalThis[abindUpdate]?.(this, 'breakpoint', newval);
+      break;
+    case 'debug':
+      this.#debug = this.hasAttribute('debug');
+      break;
+    case 'group':
+      this.#group = newval;
+      if (oldval) {
+        const oldSet = AMenu.#menus.get(oldval);
+        oldSet?.delete(this);
+        if (oldSet?.size === 0) AMenu.#menus.delete(oldval);
+      }
+      if (newval) AMenu.register(newval, this);
+      globalThis[abindUpdate]?.(this, 'group', newval);
+      break;
+    case 'open':
+      this.#open = this.hasAttribute('open');
+      if (this.#connected) this.#toggleMenu();
+      globalThis[abindUpdate]?.(this, 'open', this.#open);
+      break;
+    case 'top':
+      this.#top = this.hasAttribute('top');
+      globalThis[abindUpdate]?.(this, 'top', this.#top);
+      break;
+    case 'swipe':
+      this.#swipe = Number(newval);
+      globalThis[abindUpdate]?.(this, 'swipe', this.#swipe);
+      break;
+    case 'type':
+      this.#type = newval;
+      if (!this.#connected) return;
+      if (this.#lockedType) return;
+      if (oldval === 'sitemap' && !this.top) {
+        this.open = false;
+      }
+      this.#applyType(newval);
+      globalThis[abindUpdate]?.(this, 'type', newval);
+      break;
     }
   }
+
+  /**
+   * Invoked each time the custom element is appended into a document-connected element.
+   */
   connectedCallback() {
-    this._abortController = new AbortController;
-    this._connected = true;
-    this.#resolveConnected();
-    if (this.parentElement?.closest('a-menu') === null) {this.top = true; }
-    if (this.parentElement?.closest('a-menu') !== null && this.hasAttribute('type') ) {this._lockedType = true; }
-    this.applyType(this._type);
-    this.maybeHideHeader();
-    if (this._group) AMenu.register(this._group, this._menu);
-    this._menu.open = this._open;
-    this.addListeners();
+    this.#connected = true;
+    if (this.id) this.#menu.dataset.parent = this.id;
+    this.#abortController = new AbortController();
+    if (this.parentElement?.closest('a-menu') === null) {
+      this.top = true;
+    }
+
+    if (this.parentElement?.closest('a-menu') !== null && this.hasAttribute('type') ) {
+      this.#lockedType = true;
+    }
+
+    this.#hasLabel = this.#labelSlot.assignedElements().length > 0;
+    this.#hasIcon = this.#iconSlot.assignedElements().length > 0;
+
+    if (this.#group) AMenu.register(this.#group, this);
+
+    this.#applyType(this.#type);
+    this.#addListeners();
+    this.#setupMediaQuery(this.breakpoint);
+    if (this.#open) this.#toggleMenu();
+    if (this.debug) this.logVars();
   }
+
+  /**
+   * Invoked each time the custom element is disconnected from the document's DOM.
+   */
   disconnectedCallback() {
-    this._connected = false;
-    if (this._abortController) {this._abortController.abort(); this._abortController = null; }
-    if (this._rafHandle) {cancelAnimationFrame(this._rafHandle); this._rafHandle = null; }
-    if (this._timeStart) {this._timeStart = null; }
-    if (this._group) {AMenu._menus.get(this._group)?.delete(this._menu); }
-    this._menu = null;
-    this._header = null;
-    this._headerSlot = null;
+    if (this.#abortController) {
+      this.#abortController.abort();
+      this.#abortController = null;
+    }
+
+    if (this.#group) {
+      const groupSet = AMenu.#menus.get(this.#group);
+      if (groupSet) {
+        groupSet.delete(this);
+        if (groupSet.size === 0) AMenu.#menus.delete(this.#group);
+      }
+    }
+
+    if (this.#mql && this.#mqlHandler) {
+      this.#mql.removeEventListener('change', this.#mqlHandler);
+    }
   }
-  addListeners() {
-    this._menu.addEventListener("toggle", () => {if (this._menu.open) AMenu.openGroup(this._group, this._menu); this.open = this._menu.open; this._header.setAttribute('aria-expanded', String(this._menu.open)); }, { signal: this._abortController.signal });
-    this.addEventListener('touchstart', event => {this._swipeStart = event.touches[0].clientY; }, {signal: this._abortController.signal, passive: true });
-    this.addEventListener('touchend', event => {this._swipeEnd = event.changedTouches[0].clientY; this.handleSwipe(); }, { signal: this._abortController.signal });
-    this._headerSlot.addEventListener('slotchange', () => {this.maybeHideHeader(); }, { signal: this._abortController.signal });
-    this.addEventListener('pointerdown', e => {if (e.pointerType === 'touch') return; this._swipeStart = e.clientY; }, { signal: this._abortController.signal });
-    this.addEventListener('pointerup', e => {if (e.pointerType === 'touch') return; this._swipeEnd = e.clientY; this.handleSwipe(); }, { signal: this._abortController.signal });
-  }
-  applyType(value) {
-    const types = ['mobile', 'classic', 'ribbon', 'dropdown', 'flyout'];
-    for (const type of types) {if (!this._lockedType && type !== value) this.removeAttribute(type); }
-    if (!this._lockedType && this.getAttribute('type') !== value) {this.setAttribute('type', value); return; }
-    this.setStyle(value);
-    this.applyTypeToNested(value);
-  }
-  async applyTypeToNested(value) {
-    if (this._rafHandle) {cancelAnimationFrame(this._rafHandle); this._rafHandle = null; }
-    if (this._timeStart) {this._timeStart = null; }
-    const delay = Number(this._applyTypeToNestedDelay ?? 100); // ms
-    const start = performance.now();
-    this._timeStart = start;
-    return new Promise(resolve => {
-      const tick = async (now) => {
-        if (this._timeStart !== start) return resolve(false);
-        if (now - start >= delay) {
-          this._rafHandle = null;
-          this._timeStart = null;
-          await this.whenConnected();
-          await customElements.whenDefined('a-menu');
-          const nested = Array.from(this.children).filter(item => item.localName === 'a-menu');
-          for (const child of nested) {
-            if (typeof child.whenConnected === 'function') {await child.whenConnected(); }
-            let type;
-            switch (this._type) {case 'classic': type = 'dropdown'; break; case 'dropdown': type = 'flyout'; break; default: type = value; }
-            if (child.type !== type) {child.type = type; }
-          }
-          resolve(true);
-        } else {
-          this._rafHandle = requestAnimationFrame(tick);
+
+  // -- Private --
+
+  /**
+   * Attaches event listeners for clicks, slot changes, and touch gestures.
+   * @private
+   */
+  #addListeners() {
+    this.#menu.addEventListener('click', (event) => {
+      const path = event.composedPath();
+      if (path.includes(this.#summary)) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.target.tabIndex < 0) {
+          this.open = !this.open;
         }
-      };
-      this._rafHandle = requestAnimationFrame(tick);
+      }
+    }, { signal:this.#abortController.signal });
+
+    const handleSlotChange = () => {
+      this.#hasLabel = this.#labelSlot.assignedElements().length > 0;
+      this.#hasIcon = this.#iconSlot.assignedElements().length > 0;
+      this.#maybeHideHeader();
+      this.#maybeShowIcon();
+    };
+
+    this.#labelSlot.addEventListener('slotchange', handleSlotChange, { signal: this.#abortController.signal });
+    this.#iconSlot.addEventListener('slotchange', handleSlotChange, { signal: this.#abortController.signal });
+
+    this.addEventListener('touchstart', event => {
+      this.#swipeStart = event.touches[0].clientY;
+    }, {
+      signal: this.#abortController.signal,
+      passive: true
     });
+
+    this.addEventListener('touchend', event => {
+      this.#swipeEnd = event.changedTouches[0].clientY;
+      this.#handleSwipe();
+    }, { signal: this.#abortController.signal });
   }
-  handleSwipe() {
-    const delta = this._swipeEnd - this._swipeStart;
-    if (Math.abs(delta) < this._swipeThreshold) return;
+
+  /**
+   * Applies the specified visual type to the menu, handling overrides and header visibility.
+   * @param {string} value - The menu type to apply.
+   * @private
+   */
+  #applyType(value) {
+    if (this.#lockedType) return;
+
+    const types = ['mobile', 'classic', 'ribbon', 'dropdown', 'flyout', 'sitemap'];
+    for (const type of types) {
+      if (type !== value && this.hasAttribute(type)) {
+        this.removeAttribute(type);
+      }
+    }
+
+    // Guard: Only set attribute if different to prevent infinite recursion
+    if (this.getAttribute('type') !== value) {
+      this.setAttribute('type', value);
+      return; // Stop here, attributeChangedCallback will call applyType again
+    }
+
+    if (value === 'sitemap') {
+      this.open = true;
+    }
+
+    this.#maybeHideHeader();
+    this.#applyTypeToNested(value);
+  }
+
+  /**
+   * Asynchronously cascades the appropriate menu type to nested sub-menus.
+   * @param {string} value - The parent menu type.
+   * @returns {Promise<void>}
+   * @private
+   */
+  async #applyTypeToNested(value) {
+    if (!this.isConnected) return;
+    await customElements.whenDefined('a-menu');
+    await Promise.resolve();
+
+    if (!this.isConnected) return;
+
+    const nested = Array.from(this.children).filter(item => item.localName === 'a-menu');
+    if (!nested.length) return;
+
+    for (const child of nested) {
+      let type = value;
+      if (this.#type === 'classic') type = 'dropdown';
+      if (this.#type === 'dropdown') type = 'flyout';
+      if (child.type !== type) child.type = type;
+    }
+  }
+
+  /**
+   * Closes other menus within the same designated group to ensure accordion-like behavior.
+   * @param {AMenu} elem - The current menu element triggering the action.
+   * @param {string} group - The group identifier.
+   * @private
+   */
+  #closeOthers(elem, group) {
+    const set = AMenu.#menus.get(group);
+    if (!set) return console.warn(`the group "${group}" was not registered.`);
+    for (const menu of set) {
+      if (menu === elem) continue;
+      if (menu.open) menu.open = false;
+    }
+  }
+
+  /**
+   * Closes the menu while waiting for CSS transitions to complete, guarding against event overlaps.
+   * @param {HTMLDetailsElement} menu - The details element to close.
+   * @param {HTMLElement} items - The items container with the transition.
+   * @private
+   */
+  #closeWithTransition(menu, items) {
+    if (this.#isClosing) return;
+    this.#isClosing = true;
+
+    menu.classList.remove('open');
+
+    const duration = parseFloat(getComputedStyle(items).transitionDuration) * 1000 || 0;
+    const fallbackDelay = duration > 0 ? duration + 50 : 50;
+    let isClosed = false;
+
+    const closeMenu = (event) => {
+      if (event && event.target !== items) return;
+      if (isClosed) return;
+
+      isClosed = true;
+      this.#isClosing = false;
+      menu.open = false;
+      items.removeEventListener('transitionend', closeMenu);
+      clearTimeout(fallbackTimeout);
+    };
+
+    items.addEventListener('transitionend', closeMenu);
+    const fallbackTimeout = setTimeout(closeMenu, fallbackDelay);
+  }
+
+  /**
+   * Evaluates swipe gestures to open or close the menu based on the distance threshold.
+   * @private
+   */
+  #handleSwipe() {
+    const delta = this.#swipeEnd - this.#swipeStart;
+    if (Math.abs(delta) < this.#swipe) return;
     this.toggleAttribute('open', delta > 0);
   }
-  maybeHideHeader() {
-    const hasLabel = this._headerSlot.assignedElements().length > 0;
-    this._header.hidden = !hasLabel;
-    if (!hasLabel) this.open = true;
+
+  /**
+   * Hides the menu header (summary) if neither a label nor an icon is present.
+   * @private
+   */
+  #maybeHideHeader() {
+    this.#summary.hidden = !this.#hasLabel && !this.#maybeShowIcon();
+    if (!this.#hasLabel && this.#top) this.open = true;
   }
-  setStyle(value) {
-    const sheet = this._typeStyle;
-    const css = `:host { --type: ${value} }`;
-    sheet.replaceSync(css);
+
+  /**
+   * Evaluates whether the icon should be displayed based on slot assignment and menu type.
+   * @returns {boolean} True if the icon is shown, false otherwise.
+   * @private
+   */
+  #maybeShowIcon() {
+    const show = this.#hasIcon && this.#showIcon.includes(this.type);
+    if (show) {
+      this.#icon.classList.remove('hidden');
+      this.#summary.classList.add('no-arrow');
+      // this.#summary.style.setProperty('list-style', 'none');
+    } else {
+      this.#icon.classList.add('hidden');
+      this.#summary.classList.remove('no-arrow');
+      // this.#summary.style.removeProperty('list-style');
+    }
+
+    return show;
   }
-  async whenConnected() {
-    if (this._connected) return true;
-    await this.#connectedPromise;
-    return true;
+
+  /**
+   * Initializes the media query listener for responsive behavior based on the breakpoint.
+   * @param {number|string} maxWidth - The maximum width in pixels for the media query.
+   * @private
+   */
+  #setupMediaQuery(maxWidth) {
+    if (this.#mql && this.#mqlHandler) {
+      this.#mql.removeEventListener('change', this.#mqlHandler);
+    }
+
+    if (!maxWidth) return;
+    // this.#mql = window.matchMedia(`max-width: ${maxWidth}px`);
+    this.#mql = window.matchMedia(`(max-width: ${maxWidth}px)`);
+
+    this.#mqlHandler = (event) => {
+      if (event.matches) {
+        if (this.type !== 'mobile') {
+          this.#originalType = this.type;
+          this.type = 'mobile';
+        }
+      } else {
+        // screen is larger
+        if (this.#originalType && this.type === 'mobile') {
+          this.type = this.#originalType;
+          this.#originalType = null;
+        }
+      }
+    };
+
+    this.#mql.addEventListener('change', this.#mqlHandler);
+    this.#mqlHandler(this.#mql);
   }
-  static openGroup(group, elem) {
-    if (this._menus.size === 0) return;
-    this._menus.get(group)?.forEach( other => {if (other !== elem) other.open = false; });
+
+  /**
+   * Toggles the open state of the core details element and manages grouped menus.
+   * @private
+   */
+  #toggleMenu() {
+    if (this.#open && !this.#menu.open) {
+      this.#menu.open = true;
+      this.#menu.classList.add('open');
+      if (this.#group && this.type !== 'sitemap') this.#closeOthers(this, this.#group);
+    } else if (!this.open && this.#menu.open) {
+      this.#closeWithTransition(this.#menu, this.#items);
+    }
   }
+
+  // -- Public --
+
+  /**
+   * Logs the internal state and properties of the element to the console.
+   * @param {boolean} [isOpen=false] - Whether to expand the console group by default.
+   */
+  logVars(isOpen = false) {
+
+    if (isOpen) {
+      console.group(this);
+    } else {
+      console.groupCollapsed(this);
+    }
+
+    console.log('------ Attributes ------');
+    console.log('breakpoint', this.breakpoint);
+    console.log('group', this.group);
+    console.log('showIcon', this.showIcon);
+    console.log('open', this.open);
+    console.log('swipe', this.swipe);
+    console.log('top', this.top);
+    console.log('type', this.type);
+
+    console.log('------ Properties ------');
+    console.log('#connected', this.#connected);
+    console.log('#debug', this.#debug);
+    console.log('#hasIcon', this.#hasIcon);
+    console.log('#hasLabel', this.#hasLabel);
+    console.log('#icon', this.#icon);
+    console.log('#iconSlot', this.#iconSlot);
+    console.log('#items', this.#items);
+    console.log('#itemsSlot', this.#itemsSlot);
+    console.log('#labelSlot', this.#labelSlot);
+    console.log('#lockedType', this.#lockedType);
+    console.log('#menu', this.#menu);
+    console.log('#mql', this.#mql);
+    console.log('#mqlHandler', this.#mqlHandler);
+    console.log('#originalType', this.#originalType);
+    console.log('#summary', this.#summary);
+
+    console.groupEnd();
+  }
+
+  /**
+   * Registers a menu instance to a specific accordion group.
+   * @param {string} group - The group identifier.
+   * @param {AMenu} elem - The menu instance to register.
+   */
   static register(group, elem) {
-    if (!this._menus.has(group)) this._menus.set(group, new Set());
-    this._menus.get(group).add(elem);
+    if (!this.#menus.has(group)) this.#menus.set(group, new Set());
+    this.#menus.get(group).add(elem);
   }
-  get group() { return this._group }
-  set group(value) { this.setAttribute('group', value); }
-  get open() { return this._open }
-  set open(value) {this.toggleAttribute('open', value !== undefined && value !== false); }
-  get swipeThreshold() { return this._swipeThreshold }
-  set swipeThreshold(value) { this.setAttribute('swipe-threshold', value);}
-  get top() { return this._top }
-  set top(value) {this.toggleAttribute('top', value !== undefined && value !== false ); }
-  get type() { return this._type }
-  set type(value) {if (this._lockedType) {return console.warn('Attempting to set type on element whose type is locked because it has a "type" attribute', this); } this.setAttribute('type', value); }
+
+  // -- Getters / Setters --
+
+  /**
+   * Gets or sets the maximum width breakpoint for mobile view.
+   * @type {number|null}
+   */
+  get breakpoint() { return this.#breakpoint }
+  set breakpoint(value) {
+    if (value) {
+      this.setAttribute('breakpoint', value);
+    } else {
+      this.removeAttribute('breakpoint');
+    }
+  }
+
+  /**
+   * Gets or sets the debug logging state.
+   * @type {boolean}
+   */
+  get debug() { return this.#debug }
+  set debug(value) {
+    value = value != null && String(value) !== "false";
+    this.toggleAttribute('debug', value);
+  }
+
+  /**
+   * Gets or sets the group name for accordion functionality. Setting to null removes the attribute.
+   * @type {string|undefined}
+   */
+  get group() { return this.#group }
+  set group(value) {
+    if (value == null) {
+      this.removeAttribute('group');
+    } else {
+      this.setAttribute('group', value);
+    }
+  }
+
+  /**
+   * Gets or sets the open state of the menu.
+   * @type {boolean}
+   */
+  get open() { return this.#open }
+  set open(value) {
+    value = value != null && String(value) !== 'false';
+    this.toggleAttribute('open', value);
+  }
+
+  /**
+   * Gets the comma-separated list of types that permit icons.
+   * @type {string}
+   * @readonly
+   */
+  get showIcon() { return this.#showIcon }
+
+  /**
+   * Gets or sets the minimum swipe distance to trigger state changes. Setting to null removes the attribute.
+   * @type {number}
+   */
+  get swipe() { return this.#swipe }
+  set swipe(value) {
+    if (value == null) {
+      this.removeAttribute('swipe');
+    } else {
+      this.setAttribute('swipe', value); }
+    }
+
+  /**
+   * Gets or sets whether this is a top-level menu.
+   * @type {boolean}
+   */
+  get top() { return this.#top }
+  set top(value) {
+    value = value != null && String(value) !== "false";
+    this.toggleAttribute('top', value);
+  }
+
+  /**
+   * Gets or sets the layout type of the menu. Setting to null removes the attribute.
+   * @type {string}
+   */
+  get type() { return this.#type }
+  set type(value) {
+    if (value == null) {
+      this.removeAttribute('type');
+    } else {
+      this.setAttribute('type', value);
+    }
+  }
 }
 
 if (!customElements.get('a-menu')) customElements.define('a-menu', AMenu);
+
 export { AMenu as default };

@@ -241,6 +241,11 @@ body {
 		max-height: 80vh;
 	}
 
+	details#readme[open] summary {
+		position: sticky;
+		top: 0;
+	}
+
 	details[open] > summary
 	{ margin-bottom: .5rem; }
 

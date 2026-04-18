@@ -6,28 +6,27 @@
 	<title>A-Menu</title>
 	<script type="module" src="src/a-menu.js"></script>
 	<script type="module" src="extra/a-color.min.js"></script>
-	<script type="module" src="./extra/a-bind.min.js"></script>
+	<script type="module" src="extra/a-bind.min.js"></script>
+	<script type="module" src="extra/a-tooltip.min.js"></script>
+	<script type="module" src="extra/a-markdown.min.js"></script>
 
 	<link rel="stylesheet" href="extra/styles.css">
 	<link rel="stylesheet" href="dist/a-menu.css">
 	<link rel="stylesheet" href="extra/a-color.css">
+	<link rel="stylesheet" href="extra/a-markdown.css">
 
 	<style>
-		a-menu[type="sitemap"] select {
-			display: none;
-		}
+		a-menu[type="sitemap"] select { display: none }
+		a-tooltip { --icon-size: 1rem; }
+		#demo-controls { width: 250px }
 
-		aside {
-			width: 250px;
-		}
-
-		#demo-section {
+		#demo-menu {
 			flex: 1;
 			position: relative;
 		}
 
-		#wrapper {
-			align-items: stretch;
+		#demo-section {
+			align-items: flex-start;
 			display: flex;
 			flex-wrap: wrap;
 			gap: 1rem;
@@ -43,19 +42,25 @@
 <header>
 	<h1>A-Menu</h1>
 	<p>A custom element that renders a configurable, responsive menu.</p>
+	<a href="tests/index.html" target="_blank">Tests</a>
 </header>
+
+<details id="readme">
+	<summary>README</summary>
+	<a-markdown file="README.md"></a-markdown>
+</details>
 
 <h2>Demo</h2>
 
-<div id="wrapper">
+<section id="demo-section">
 	<!-- Top Level Controls -->
-	<aside>
+	<div id="demo-controls">
 		<a-bindgroup model="dom:#demo">
 			<a-menu type="mobile" id="demo-props">
 
 				<!-- Attrs -->
 
-				<a-menu group="top-lvl" open>
+				<a-menu group="top-lvl">
 					<strong slot="label">Attributes</strong>
 
 					<div class="flex space-between">
@@ -114,78 +119,96 @@
 
 				<!-- CSS Vars -->
 
-				<a-menu group="top-lvl">
+				<a-menu group="top-lvl" open>
 					<strong slot="label">CSS Vars</strong>
+					<a-tooltip-group nohover position="modal">
+						<div class="flex stretch space-between">
+							<a-tooltip>
+								<label slot="text" for="demo-flex">--amenu-flex</label>
 
-					<div class="flex stretch space-between">
-						<label for="demo-flex">--amenu-flex</label>
+								<b slot="title">Horizontal Justification of Menu Items</b>
+								<p>Only affects classic and ribbon menus. Set to 1 if you want all items the same width. Otherwise, use same values as the css property justify-content.</p>
+							</a-tooltip>
 
-						<a-bind prop="--amenu-flex">
-							<select id="demo-flex">
-								<option>1</option>
-								<option>start</option>
-								<option>end</option>
-								<option>center</option>
-								<option>space-around</option>
-								<option>space-between</option>
-							</select>
-						</a-bind>
-					</div>
+							<a-bind prop="--amenu-flex">
+								<select id="demo-flex">
+									<option>1</option>
+									<option>start</option>
+									<option>end</option>
+									<option>center</option>
+									<option>space-around</option>
+									<option>space-between</option>
+								</select>
+							</a-bind>
+						</div>
 
-					<div class="flex stretch">
-					  <label for="demo-min" class="flex1 nowrap">
-					  	--amenu-min
-					  </label>
-					  <a-bind prop="--amenu-min" class="flex1">
-							<select id="demo-min">
-								<option>auto</option>
-								<option>35px</option>
-								<option>3rem</option>
-								<option>4em</option>
-							</select>
-						</a-bind>
-				  </div>
+						<div class="flex stretch">
+							<a-tooltip>
+							  <label slot="text" for="demo-min" class="flex1 nowrap">
+							  	--amenu-min
+							  </label>
+							  <b slot="title">Minimum Height</b>
+							  <p>Determines the minimum height of menu elements.</p>
+							</a-tooltip>
+						  <a-bind prop="--amenu-min" class="flex1">
+								<select id="demo-min">
+									<option>auto</option>
+									<option>35px</option>
+									<option>3rem</option>
+									<option>4em</option>
+								</select>
+							</a-bind>
+					  </div>
 
-				  <div class="flex stretch">
-				  	<label for="demo-pad" class="flex1 nowrap">
-				  		--amenu-pad
-				  	</label>
-				  	<a-bind prop="--amenu-pad" class="flex1">
-							<select id="demo-pad">
-								<option>0</option>
-								<option>10px</option>
-								<option>.5rem</option>
-								<option>1rem</option>
-							</select>
-						</a-bind>
-					</div>
+					  <div class="flex stretch">
+					  	<a-tooltip>
+						  	<label slot="text" for="demo-pad" class="flex1 nowrap">
+						  		--amenu-pad
+						  	</label>
+						  	<b slot="title">Horizontal Padding</b>
+						  	<p>Determines the horizontal padding in several elements.</p>
+						  </a-tooltip>
+					  	<a-bind prop="--amenu-pad" class="flex1">
+								<select id="demo-pad">
+									<option>0</option>
+									<option>10px</option>
+									<option>.5rem</option>
+									<option>1rem</option>
+								</select>
+							</a-bind>
+						</div>
 
-					<div class="flex stretch">
-						<label for="demo-duration" class="flex1 nowrap"> --amenu-duration </label>
-						<a-bind prop="--amenu-duration" class="flex1">
-							<select id="demo-duration">
-								<option>0s</option>
-								<option>0.25s</option>
-								<option>400ms</option>
-								<option>1s</option>
-							</select>
-						</a-bind>
-					</div>
+						<div class="flex stretch">
+							<a-tooltip>
+								<label slot="text" for="demo-duration" class="flex1 nowrap"> --amenu-duration </label>
+								<b slot="title">Transition Duration</b>
+								<p>Determines the duration of the transition between the open and closed states.</p>
+							</a-tooltip>
+							<a-bind prop="--amenu-duration" class="flex1">
+								<select id="demo-duration">
+									<option>0s</option>
+									<option>0.25s</option>
+									<option>400ms</option>
+									<option>1s</option>
+								</select>
+							</a-bind>
+						</div>
+					</a-tooltip-group>
 				</a-menu>
 			</a-menu>
 		</a-bindgroup>
-	</aside>
+	</div>
 
-	<section id="demo-section">
+	<div id="demo-menu">
 		<!-- Demo Menu -->
-		<a-menu id="demo" type="sitemap">
+		<a-menu id="demo" type="classic">
 			<strong slot="icon">☰</strong>
 			<a href="#">Foo</a>
 
 			<a-menu id="demo-A" group="level-1" open>
 				<strong slot="label">
 					Bloc A:
-					<a-bind
+					<!-- <a-bind
 					model="dom:#demo-A"
 					prop="type">
 					<select>
@@ -196,7 +219,7 @@
 						<option>flyout</option>
 						<option>sitemap</option>
 					</select>
-				</a-bind>
+				</a-bind> -->
 				</strong>
 				<a href="#">Bar</a>
 				<a href="#">Bar Two</a>
@@ -205,18 +228,18 @@
 				<a-menu id="demo-Aa" open>
 					<strong slot="label">
 						Bloc Aa:
-						<a-bind
-					model="dom:#demo-Aa"
-					prop="type">
-					<select>
-						<option>classic</option>
-						<option>mobile</option>
-						<option>ribbon</option>
-						<option>dropdown</option>
-						<option>flyout</option>
-						<option>sitemap</option>
-					</select>
-				</a-bind>
+						<!-- <a-bind
+							model="dom:#demo-Aa"
+							prop="type">
+							<select>
+								<option>classic</option>
+								<option>mobile</option>
+								<option>ribbon</option>
+								<option>dropdown</option>
+								<option>flyout</option>
+								<option>sitemap</option>
+							</select>
+						</a-bind> -->
 					</strong>
 					<a href="#">Baz</a>
 					<a href="#">Baz Two</a>
@@ -227,7 +250,7 @@
 			<a-menu id="demo-B" group="level-1">
 				<strong slot="label">
 					Bloc B:
-					<a-bind
+					<!-- <a-bind
 						model="dom:#demo-B"
 						prop="type">
 						<select>
@@ -238,24 +261,24 @@
 							<option>flyout</option>
 							<option>sitemap</option>
 						</select>
-					</a-bind>
+					</a-bind> -->
 				</strong>
 
 				<a-menu id="demo-Ba">
 					<strong slot="label">
 						Bloc Ba:
-						<a-bind
-					model="dom:#demo-Ba"
-					prop="type">
-					<select>
-						<option>classic</option>
-						<option>mobile</option>
-						<option>ribbon</option>
-						<option>dropdown</option>
-						<option>flyout</option>
-						<option>sitemap</option>
-					</select>
-				</a-bind>
+						<!-- <a-bind
+							model="dom:#demo-Ba"
+							prop="type">
+							<select>
+								<option>classic</option>
+								<option>mobile</option>
+								<option>ribbon</option>
+								<option>dropdown</option>
+								<option>flyout</option>
+								<option>sitemap</option>
+							</select>
+						</a-bind> -->
 					</strong>
 					<a href="#">Bing</a>
 					<a href="#">Bing Two</a>
@@ -268,12 +291,15 @@
 
 			</a-menu>
 		</a-menu>
-	</section>
-</div>
+	</div>
+</section>
 
-<hr>
+<section id="examples">
+	<h2>Examples</h2>
 
-<p>Proident minim do voluptate incididunt ullamco dolore labore ex non enim quis ut commodo ea elit minim dolore esse ut dolor elit ut veniam id quis adipisicing in cillum velitlaborum.</p>
-
+	<div class="card">
+		<h3>example one</h3>
+	</div>
+</section>
 </body>
 </html>

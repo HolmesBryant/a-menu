@@ -14,8 +14,8 @@
 
 ::slotted(a),
 ::slotted(a-menu) {
-  flex: var(--flex, center);
-  min-height: var(--min, 35px);
+  flex: var(--amenu-flex, center);
+  min-height: var(--amenu-min, 35px);
 }
 
 details {
@@ -38,7 +38,7 @@ details.open > #items {
 
 summary {
   box-sizing: border-box;
-  min-height: var(--min, 35px);
+  min-height: var(--amenu-min, 35px);
 }
 
 .no-arrow {
@@ -54,11 +54,11 @@ summary {
 #items {
   align-items: stretch;
   display: flex;
-  justify-content: var(--flex, center);
+  justify-content: var(--amenu-flex, center);
   transition:
-    height var(--duration, 400ms) ease-in-out,
-    max-height var(--duration, 400ms) ease-in-out,
-    opacity var(--duration, 400ms);
+    height var(--amenu-duration, 400ms) ease-in-out,
+    max-height var(--amenu-duration, 400ms) ease-in-out,
+    opacity var(--amenu-duration, 400ms) 200ms;
 }
 
 @supports (interpolate-size: allow-keywords) {
@@ -137,6 +137,7 @@ summary {
   flex-direction: column;
   width: max-content;
   position: absolute;
+  top: 100%;
 }
 
 /* --- Flyout --- */
@@ -188,5 +189,5 @@ summary {
 :host([type="sitemap"]) #items {
   flex-direction: column;
   /* margin-left: 1rem; */
-  margin-left: var(--pad, 1rem);
+  margin-left: var(--amenu-pad, 1rem);
 }
