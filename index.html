@@ -5,10 +5,17 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>A-Menu</title>
 	<script type="module" src="src/a-menu.js"></script>
+	<!-- <script type="module" src="dist/a-menu.min.js"></script> -->
+
 	<script type="module" src="extra/a-color.min.js"></script>
-	<script type="module" src="extra/a-bind.min.js"></script>
 	<script type="module" src="extra/a-tooltip.min.js"></script>
 	<script type="module" src="extra/a-markdown.min.js"></script>
+	<script type="module" src="extra/a-code.min.js"></script>
+
+	<script type="module">
+		import ABind from './extra/a-bind.min.js';
+		window.update = ABind.update
+	</script>
 
 	<link rel="stylesheet" href="extra/styles.css">
 	<link rel="stylesheet" href="dist/a-menu.css">
@@ -16,8 +23,22 @@
 	<link rel="stylesheet" href="extra/a-markdown.css">
 
 	<style>
+		a { cursor: pointer; }
 		a-menu[type="sitemap"] select { display: none }
 		a-tooltip { --icon-size: 1rem; }
+
+		iframe {
+			height:250px;
+			width:100%;
+		}
+
+		.resizable {
+			border: 1px solid var(--border-color);
+			border-right-width: 4px;
+			resize: horizontal;
+			overflow: auto;
+		}
+
 		#demo-controls { width: 250px }
 
 		#demo-menu {
@@ -32,8 +53,8 @@
 			gap: 1rem;
 		}
 
-		#demo-props div:hover,
-		#demo-props div:active {
+		#demo-controls div:hover,
+		#demo-controls div:active {
 			filter: brightness(1.25);
 		}
 	</style>
@@ -60,7 +81,7 @@
 
 				<!-- Attrs -->
 
-				<a-menu group="top-lvl">
+				<a-menu group="top-lvl" open>
 					<strong slot="label">Attributes</strong>
 
 					<div class="flex space-between">
@@ -119,7 +140,7 @@
 
 				<!-- CSS Vars -->
 
-				<a-menu group="top-lvl" open>
+				<a-menu group="top-lvl">
 					<strong slot="label">CSS Vars</strong>
 					<a-tooltip-group nohover position="modal">
 						<div class="flex stretch space-between">
@@ -201,104 +222,231 @@
 
 	<div id="demo-menu">
 		<!-- Demo Menu -->
-		<a-menu id="demo" type="classic">
+		<a-menu id="demo" type="mobile">
 			<strong slot="icon">☰</strong>
-			<a href="#">Foo</a>
+			<a>Foo</a>
 
 			<a-menu id="demo-A" group="level-1" open>
 				<strong slot="label">
 					Bloc A:
-					<!-- <a-bind
-					model="dom:#demo-A"
-					prop="type">
-					<select>
-						<option>classic</option>
-						<option>mobile</option>
-						<option>ribbon</option>
-						<option>dropdown</option>
-						<option>flyout</option>
-						<option>sitemap</option>
-					</select>
-				</a-bind> -->
 				</strong>
-				<a href="#">Bar</a>
-				<a href="#">Bar Two</a>
-				<a href="#">Bar Three</a>
+				<a>Bar</a>
+				<a>Bar Two</a>
+				<a>Bar Three</a>
 
 				<a-menu id="demo-Aa" open>
 					<strong slot="label">
 						Bloc Aa:
-						<!-- <a-bind
-							model="dom:#demo-Aa"
-							prop="type">
-							<select>
-								<option>classic</option>
-								<option>mobile</option>
-								<option>ribbon</option>
-								<option>dropdown</option>
-								<option>flyout</option>
-								<option>sitemap</option>
-							</select>
-						</a-bind> -->
 					</strong>
-					<a href="#">Baz</a>
-					<a href="#">Baz Two</a>
-					<a href="#">Baz Three</a>
+					<a>Baz</a>
+					<a>Baz Two</a>
+					<a>Baz Three</a>
 				</a-menu>
 			</a-menu>
 
 			<a-menu id="demo-B" group="level-1">
 				<strong slot="label">
 					Bloc B:
-					<!-- <a-bind
-						model="dom:#demo-B"
-						prop="type">
-						<select>
-							<option>classic</option>
-							<option>mobile</option>
-							<option>ribbon</option>
-							<option>dropdown</option>
-							<option>flyout</option>
-							<option>sitemap</option>
-						</select>
-					</a-bind> -->
 				</strong>
 
 				<a-menu id="demo-Ba">
 					<strong slot="label">
 						Bloc Ba:
-						<!-- <a-bind
-							model="dom:#demo-Ba"
-							prop="type">
-							<select>
-								<option>classic</option>
-								<option>mobile</option>
-								<option>ribbon</option>
-								<option>dropdown</option>
-								<option>flyout</option>
-								<option>sitemap</option>
-							</select>
-						</a-bind> -->
 					</strong>
-					<a href="#">Bing</a>
-					<a href="#">Bing Two</a>
-					<a href="#">Bing Three</a>
+					<a>Bing</a>
+					<a>Bing Two</a>
+					<a>Bing Three</a>
 				</a-menu>
 
-				<a href="#">Boom</a>
-				<a href="#">Boom Two</a>
-				<a href="#">Boom Three</a>
+				<a>Boom</a>
+				<a>Boom Two</a>
+				<a>Boom Three</a>
 
 			</a-menu>
 		</a-menu>
 	</div>
 </section>
 
-<section id="examples">
+<section id="examples" class="flex column stretch">
 	<h2>Examples</h2>
 
 	<div class="card">
-		<h3>example one</h3>
+	<h3>Mobile Menu with Icon and Label</h3>
+		<a-menu type="mobile">
+		  <span slot="icon">🍔</span>
+		  <span slot="label">Menu</span>
+
+		  <a href="/">Home</a>
+		  <a href="/about">About</a>
+
+		  <a-menu>
+		    <span slot="label">Services</span>
+		    <a href="/">Catering</a>
+		    <a href="/">Take Out</a>
+		  </a-menu>
+		</a-menu>
+
+		<hr>
+
+		<details>
+			<summary class="nofrills">Code</summary>
+			<a-code highlight>
+				<textarea>
+					<a-menu type="mobile">
+					  <span slot="icon">🍔</span>
+					  <span slot="label">Menu</span>
+
+					  <a href="/">Home</a>
+					  <a href="/">About</a>
+
+					  <!-- Nested menus are supported -->
+					  <a-menu>
+					    <span slot="label">Services</span>
+					    <a href="/">Catering</a>
+					    <a href="/">Take Out</a>
+					  </a-menu>
+					</a-menu>
+				</textarea>
+			</a-code>
+		</details>
+	</div>
+
+	<div class="card" style="height:300px">
+	<h3>Sitemap Menu</h3>
+
+		<a-menu type="sitemap">
+		  <span slot="icon">🍔</span>
+		  <span slot="label">Menu</span>
+
+		  <a>Home</a>
+		  <a>About</a>
+
+		  <a-menu>
+		    <span slot="label">Services</span>
+		    <a>Catering</a>
+		    <a>Take Out</a>
+		  </a-menu>
+
+			<a-menu>
+		    <span slot="label">Products</span>
+		    <a>Hamburger</a>
+		    <a>Cheeseburger</a>
+		    <a>Fries</a>
+		    <a>Onion Rings</a>
+			</a-menu>
+		</a-menu>
+	</div>
+
+	<div class="card">
+		<h3>Using the "group" attribute for accordian behavior</h3>
+
+			<a-menu type="mobile" debug>
+				<strong slot="icon">☰</strong>
+
+			  <a>Home</a>
+			  <a>About</a>
+
+			  <a-menu group="group1">
+			    <span slot="label">Services</span>
+			    <a>Catering</a>
+			    <a>Take Out</a>
+			  </a-menu>
+
+				<a-menu group="group1" open>
+			    <span slot="label">Products</span>
+			    <a>Hamburger</a>
+			    <a>Cheeseburger</a>
+			    <a>Fries</a>
+			    <a>Onion Rings</a>
+			  </a-menu>
+			</a-menu>
+	</div>
+
+	<div class="card">
+	<h3>Classic Menu with breakpoint at 360px</h3>
+
+		<!-- slider -->
+		<a-bind
+			model="dom:#resize-a"
+			prop="scrollWidth">
+
+		<input
+			id="resize-a-slider"
+			style="width:100%"
+			type="range"
+			max="1000"
+			step="1"
+			oninput="window.update(this,'value', `${this.value}px`)">
+		</a-bind>
+
+		<!-- output -->
+		<div style="width:max-content; margin:0 auto">
+			<a-bind
+				pull
+				model="dom:#resize-a"
+				prop="scrollWidth">
+				<output id="resize-a-output">...</output>px
+			</a-bind>
+		</div>
+
+		<!-- resizable iframe -->
+		<a-bind
+			model="dom:#resize-a-slider"
+			prop="value"
+			elem-prop="style.width">
+
+			<iframe id="resize-a"
+			  srcdoc='
+			  	<html>
+			  	<head>
+			  		<title>Breakpoint Example</title>
+			  		<script type="module" src="src/a-menu.js"></script>
+			  		<link rel="stylesheet" href="dist/a-menu.css">
+			  		<style>
+			  			a { cursor:pointer }
+			  			a-menu { display: flex }
+			  		</style>
+			  	</head>
+			  	<body>
+			    <a-menu breakpoint="360">
+			      <span slot="icon">🍔</span>
+
+			      <a>Home</a>
+			      <a>About</a>
+
+			      <a-menu open>
+			        <span slot="label">Services</span>
+			        <a>Catering</a>
+			        <a>Take Out</a>
+			      </a-menu>
+			    </a-menu>
+			  	</body>
+			  	</html>
+			  '>
+			</iframe>
+		</a-bind>
+
+		<hr>
+
+		<details>
+			<summary class="nofrills">Code</summary>
+			<a-code highlight>
+				<textarea>
+					<a-menu breakpoint="640">
+			      <span slot="icon">🍔</span>
+
+			      <a>Home</a>
+			      <a>About</a>
+
+			      <a-menu open>
+			        <span slot="label">Services</span>
+			        <a>Catering</a>
+			        <a>Take Out</a>
+			      </a-menu>
+			    </a-menu>
+				</textarea>
+			</a-code>
+		</details>
 	</div>
 </section>
 </body>

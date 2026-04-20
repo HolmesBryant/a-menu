@@ -14,7 +14,7 @@ export default {
     },
     // Minified ES Module
     {
-      file: 'dist/a-menu.js.min.js',
+      file: 'dist/a-menu.min.js',
       format: 'es',
       plugins: [terser({
         output: { comments: false },

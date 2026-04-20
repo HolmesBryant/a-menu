@@ -1,11 +1,25 @@
+/***************************************************
+	Styles for a-menu light dom
+	Available parts (these map to elements in shadow dom):
+	::part(menu) - the details element
+	::part(summary) - the summary element
+	::part(label-wrapper) - div containing icon and label
+	::part(icon) - span containing the icon slot
+	::part(label) - span containing the label slot
+	::part(items) - div containing the menu items
+****************************************************/
+
 :root {
 	--amenu-background: snow;
 	--amenu-text: rgb(60,60,60);
 	--amenu-border: silver;
+	--amenu-accent: dodgerblue;
+
 	/* minimum height of elements */
 	--amenu-min: 35px;
 
-	/* left/right padding of all items */
+	/* left/right padding of menu items */
+	/* left margin of items in 'sitemap' menu*/
 	--amenu-pad: .5rem;
 
 	/* transition duration */
@@ -31,13 +45,15 @@ a-menu {
 
 	background: var(--amenu-background);
 
-	& a,
-	&::part(label)
-	{ background: var(--amenu-background); }
+	& > *
+	{ background: var(--amenu-background) }
 
 	& a:hover,
 	& a:focus,
 	& a:active,
+	&::part(icon):hover,
+	&::part(icon):focus,
+	&::part(icon):active,
 	&::part(label):hover,
 	&::part(label):focus,
 	&::part(label):active
@@ -45,16 +61,17 @@ a-menu {
 
 /***** Border *****/
 
-	&:not([type="ribbon"]):not([type="sitemap"]):not([top]) a,
-	&:not([top]):not([type="ribbon"]):not([type="sitemap"]) a-menu
+	&:not([top]):not([type="ribbon"]):not([type="sitemap"]) > *:not([slot="label"])
 	{ border-left: 4px solid var(--amenu-border) }
 
-	&:not([type="sitemap"]) a,
-	&:not([top]):not([type="sitemap"]) div,
-	&:not([type="sitemap"]) a-menu:not([top])
-	{ border: 1px solid var(--amenu-border) }
+	&:not([type="sitemap"]) > *:not([slot="label"]):not([slot="icon"])
+	{ border: 1px solid var(--amenu-border); }
 
 /***** Text *****/
+
+	&[open]::part(summary),
+	&[open]::part(label)
+	{ color: var(--amenu-accent); }
 
 	& a,
 	&::part(label) {
@@ -76,6 +93,7 @@ a-menu {
 
 /***** Cursor *****/
 
+	&::part(icon),
 	&::part(label)
 	{ cursor: pointer }
 
@@ -84,12 +102,19 @@ a-menu {
 	&[top]::part(items)
 	{ box-shadow: none }
 
-	&:not([top])&:not([type="sitemap"])::part(items)
+	&:not([top]):not([type="sitemap"]):not([type="mobile"])::part(items)
 	{ box-shadow: 2px 2px 5px black; }
 
 /***** Misc *****/
 
-	& > * { padding: 0 var(--amenu-pad); }
+	& a,
+	& div,
+	& ::part(label)
+	{ padding: 0 var(--amenu-pad); }
+
 	&[type="sitemap"] > * { padding: 0; }
 
+	& [slot="label"] {
+		flex: 1;
+	}
 } /* end a-menu */

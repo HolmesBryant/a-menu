@@ -123,13 +123,15 @@ export default class AMenu extends HTMLElement {
   static {
     this.template.innerHTML = `
       <details part="menu" id="menu">
-        <summary part="label" id="summary" role="button" aria-expanded="false">
-          <span part="icon" id="icon">
-            <slot name="icon"></slot>
-          </span>
-          <span id="label">
-            <slot name="label"></slot>
-          </span>
+        <summary part="summary" id="summary" role="button" aria-expanded="false">
+          <div id="label-wrapper">
+            <span part="icon" id="icon">
+              <slot name="icon"></slot>
+            </span>
+            <span part="label" id="label">
+              <slot name="label"></slot>
+            </span>
+          </div>
         </summary>
         <div part="items" id="items">
           <slot></slot>
@@ -217,6 +219,7 @@ export default class AMenu extends HTMLElement {
     this.#connected = true;
     if (this.id) this.#menu.dataset.parent = this.id;
     this.#abortController = new AbortController();
+
     if (this.parentElement?.closest('a-menu') === null) {
       this.top = true;
     }
@@ -314,7 +317,6 @@ export default class AMenu extends HTMLElement {
         this.removeAttribute(type);
       }
     }
-
     // Guard: Only set attribute if different to prevent infinite recursion
     if (this.getAttribute('type') !== value) {
       this.setAttribute('type', value);
@@ -415,7 +417,7 @@ export default class AMenu extends HTMLElement {
    */
   #maybeHideHeader() {
     this.#summary.hidden = !this.#hasLabel && !this.#maybeShowIcon();
-    if (!this.#hasLabel && this.#top) this.open = true;
+    if (!this.#hasLabel && !this.#hasIcon && this.#top) this.open = true;
   }
 
   /**
@@ -449,7 +451,6 @@ export default class AMenu extends HTMLElement {
     }
 
     if (!maxWidth) return;
-    // this.#mql = window.matchMedia(`max-width: ${maxWidth}px`);
     this.#mql = window.matchMedia(`(max-width: ${maxWidth}px)`);
 
     this.#mqlHandler = (event) => {
