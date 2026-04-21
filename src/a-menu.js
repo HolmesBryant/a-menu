@@ -20,7 +20,7 @@ export default class AMenu extends HTMLElement {
   #group;
 
   /** @type {string} Comma-separated list of menu types that display an icon. */
-  #showIcon = "mobile, flyout, dropdown";
+  #showIcon = ['mobile', 'flyout', 'dropdown'];
 
   /** @type {boolean} Indicates if the menu is currently expanded. */
   #open = false;
@@ -31,7 +31,7 @@ export default class AMenu extends HTMLElement {
   /** @type {boolean} Indicates if this is the top-level menu in a nested structure. */
   #top = false;
 
-  /** @type {string} The visual style type of the menu (e.g., 'classic', 'mobile', 'ribbon'). */
+  /** @type {string} The visual style type of the menu (e.g., 'classic', 'mobile', 'shingle'). */
   #type = 'classic';
 
   // -- Private --
@@ -72,6 +72,9 @@ export default class AMenu extends HTMLElement {
   /** @type {boolean} Locks the menu type if defined by a parent menu. */
   #lockedType = false;
 
+  /** @type {boolean} Whether info has already been logged. */
+  #logged = false;
+
   /** @type {HTMLDetailsElement} The core details element serving as the menu. */
   #menu;
 
@@ -80,6 +83,9 @@ export default class AMenu extends HTMLElement {
 
   /** @type {Function} The handler for media query changes. */
   #mqlHandler;
+
+  /** @type {string|null} Stores the original 'open' value when temporarily switching to mobile */
+  #originalOpen;
 
   /** @type {string|null} Stores the original type when temporarily switching to mobile. */
   #originalType;
@@ -110,6 +116,7 @@ export default class AMenu extends HTMLElement {
     'debug',
     'group',
     'open',
+    'show-icon',
     'swipe',
     'top',
     'type'
@@ -195,6 +202,10 @@ export default class AMenu extends HTMLElement {
       this.#top = this.hasAttribute('top');
       globalThis[abindUpdate]?.(this, 'top', this.#top);
       break;
+    case 'show-icon':
+      this.#showIcon = newval.split(',').map( item => item.trim());
+      globalThis[abindUpdate]?.(this, 'showIcon', this.#showIcon);
+      break;
     case 'swipe':
       this.#swipe = Number(newval);
       globalThis[abindUpdate]?.(this, 'swipe', this.#swipe);
@@ -237,7 +248,6 @@ export default class AMenu extends HTMLElement {
     this.#addListeners();
     this.#setupMediaQuery(this.breakpoint);
     if (this.#open) this.#toggleMenu();
-    if (this.debug) this.logVars();
   }
 
   /**
@@ -284,7 +294,7 @@ export default class AMenu extends HTMLElement {
       this.#hasLabel = this.#labelSlot.assignedElements().length > 0;
       this.#hasIcon = this.#iconSlot.assignedElements().length > 0;
       this.#maybeHideHeader();
-      this.#maybeShowIcon();
+      // this.#maybeShowIcon();
     };
 
     this.#labelSlot.addEventListener('slotchange', handleSlotChange, { signal: this.#abortController.signal });
@@ -309,9 +319,12 @@ export default class AMenu extends HTMLElement {
    * @private
    */
   #applyType(value) {
-    if (this.#lockedType) return;
+    if (this.#lockedType) {
+      if (this.debug) this.logVars();
+      return;
+    }
 
-    const types = ['mobile', 'classic', 'ribbon', 'dropdown', 'flyout', 'sitemap'];
+    const types = ['mobile', 'classic', 'shingle', 'dropdown', 'flyout', 'sitemap'];
     for (const type of types) {
       if (type !== value && this.hasAttribute(type)) {
         this.removeAttribute(type);
@@ -323,12 +336,11 @@ export default class AMenu extends HTMLElement {
       return; // Stop here, attributeChangedCallback will call applyType again
     }
 
-    if (value === 'sitemap') {
-      this.open = true;
-    }
+    if (value === 'sitemap') this.open = true;
 
-    this.#maybeHideHeader();
     this.#applyTypeToNested(value);
+    this.#maybeHideHeader();
+    this.#maybeShowIcon();
   }
 
   /**
@@ -345,7 +357,10 @@ export default class AMenu extends HTMLElement {
     if (!this.isConnected) return;
 
     const nested = Array.from(this.children).filter(item => item.localName === 'a-menu');
-    if (!nested.length) return;
+    if (!nested.length) {
+      if (this.debug) this.logVars();
+      return;
+    }
 
     for (const child of nested) {
       let type = value;
@@ -353,6 +368,8 @@ export default class AMenu extends HTMLElement {
       if (this.#type === 'dropdown') type = 'flyout';
       if (child.type !== type) child.type = type;
     }
+
+    if (this.debug) this.logVars();
   }
 
   /**
@@ -426,15 +443,14 @@ export default class AMenu extends HTMLElement {
    * @private
    */
   #maybeShowIcon() {
-    const show = this.#hasIcon && this.#showIcon.includes(this.type);
+    const show = this.#hasIcon && this.showIcon.includes(this.type);
+    if (this.debug) console.log(this.#hasIcon, this.type, this.showIcon);
     if (show) {
       this.#icon.classList.remove('hidden');
       this.#summary.classList.add('no-arrow');
-      // this.#summary.style.setProperty('list-style', 'none');
     } else {
       this.#icon.classList.add('hidden');
       this.#summary.classList.remove('no-arrow');
-      // this.#summary.style.removeProperty('list-style');
     }
 
     return show;
@@ -446,6 +462,7 @@ export default class AMenu extends HTMLElement {
    * @private
    */
   #setupMediaQuery(maxWidth) {
+    if (!this.#top) return;
     if (this.#mql && this.#mqlHandler) {
       this.#mql.removeEventListener('change', this.#mqlHandler);
     }
@@ -458,12 +475,16 @@ export default class AMenu extends HTMLElement {
         if (this.type !== 'mobile') {
           this.#originalType = this.type;
           this.type = 'mobile';
+          this.#originalOpen = this.open;
+          this.open = false;
         }
       } else {
         // screen is larger
         if (this.#originalType && this.type === 'mobile') {
           this.type = this.#originalType;
+          this.open = this.#originalOpen;
           this.#originalType = null;
+          this.#originalOpen = null;
         }
       }
     };
@@ -493,7 +514,7 @@ export default class AMenu extends HTMLElement {
    * @param {boolean} [isOpen=false] - Whether to expand the console group by default.
    */
   logVars(isOpen = false) {
-
+    if (this.#logged) return;
     if (isOpen) {
       console.group(this);
     } else {
@@ -501,32 +522,34 @@ export default class AMenu extends HTMLElement {
     }
 
     console.log('------ Attributes ------');
-    console.log('breakpoint', this.breakpoint);
-    console.log('group', this.group);
-    console.log('showIcon', this.showIcon);
-    console.log('open', this.open);
-    console.log('swipe', this.swipe);
-    console.log('top', this.top);
-    console.log('type', this.type);
+    console.log('breakpoint :', this.breakpoint);
+    console.log('group :', this.group);
+    console.log('showIcon :', this.showIcon);
+    console.log('open :', this.open);
+    console.log('swipe :', this.swipe);
+    console.log('top :', this.top);
+    console.log('type :', this.type);
 
     console.log('------ Properties ------');
-    console.log('#connected', this.#connected);
-    console.log('#debug', this.#debug);
-    console.log('#hasIcon', this.#hasIcon);
-    console.log('#hasLabel', this.#hasLabel);
-    console.log('#icon', this.#icon);
-    console.log('#iconSlot', this.#iconSlot);
-    console.log('#items', this.#items);
-    console.log('#itemsSlot', this.#itemsSlot);
-    console.log('#labelSlot', this.#labelSlot);
-    console.log('#lockedType', this.#lockedType);
-    console.log('#menu', this.#menu);
-    console.log('#mql', this.#mql);
-    console.log('#mqlHandler', this.#mqlHandler);
-    console.log('#originalType', this.#originalType);
-    console.log('#summary', this.#summary);
+    console.log('#connected :', this.#connected);
+    console.log('#hasIcon :', this.#hasIcon);
+    console.log('#hasLabel :', this.#hasLabel);
+    console.log('#lockedType :', this.#lockedType);
+    console.log('#mql :', this.#mql);
+    console.log('#mqlHandler :', this.#mqlHandler);
+    console.log('#originalType :', this.#originalType);
+
+    // console.log('------ Elements ------');
+    // console.log('#icon', this.#icon);
+    // console.log('#iconSlot', this.#iconSlot);
+    // console.log('#items', this.#items);
+    // console.log('#itemsSlot', this.#itemsSlot);
+    // console.log('#labelSlot', this.#labelSlot);
+    // console.log('#menu', this.#menu);
+    // console.log('#summary', this.#summary);
 
     console.groupEnd();
+    this.#logged = true;
   }
 
   /**
@@ -593,6 +616,12 @@ export default class AMenu extends HTMLElement {
    * @readonly
    */
   get showIcon() { return this.#showIcon }
+
+  /**
+   * Sets the 'show-icon' attribute.
+   * @param {string} value - A comma separated list of menu types for which to show the icon.
+   */
+  set showIcon(value) { this.setAttribute('show-icon', value) }
 
   /**
    * Gets or sets the minimum swipe distance to trigger state changes. Setting to null removes the attribute.

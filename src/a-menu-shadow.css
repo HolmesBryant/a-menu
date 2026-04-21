@@ -8,8 +8,8 @@
 
 ::slotted(*) {
   align-items: center;
-  display: inline-flex;
-  flex: 1;
+  display: flex;
+  line-height: 1;
   min-height: var(--amenu-min, 35px);
   text-decoration: none;
   white-space: nowrap;
@@ -46,7 +46,9 @@ summary {
   position: relative;
 }
 
-summary::marker { font-size: 1em; }
+summary::marker {
+  font-size: 1em;
+}
 
 summary span {
   display: flex;
@@ -58,11 +60,13 @@ summary span {
 .no-arrow {
   align-items: center;
   display: flex;
+  padding: 0;
 }
 
 #icon:not(.hidden) { flex: 0 }
 
 #label-wrapper {
+  align-items: center;
   display: inline-flex;
   width: calc(100% - .5em);
 }
@@ -114,11 +118,6 @@ summary span {
   width: 100%;
 }
 
-:host([top][type="mobile"]) summary {
-  display: block;
-  list-style: none;
-}
-
 :host([type="mobile"]) #items {
   flex-direction: column;
   width: 100%;
@@ -126,19 +125,39 @@ summary span {
 
 /* -- Ribbon -- */
 
-:host([type="ribbon"]) details {
+/* Ensure the top-level menu acts as the positioning anchor for child panels */
+:host([type="shingle"][top]) {
+  position: relative;
+}
+
+:host([type="shingle"][top]) details {
+  display: flex;
+}
+
+:host([type="shingle"]) details {
   display: block;
   width: 100%;
 }
 
-:host([type="ribbon"][top]) #items {
+/* Remove relative positioning from individual tabs so absolute #items escapes them */
+:host([type="shingle"]:not([top])) details {
+  position: static;
+}
+
+:host([type="shingle"][top]) #items {
   width: 100%;
 }
 
-:host([type="ribbon"]) #items {
+:host([type="shingle"]) #items {
   flex-direction: row;
-  width: max-content;
   position: absolute;
+  left: 5%;
+  top: 100%;
+  width: 100%;
+}
+
+:host([type="shingle"][top]) #items {
+  left: 0;
 }
 
 /* --- Dropdown --- */
@@ -196,10 +215,11 @@ summary span {
 
 :host([type="sitemap"]) summary {
   list-style: none;
+  padding: 0;
   pointer-events: none;
 }
 
 :host([type="sitemap"]) #items {
   flex-direction: column;
-  margin-left: var(--amenu-pad, 1rem);
+  margin-left: calc(var(--amenu-pad, .5rem) * 2.5);
 }

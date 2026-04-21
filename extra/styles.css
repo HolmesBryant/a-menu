@@ -372,10 +372,9 @@ body {
 		display: flex;
 		flex-wrap: wrap;
 		gap: var(--gap);
-		row-gap: 1rem;
 	}
 
-	.flex:has(label)
+	.flex > label
 	{ row-gap: 0 }
 
 	.flex1

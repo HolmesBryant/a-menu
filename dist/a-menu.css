@@ -1,4 +1,5 @@
 /***************************************************
+	@file a-menu.css
 	Styles for a-menu light dom
 	Available parts (these map to elements in shadow dom):
 	::part(menu) - the details element
@@ -39,6 +40,14 @@
 	}
 }
 
+/* prevent FOUC */
+a-menu:not(:defined) {
+  display: inline-block;
+  visibility: hidden;
+  min-height: var(--icon-size);
+  min-width: var(--icon-size);
+}
+
 a-menu {
 
 /***** Background *****/
@@ -61,7 +70,7 @@ a-menu {
 
 /***** Border *****/
 
-	&:not([top]):not([type="ribbon"]):not([type="sitemap"]) > *:not([slot="label"])
+	&:not([top]):not([type="shingle"]):not([type="sitemap"]) > *:not([slot="label"]):not([slot="icon"])
 	{ border-left: 4px solid var(--amenu-border) }
 
 	&:not([type="sitemap"]) > *:not([slot="label"]):not([slot="icon"])
@@ -74,6 +83,7 @@ a-menu {
 	{ color: var(--amenu-accent); }
 
 	& a,
+	&::part(summary),
 	&::part(label) {
 		color: var(--amenu-text);
 		font-weight: bold;

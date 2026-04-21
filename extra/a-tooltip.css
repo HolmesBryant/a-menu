@@ -1,0 +1,50 @@
+a-tooltip {
+	/* these variables affect the css in the shadow root */
+	--accent-color:orange;
+	--border-color: silver;
+	--border-radius: 50%;
+	--cursor: help;
+	--message-size: 300px;
+	--icon-background: dodgerblue;
+	--icon-color: white;
+	--icon-size: 35px;
+	--pad: .5rem;
+	white-space: normal;
+}
+
+/* prevent FOUC */
+a-tooltip:not(:defined) {
+  display: inline-block;
+  visibility: hidden;
+  min-height: var(--icon-size);
+  min-width: var(--icon-size);
+}
+
+/* The tooltip message dialog */
+a-tooltip::part(dialog) {}
+
+/* The title section of the tooltip message */
+a-tooltip::part(title) {}
+
+/* The "close" button in the tooltip message dialog */
+a-tooltip::part(close) {}
+
+/* The message section in the tooltip dialog */
+a-tooltip::part(message) {}
+
+/* The button which contains the icon or symbol you click to display the message */
+a-tooltip::part(icon) {}
+
+a-tooltip figure {
+	display: flex;
+	gap: 1rem;
+	justify-content: center;
+	padding: 0;
+	margin: 0;
+}
+
+a-tooltip figure img {
+	width: auto;
+	max-height: 75svh;
+	object-fit: contain;
+}

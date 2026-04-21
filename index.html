@@ -21,6 +21,7 @@
 	<link rel="stylesheet" href="dist/a-menu.css">
 	<link rel="stylesheet" href="extra/a-color.css">
 	<link rel="stylesheet" href="extra/a-markdown.css">
+	<link rel="stylesheet" href="extra/a-tooltip.css">
 
 	<style>
 		a { cursor: pointer; }
@@ -32,10 +33,13 @@
 			width:100%;
 		}
 
+		.burger {
+			background: none;
+			transform: translateY(-0.08em);
+		}
+
 		.resizable {
 			border: 1px solid var(--border-color);
-			border-right-width: 4px;
-			resize: horizontal;
 			overflow: auto;
 		}
 
@@ -44,6 +48,7 @@
 		#demo-menu {
 			flex: 1;
 			position: relative;
+			z-index: 6;
 		}
 
 		#demo-section {
@@ -51,6 +56,16 @@
 			display: flex;
 			flex-wrap: wrap;
 			gap: 1rem;
+		}
+
+		#shingle-menu {
+			height: 100px;
+		}
+
+		#sitemap-menu {
+			height: min-content;
+			position:relative;
+			z-index:5;
 		}
 
 		#demo-controls div:hover,
@@ -99,7 +114,7 @@
 							<select id="demo-type">
 								<option>classic</option>
 								<option>mobile</option>
-								<option>ribbon</option>
+								<option>shingle</option>
 								<option>sitemap</option>
 								<option>flyout</option>
 								<option>dropdown</option>
@@ -142,13 +157,17 @@
 
 				<a-menu group="top-lvl">
 					<strong slot="label">CSS Vars</strong>
-					<a-tooltip-group nohover position="modal">
-						<div class="flex stretch space-between">
+					<a-tooltip-group
+						nohover
+						position="modal"
+						class="flex column stretch gap3">
+
+						<div class="flex column">
 							<a-tooltip>
 								<label slot="text" for="demo-flex">--amenu-flex</label>
 
 								<b slot="title">Horizontal Justification of Menu Items</b>
-								<p>Only affects classic and ribbon menus. Set to 1 if you want all items the same width. Otherwise, use same values as the css property justify-content.</p>
+								<p>Only affects classic and shingle menus. Set to 1 if you want all items the same width. Otherwise, use same values as the css property justify-content.</p>
 							</a-tooltip>
 
 							<a-bind prop="--amenu-flex">
@@ -163,7 +182,7 @@
 							</a-bind>
 						</div>
 
-						<div class="flex stretch">
+						<div class="flex column">
 							<a-tooltip>
 							  <label slot="text" for="demo-min" class="flex1 nowrap">
 							  	--amenu-min
@@ -171,7 +190,7 @@
 							  <b slot="title">Minimum Height</b>
 							  <p>Determines the minimum height of menu elements.</p>
 							</a-tooltip>
-						  <a-bind prop="--amenu-min" class="flex1">
+						  <a-bind prop="--amenu-min">
 								<select id="demo-min">
 									<option>auto</option>
 									<option>35px</option>
@@ -181,7 +200,7 @@
 							</a-bind>
 					  </div>
 
-					  <div class="flex stretch">
+					  <div class="flex column">
 					  	<a-tooltip>
 						  	<label slot="text" for="demo-pad" class="flex1 nowrap">
 						  		--amenu-pad
@@ -189,7 +208,7 @@
 						  	<b slot="title">Horizontal Padding</b>
 						  	<p>Determines the horizontal padding in several elements.</p>
 						  </a-tooltip>
-					  	<a-bind prop="--amenu-pad" class="flex1">
+					  	<a-bind prop="--amenu-pad">
 								<select id="demo-pad">
 									<option>0</option>
 									<option>10px</option>
@@ -199,13 +218,13 @@
 							</a-bind>
 						</div>
 
-						<div class="flex stretch">
+						<div class="flex column">
 							<a-tooltip>
 								<label slot="text" for="demo-duration" class="flex1 nowrap"> --amenu-duration </label>
 								<b slot="title">Transition Duration</b>
 								<p>Determines the duration of the transition between the open and closed states.</p>
 							</a-tooltip>
-							<a-bind prop="--amenu-duration" class="flex1">
+							<a-bind prop="--amenu-duration">
 								<select id="demo-duration">
 									<option>0s</option>
 									<option>0.25s</option>
@@ -222,7 +241,7 @@
 
 	<div id="demo-menu">
 		<!-- Demo Menu -->
-		<a-menu id="demo" type="mobile">
+		<a-menu id="demo" type="mobile" open>
 			<strong slot="icon">☰</strong>
 			<a>Foo</a>
 
@@ -271,22 +290,23 @@
 	<h2>Examples</h2>
 
 	<div class="card">
-	<h3>Mobile Menu with Icon and Label</h3>
-		<a-menu type="mobile">
-		  <span slot="icon">🍔</span>
+	<h3>Mobile Menu with Icons and Labels</h3>
+		<a-menu type="mobile" open>
+		  <b slot="icon">☰</b>
 		  <span slot="label">Menu</span>
 
-		  <a href="/">Home</a>
-		  <a href="/about">About</a>
+		  <a>Home</a>
+		  <a>About</a>
 
 		  <a-menu>
-		    <span slot="label">Services</span>
-		    <a href="/">Catering</a>
-		    <a href="/">Take Out</a>
+		  	<span slot="icon" class="burger">🍔</span>
+		    <b slot="label">Products</b>
+		    <a>Hamburger</a>
+		    <a>Cheeseburger</a>
+		    <a>Fries</a>
+		    <a>Onion Rings</a>
 		  </a-menu>
 		</a-menu>
-
-		<hr>
 
 		<details>
 			<summary class="nofrills">Code</summary>
@@ -311,66 +331,139 @@
 		</details>
 	</div>
 
-	<div class="card" style="height:300px">
+	<hr>
+
+	<div class="card">
 	<h3>Sitemap Menu</h3>
 
-		<a-menu type="sitemap">
-		  <span slot="icon">🍔</span>
-		  <span slot="label">Menu</span>
+		<p>Set type to "sitemap" and breakpoint to "0".</p>
 
-		  <a>Home</a>
-		  <a>About</a>
+		<div id="sitemap-menu">
+				<a-menu
+					type="sitemap"
+					breakpoint="0">
 
-		  <a-menu>
-		    <span slot="label">Services</span>
-		    <a>Catering</a>
-		    <a>Take Out</a>
-		  </a-menu>
+				  <a>Home</a>
+				  <a>About</a>
 
-			<a-menu>
+				  <a-menu>
+				    <span slot="label">Services</span>
+				    <a>Catering</a>
+				    <a>Take Out</a>
+				  </a-menu>
+
+					<a-menu>
+				    <span slot="label">Products</span>
+				    <a>Hamburger</a>
+				    <a>Cheeseburger</a>
+				    <a>Fries</a>
+				    <a>Onion Rings</a>
+					</a-menu>
+				</a-menu>
+
+			<details>
+				<summary class="nofrills">Code</summary>
+				<a-code highlight>
+					<textarea>
+						<a-menu
+							type="sitemap"
+							breakpoint="0">
+
+							....
+						</a-menu>
+					</textarea>
+				</a-code>
+			</details>
+		</div>
+	</div>
+
+	<hr>
+
+	<div class="card">
+	<h3>Using the "group" attribute for accordian behavior</h3>
+
+		<a-menu type="mobile">
+			<strong slot="icon">☰</strong>
+
+			<a-menu group="group1">
 		    <span slot="label">Products</span>
 		    <a>Hamburger</a>
 		    <a>Cheeseburger</a>
 		    <a>Fries</a>
 		    <a>Onion Rings</a>
-			</a-menu>
+		  </a-menu>
+
+		  <a-menu group="group1">
+		    <span slot="label">Services</span>
+		    <a>Catering</a>
+		    <a>Take Out</a>
+		  </a-menu>
+
+		  <a-menu group="group1">
+		  	<b slot="label">Locations</b>
+		  	<a>New York</a>
+		  	<a>Los Angeles</a>
+		  	<a>Chicago</a>
+		  	<a>Dallas</a>
+		  </a-menu>
 		</a-menu>
+
+		<details>
+			<summary class="nofrills">Code</summary>
+			<a-code highlight>
+				<textarea>
+					<a-menu type="mobile">
+						<strong slot="icon">
+							☰
+						</strong>
+
+					  <a-menu
+					  	group="group1">
+
+					  	<b slot="label">
+					  		Locations
+					  	</b>
+					  	...
+					  </a-menu>
+
+					  <a-menu
+					  	group="group1">
+
+					    <b slot="label">
+					    	Services
+					    </b>
+					    ...
+					  </a-menu>
+
+						<a-menu
+							group="group1">
+
+					    <b slot="label">
+					    	Products
+					    </b>
+					    ...
+					  </a-menu>
+					</a-menu>
+				</textarea>
+			</a-code>
+		</details>
 	</div>
 
-	<div class="card">
-		<h3>Using the "group" attribute for accordian behavior</h3>
-
-			<a-menu type="mobile" debug>
-				<strong slot="icon">☰</strong>
-
-			  <a>Home</a>
-			  <a>About</a>
-
-			  <a-menu group="group1">
-			    <span slot="label">Services</span>
-			    <a>Catering</a>
-			    <a>Take Out</a>
-			  </a-menu>
-
-				<a-menu group="group1" open>
-			    <span slot="label">Products</span>
-			    <a>Hamburger</a>
-			    <a>Cheeseburger</a>
-			    <a>Fries</a>
-			    <a>Onion Rings</a>
-			  </a-menu>
-			</a-menu>
-	</div>
+	<hr>
 
 	<div class="card">
 	<h3>Classic Menu with breakpoint at 360px</h3>
+		<p>If the top menu has no label and the icon is absent or hidden, you must manually add the "open" atribute to the top menu. When the breakpoint is triggered, the menu will automatically close.</p>
+		<strong>Note:</strong>
+		<p>The icon (even if present) is hidden on "classic", "shingle", and "sitemap" menus by default.</p>
+		<p>The "breakpoint" attribute is only honored on top level menus.</p>
 
 		<!-- slider -->
 		<a-bind
 			model="dom:#resize-a"
 			prop="scrollWidth">
 
-		<input
+			<input
 			id="resize-a-slider"
 			style="width:100%"
 			type="range"
@@ -408,13 +501,13 @@
 			  		</style>
 			  	</head>
 			  	<body>
-			    <a-menu breakpoint="360">
-			      <span slot="icon">🍔</span>
+			    <a-menu open breakpoint="360">
+			      <b slot="icon">☰</b>
 
 			      <a>Home</a>
 			      <a>About</a>
 
-			      <a-menu open>
+			      <a-menu>
 			        <span slot="label">Services</span>
 			        <a>Catering</a>
 			        <a>Take Out</a>
@@ -426,24 +519,78 @@
 			</iframe>
 		</a-bind>
 
-		<hr>
+		<details>
+			<summary class="nofrills">Code</summary>
+			<a-code highlight>
+				<textarea>
+					<a-menu
+						open
+						breakpoint="360">
+
+			      <span slot="icon">🍔</span>
+
+			      <a href="/">Home</a>
+			      <a href="/">About</a>
+
+			      <a-menu>
+			        <span
+			        	slot="label">
+			        	Services
+			        </span>
+
+			        <a href="/">Catering</a>
+			        <a href="/">Take Out</a>
+			      </a-menu>
+			    </a-menu>
+				</textarea>
+			</a-code>
+		</details>
+	</div>
+
+	<hr>
+
+	<div class="card">
+	<h3>Showing the icon on "shingle" type menus</h3>
+		<div id="shingle-menu">
+			<a-menu
+				open
+				type="shingle"
+				show-icon="shingle, mobile"
+				style="display:inline-flex">
+
+			  <b slot="icon">☰</b>
+
+			  <a>Home</a>
+			  <a>About</a>
+
+			  <a-menu>
+			    <span slot="label">Services</span>
+			    <a>Catering</a>
+			    <a>Take Out</a>
+			  </a-menu>
+			</a-menu>
+		</div>
 
 		<details>
 			<summary class="nofrills">Code</summary>
 			<a-code highlight>
 				<textarea>
-					<a-menu breakpoint="640">
-			      <span slot="icon">🍔</span>
+					<a-menu
+						open
+						type="shingle"
+						show-icon="shingle, mobile">
 
-			      <a>Home</a>
-			      <a>About</a>
+					  <span slot="icon">☰</span>
 
-			      <a-menu open>
-			        <span slot="label">Services</span>
-			        <a>Catering</a>
-			        <a>Take Out</a>
-			      </a-menu>
-			    </a-menu>
+					  <a href="/">Home</a>
+					  <a href="/about">About</a>
+
+					  <a-menu>
+					    <b slot="label">Services</b>
+					    <a href="/">Catering</a>
+					    <a href="/">Take Out</a>
+					  </a-menu>
+					</a-menu>
 				</textarea>
 			</a-code>
 		</details>

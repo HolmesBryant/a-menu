@@ -1,4 +1,4 @@
-const sheet = new CSSStyleSheet();sheet.replaceSync("/* a-menu-shadow.css */\r\n\r\n:host {\r\n  display: flex;\r\n  interpolate-size: allow-keywords;\r\n}\r\n\r\n::slotted(a) {\r\n  align-items: center;\r\n  display: flex;\r\n  text-decoration: none;\r\n  white-space: nowrap;\r\n}\r\n\r\n::slotted(a),\r\n::slotted(a-menu) {\r\n  flex: var(--amenu-flex, center);\r\n  min-height: var(--amenu-min, 35px);\r\n}\r\n\r\ndetails {\r\n  display: flex;\r\n  position: relative;\r\n}\r\n\r\ndetails > #items {\r\n  height: auto;\r\n  max-height: 0;\r\n  opacity: 0;\r\n  overflow: hidden;\r\n}\r\n\r\ndetails.open > #items {\r\n  max-height: 100svh;\r\n  opacity: 1;\r\n  overflow: visible;\r\n}\r\n\r\nsummary {\r\n  box-sizing: border-box;\r\n  min-height: var(--amenu-min, 35px);\r\n}\r\n\r\n.no-arrow {\r\n  align-items: center;\r\n  display: flex;\r\n}\r\n\r\n::slotted([slot=\"icon\"]) { display: block }\r\n\r\n#icon:not(.hidden) {\r\n}\r\n\r\n#items {\r\n  align-items: stretch;\r\n  display: flex;\r\n  justify-content: var(--amenu-flex, center);\r\n  transition:\r\n    height var(--amenu-duration, 400ms) ease-in-out,\r\n    max-height var(--amenu-duration, 400ms) ease-in-out,\r\n    opacity var(--amenu-duration, 400ms) 200ms;\r\n}\r\n\r\n@supports (interpolate-size: allow-keywords) {\r\n  details > #items {\r\n    height: 0;\r\n    max-height: unset;\r\n  }\r\n\r\n  details.open > #items {\r\n    height: auto;\r\n  }\r\n}\r\n\r\n/* --- Classic --- */\r\n\r\n:host([type=\"classic\"])\r\n{ padding: 0; }\r\n\r\n:host([type=\"classic\"]) details {\r\n  display: block;\r\n  width: 100%;\r\n}\r\n\r\n:host([type=\"classic\"]) summary\r\n{ list-style: none; }\r\n\r\n:host([type=\"classic\"]) #items {\r\n  flex-direction: row;\r\n  width: 100%;\r\n}\r\n\r\n/* --- Mobile --- */\r\n\r\n:host([type=\"mobile\"]) details {\r\n  display: flex;\r\n  flex-direction: column;\r\n  width: 100%;\r\n}\r\n\r\n:host([top][type=\"mobile\"]) summary {\r\n  display: block;\r\n  list-style: none;\r\n}\r\n\r\n:host([type=\"mobile\"]) #items {\r\n  flex-direction: column;\r\n  width: 100%;\r\n}\r\n\r\n/* -- Ribbon -- */\r\n\r\n:host([type=\"ribbon\"]) details {\r\n  display: block;\r\n  width: 100%;\r\n}\r\n\r\n:host([type=\"ribbon\"][top]) #items {\r\n  width: 100%;\r\n}\r\n\r\n:host([type=\"ribbon\"]) #items {\r\n  flex-direction: row;\r\n  width: max-content;\r\n  position: absolute;\r\n}\r\n\r\n/* --- Dropdown --- */\r\n\r\n:host([type=\"dropdown\"]) details {\r\n  display: flex;\r\n  flex-direction: column;\r\n}\r\n\r\n:host([type=\"dropdown\"]) #items {\r\n  box-shadow: 0 4px 6px rgba(0,0,0,0.1);\r\n  flex-direction: column;\r\n  width: max-content;\r\n  position: absolute;\r\n  top: 100%;\r\n}\r\n\r\n/* --- Flyout --- */\r\n\r\n:host([type=\"flyout\"]) { display: inline-flex; }\r\n\r\n:host([type=\"flyout\"]) details {\r\n  display: flex;\r\n  flex-direction: column;\r\n  width: max-content;\r\n}\r\n\r\n:host([type=\"flyout\"]) #items {\r\n  box-shadow: 4px 4px 6px rgba(0,0,0,0.1);\r\n  flex-direction: column;\r\n  position: absolute;\r\n  left: 100%;\r\n  top: 0;\r\n  min-width: 200px;\r\n  width: max-content;\r\n}\r\n\r\n/* --- Sitemap --- */\r\n\r\n:host([type=\"sitemap\"]) {\r\n  display: block;\r\n  box-sizing: border-box;\r\n  padding: 0;\r\n  break-inside: avoid;\r\n}\r\n\r\n:host([type=\"sitemap\"][top]) {\r\n  column-width: 200px;\r\n  column-gap: 2rem;\r\n  margin: 0;\r\n  padding: 0;\r\n  width: 100%;\r\n}\r\n\r\n:host([type=\"sitemap\"]) details {\r\n  flex-direction: column;\r\n}\r\n\r\n:host([type=\"sitemap\"]) summary {\r\n  list-style: none;\r\n  pointer-events: none;\r\n}\r\n\r\n:host([type=\"sitemap\"]) #items {\r\n  flex-direction: column;\r\n  /* margin-left: 1rem; */\r\n  margin-left: var(--amenu-pad, 1rem);\r\n}\r\n");
+const sheet = new CSSStyleSheet();sheet.replaceSync("/* a-menu-shadow.css */\r\n\r\n:host {\r\n  display: flex;\r\n  interpolate-size: allow-keywords;\r\n  min-height: var(--amenu-min, 35px);\r\n}\r\n\r\n::slotted(*) {\r\n  align-items: center;\r\n  display: flex;\r\n  line-height: 1;\r\n  min-height: var(--amenu-min, 35px);\r\n  text-decoration: none;\r\n  white-space: nowrap;\r\n}\r\n\r\n::slotted(a),\r\n::slotted(a-menu) {\r\n  flex: var(--amenu-flex, center);\r\n  min-height: var(--amenu-min, 35px);\r\n}\r\n\r\ndetails {\r\n  display: flex;\r\n  position: relative;\r\n}\r\n\r\ndetails > #items {\r\n  height: auto;\r\n  max-height: 0;\r\n  opacity: 0;\r\n  overflow: hidden;\r\n}\r\n\r\ndetails.open > #items {\r\n  max-height: 100svh;\r\n  opacity: 1;\r\n  overflow: visible;\r\n}\r\n\r\nsummary {\r\n  box-sizing: border-box;\r\n  min-height: var(--amenu-min, 35px);\r\n  padding-left: var(--amenu-pad, .5rem);\r\n  position: relative;\r\n}\r\n\r\nsummary::marker {\r\n  font-size: 1em;\r\n}\r\n\r\nsummary span {\r\n  display: flex;\r\n  flex: 1;\r\n}\r\n\r\n.hidden { display: none; }\r\n\r\n.no-arrow {\r\n  align-items: center;\r\n  display: flex;\r\n  padding: 0;\r\n}\r\n\r\n#icon:not(.hidden) { flex: 0 }\r\n\r\n#label-wrapper {\r\n  align-items: center;\r\n  display: inline-flex;\r\n  width: calc(100% - .5em);\r\n}\r\n\r\n#items {\r\n  align-items: stretch;\r\n  display: flex;\r\n  justify-content: var(--amenu-flex, center);\r\n  transition:\r\n    height var(--amenu-duration, 400ms) ease-in-out,\r\n    max-height var(--amenu-duration, 400ms) ease-in-out,\r\n    opacity var(--amenu-duration, 400ms) 200ms;\r\n}\r\n\r\n@supports (interpolate-size: allow-keywords) {\r\n  details > #items {\r\n    height: 0;\r\n    max-height: unset;\r\n  }\r\n\r\n  details.open > #items {\r\n    height: auto;\r\n  }\r\n}\r\n\r\n/* --- Classic --- */\r\n\r\n:host([type=\"classic\"])\r\n{ padding: 0; }\r\n\r\n:host([type=\"classic\"]) details {\r\n  display: block;\r\n  width: 100%;\r\n}\r\n\r\n:host([type=\"classic\"]) summary\r\n{ list-style: none; }\r\n\r\n:host([type=\"classic\"]) #items {\r\n  flex-direction: row;\r\n  width: 100%;\r\n}\r\n\r\n/* --- Mobile --- */\r\n\r\n:host([type=\"mobile\"]) details {\r\n  display: flex;\r\n  flex-direction: column;\r\n  width: 100%;\r\n}\r\n\r\n:host([type=\"mobile\"]) #items {\r\n  flex-direction: column;\r\n  width: 100%;\r\n}\r\n\r\n/* -- Ribbon -- */\r\n\r\n:host([type=\"ribbon\"][top]) details {\r\n  display: flex;\r\n}\r\n\r\n:host([type=\"ribbon\"]) details {\r\n  display: block;\r\n  width: 100%;\r\n}\r\n\r\n:host([type=\"ribbon\"][top]) #items {\r\n  width: 100%;\r\n}\r\n\r\n:host([type=\"ribbon\"]) #items {\r\n  flex-direction: row;\r\n  width: max-content;\r\n  position: absolute;\r\n}\r\n\r\n/* --- Dropdown --- */\r\n\r\n:host([type=\"dropdown\"]) details {\r\n  display: flex;\r\n  flex-direction: column;\r\n}\r\n\r\n:host([type=\"dropdown\"]) #items {\r\n  box-shadow: 0 4px 6px rgba(0,0,0,0.1);\r\n  flex-direction: column;\r\n  position: absolute;\r\n  top: 100%;\r\n}\r\n\r\n/* --- Flyout --- */\r\n\r\n:host([type=\"flyout\"]) { display: inline-flex; }\r\n\r\n:host([type=\"flyout\"]) details {\r\n  display: flex;\r\n  flex-direction: column;\r\n}\r\n\r\n:host([type=\"flyout\"]) #items {\r\n  box-shadow: 4px 4px 6px rgba(0,0,0,0.1);\r\n  flex-direction: column;\r\n  position: absolute;\r\n  left: 100%;\r\n  top: 0;\r\n  width: max-content;\r\n}\r\n\r\n/* --- Sitemap --- */\r\n\r\n:host([type=\"sitemap\"]) {\r\n  display: block;\r\n  box-sizing: border-box;\r\n  padding: 0;\r\n  break-inside: avoid;\r\n}\r\n\r\n:host([type=\"sitemap\"][top]) {\r\n  column-width: 200px;\r\n  column-gap: 2rem;\r\n  margin: 0;\r\n  padding: 0;\r\n  width: 100%;\r\n}\r\n\r\n:host([type=\"sitemap\"]) details {\r\n  flex-direction: column;\r\n}\r\n\r\n:host([type=\"sitemap\"]) summary {\r\n  list-style: none;\r\n  padding: 0;\r\n  pointer-events: none;\r\n}\r\n\r\n:host([type=\"sitemap\"]) #items {\r\n  flex-direction: column;\r\n  margin-left: calc(var(--amenu-pad, .5rem) * 2.5);\r\n}\r\n");
 
 /**
  * @file a-menu.js
@@ -7,6 +7,7 @@ const sheet = new CSSStyleSheet();sheet.replaceSync("/* a-menu-shadow.css */\r\n
  * @version 1.0.0
  * @license GPL-3.0
  */
+
 
 const abindUpdate = Symbol.for('abind.update');
 
@@ -20,7 +21,7 @@ class AMenu extends HTMLElement {
   #group;
 
   /** @type {string} Comma-separated list of menu types that display an icon. */
-  #showIcon = "mobile, flyout, dropdown";
+  #showIcon = ['mobile', 'flyout', 'dropdown'];
 
   /** @type {boolean} Indicates if the menu is currently expanded. */
   #open = false;
@@ -31,7 +32,7 @@ class AMenu extends HTMLElement {
   /** @type {boolean} Indicates if this is the top-level menu in a nested structure. */
   #top = false;
 
-  /** @type {string} The visual style type of the menu (e.g., 'classic', 'mobile', 'ribbon'). */
+  /** @type {string} The visual style type of the menu (e.g., 'classic', 'mobile', 'shingle'). */
   #type = 'classic';
 
   // -- Private --
@@ -72,6 +73,9 @@ class AMenu extends HTMLElement {
   /** @type {boolean} Locks the menu type if defined by a parent menu. */
   #lockedType = false;
 
+  /** @type {boolean} Whether info has already been logged. */
+  #logged = false;
+
   /** @type {HTMLDetailsElement} The core details element serving as the menu. */
   #menu;
 
@@ -80,6 +84,9 @@ class AMenu extends HTMLElement {
 
   /** @type {Function} The handler for media query changes. */
   #mqlHandler;
+
+  /** @type {string|null} Stores the original 'open' value when temporarily switching to mobile */
+  #originalOpen;
 
   /** @type {string|null} Stores the original type when temporarily switching to mobile. */
   #originalType;
@@ -110,6 +117,7 @@ class AMenu extends HTMLElement {
     'debug',
     'group',
     'open',
+    'show-icon',
     'swipe',
     'top',
     'type'
@@ -123,13 +131,15 @@ class AMenu extends HTMLElement {
   static {
     this.template.innerHTML = `
       <details part="menu" id="menu">
-        <summary part="label" id="summary" role="button" aria-expanded="false">
-          <span part="icon" id="icon">
-            <slot name="icon"></slot>
-          </span>
-          <span id="label">
-            <slot name="label"></slot>
-          </span>
+        <summary part="summary" id="summary" role="button" aria-expanded="false">
+          <div id="label-wrapper">
+            <span part="icon" id="icon">
+              <slot name="icon"></slot>
+            </span>
+            <span part="label" id="label">
+              <slot name="label"></slot>
+            </span>
+          </div>
         </summary>
         <div part="items" id="items">
           <slot></slot>
@@ -193,6 +203,10 @@ class AMenu extends HTMLElement {
       this.#top = this.hasAttribute('top');
       globalThis[abindUpdate]?.(this, 'top', this.#top);
       break;
+    case 'show-icon':
+      this.#showIcon = newval.split(',').map( item => item.trim());
+      globalThis[abindUpdate]?.(this, 'showIcon', this.#showIcon);
+      break;
     case 'swipe':
       this.#swipe = Number(newval);
       globalThis[abindUpdate]?.(this, 'swipe', this.#swipe);
@@ -217,6 +231,7 @@ class AMenu extends HTMLElement {
     this.#connected = true;
     if (this.id) this.#menu.dataset.parent = this.id;
     this.#abortController = new AbortController();
+
     if (this.parentElement?.closest('a-menu') === null) {
       this.top = true;
     }
@@ -234,7 +249,6 @@ class AMenu extends HTMLElement {
     this.#addListeners();
     this.#setupMediaQuery(this.breakpoint);
     if (this.#open) this.#toggleMenu();
-    if (this.debug) this.logVars();
   }
 
   /**
@@ -281,7 +295,7 @@ class AMenu extends HTMLElement {
       this.#hasLabel = this.#labelSlot.assignedElements().length > 0;
       this.#hasIcon = this.#iconSlot.assignedElements().length > 0;
       this.#maybeHideHeader();
-      this.#maybeShowIcon();
+      // this.#maybeShowIcon();
     };
 
     this.#labelSlot.addEventListener('slotchange', handleSlotChange, { signal: this.#abortController.signal });
@@ -306,27 +320,28 @@ class AMenu extends HTMLElement {
    * @private
    */
   #applyType(value) {
-    if (this.#lockedType) return;
+    if (this.#lockedType) {
+      if (this.debug) this.logVars();
+      return;
+    }
 
-    const types = ['mobile', 'classic', 'ribbon', 'dropdown', 'flyout', 'sitemap'];
+    const types = ['mobile', 'classic', 'shingle', 'dropdown', 'flyout', 'sitemap'];
     for (const type of types) {
       if (type !== value && this.hasAttribute(type)) {
         this.removeAttribute(type);
       }
     }
-
     // Guard: Only set attribute if different to prevent infinite recursion
     if (this.getAttribute('type') !== value) {
       this.setAttribute('type', value);
       return; // Stop here, attributeChangedCallback will call applyType again
     }
 
-    if (value === 'sitemap') {
-      this.open = true;
-    }
+    if (value === 'sitemap') this.open = true;
 
-    this.#maybeHideHeader();
     this.#applyTypeToNested(value);
+    this.#maybeHideHeader();
+    this.#maybeShowIcon();
   }
 
   /**
@@ -343,7 +358,10 @@ class AMenu extends HTMLElement {
     if (!this.isConnected) return;
 
     const nested = Array.from(this.children).filter(item => item.localName === 'a-menu');
-    if (!nested.length) return;
+    if (!nested.length) {
+      if (this.debug) this.logVars();
+      return;
+    }
 
     for (const child of nested) {
       let type = value;
@@ -351,6 +369,8 @@ class AMenu extends HTMLElement {
       if (this.#type === 'dropdown') type = 'flyout';
       if (child.type !== type) child.type = type;
     }
+
+    if (this.debug) this.logVars();
   }
 
   /**
@@ -415,7 +435,7 @@ class AMenu extends HTMLElement {
    */
   #maybeHideHeader() {
     this.#summary.hidden = !this.#hasLabel && !this.#maybeShowIcon();
-    if (!this.#hasLabel && this.#top) this.open = true;
+    if (!this.#hasLabel && !this.#hasIcon && this.#top) this.open = true;
   }
 
   /**
@@ -424,15 +444,14 @@ class AMenu extends HTMLElement {
    * @private
    */
   #maybeShowIcon() {
-    const show = this.#hasIcon && this.#showIcon.includes(this.type);
+    const show = this.#hasIcon && this.showIcon.includes(this.type);
+    if (this.debug) console.log(this.#hasIcon, this.type, this.showIcon);
     if (show) {
       this.#icon.classList.remove('hidden');
       this.#summary.classList.add('no-arrow');
-      // this.#summary.style.setProperty('list-style', 'none');
     } else {
       this.#icon.classList.add('hidden');
       this.#summary.classList.remove('no-arrow');
-      // this.#summary.style.removeProperty('list-style');
     }
 
     return show;
@@ -444,12 +463,12 @@ class AMenu extends HTMLElement {
    * @private
    */
   #setupMediaQuery(maxWidth) {
+    if (!this.#top) return;
     if (this.#mql && this.#mqlHandler) {
       this.#mql.removeEventListener('change', this.#mqlHandler);
     }
 
     if (!maxWidth) return;
-    // this.#mql = window.matchMedia(`max-width: ${maxWidth}px`);
     this.#mql = window.matchMedia(`(max-width: ${maxWidth}px)`);
 
     this.#mqlHandler = (event) => {
@@ -457,12 +476,16 @@ class AMenu extends HTMLElement {
         if (this.type !== 'mobile') {
           this.#originalType = this.type;
           this.type = 'mobile';
+          this.#originalOpen = this.open;
+          this.open = false;
         }
       } else {
         // screen is larger
         if (this.#originalType && this.type === 'mobile') {
           this.type = this.#originalType;
+          this.open = this.#originalOpen;
           this.#originalType = null;
+          this.#originalOpen = null;
         }
       }
     };
@@ -492,7 +515,7 @@ class AMenu extends HTMLElement {
    * @param {boolean} [isOpen=false] - Whether to expand the console group by default.
    */
   logVars(isOpen = false) {
-
+    if (this.#logged) return;
     if (isOpen) {
       console.group(this);
     } else {
@@ -500,32 +523,34 @@ class AMenu extends HTMLElement {
     }
 
     console.log('------ Attributes ------');
-    console.log('breakpoint', this.breakpoint);
-    console.log('group', this.group);
-    console.log('showIcon', this.showIcon);
-    console.log('open', this.open);
-    console.log('swipe', this.swipe);
-    console.log('top', this.top);
-    console.log('type', this.type);
+    console.log('breakpoint :', this.breakpoint);
+    console.log('group :', this.group);
+    console.log('showIcon :', this.showIcon);
+    console.log('open :', this.open);
+    console.log('swipe :', this.swipe);
+    console.log('top :', this.top);
+    console.log('type :', this.type);
 
     console.log('------ Properties ------');
-    console.log('#connected', this.#connected);
-    console.log('#debug', this.#debug);
-    console.log('#hasIcon', this.#hasIcon);
-    console.log('#hasLabel', this.#hasLabel);
-    console.log('#icon', this.#icon);
-    console.log('#iconSlot', this.#iconSlot);
-    console.log('#items', this.#items);
-    console.log('#itemsSlot', this.#itemsSlot);
-    console.log('#labelSlot', this.#labelSlot);
-    console.log('#lockedType', this.#lockedType);
-    console.log('#menu', this.#menu);
-    console.log('#mql', this.#mql);
-    console.log('#mqlHandler', this.#mqlHandler);
-    console.log('#originalType', this.#originalType);
-    console.log('#summary', this.#summary);
+    console.log('#connected :', this.#connected);
+    console.log('#hasIcon :', this.#hasIcon);
+    console.log('#hasLabel :', this.#hasLabel);
+    console.log('#lockedType :', this.#lockedType);
+    console.log('#mql :', this.#mql);
+    console.log('#mqlHandler :', this.#mqlHandler);
+    console.log('#originalType :', this.#originalType);
+
+    // console.log('------ Elements ------');
+    // console.log('#icon', this.#icon);
+    // console.log('#iconSlot', this.#iconSlot);
+    // console.log('#items', this.#items);
+    // console.log('#itemsSlot', this.#itemsSlot);
+    // console.log('#labelSlot', this.#labelSlot);
+    // console.log('#menu', this.#menu);
+    // console.log('#summary', this.#summary);
 
     console.groupEnd();
+    this.#logged = true;
   }
 
   /**
@@ -592,6 +617,12 @@ class AMenu extends HTMLElement {
    * @readonly
    */
   get showIcon() { return this.#showIcon }
+
+  /**
+   * Sets the 'show-icon' attribute.
+   * @param {string} value - A comma separated list of menu types for which to show the icon.
+   */
+  set showIcon(value) { this.setAttribute('show-icon', value); }
 
   /**
    * Gets or sets the minimum swipe distance to trigger state changes. Setting to null removes the attribute.
