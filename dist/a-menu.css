@@ -52,35 +52,42 @@ a-menu {
 
 /***** Background *****/
 
-	background: var(--amenu-background);
-
 	& > *
 	{ background: var(--amenu-background) }
 
+	&[open]:not([type="sitemap"])::part(summary),
+	&[open]:not([type="sitemap"]) > [slot="icon"],
+	&[open]:not([type="sitemap"]) > [slot="label"],
+	& [slot="icon"]:active,
+	& [slot="label"]:active
+	{ background: var(--amenu-accent); }
+
 	& a:hover,
 	& a:focus,
-	& a:active,
 	&::part(icon):hover,
 	&::part(icon):focus,
-	&::part(icon):active,
-	&::part(label):hover,
-	&::part(label):focus,
-	&::part(label):active
+	& [slot="label"]:hover,
+	& [slot="label"]:focus
 	{ filter: brightness(1.25) }
 
 /***** Border *****/
 
 	&:not([top]):not([type="shingle"]):not([type="sitemap"]) > *:not([slot="label"]):not([slot="icon"])
-	{ border-left: 4px solid var(--amenu-border) }
+	{ border-left: 4px solid var(--amenu-accent) }
 
 	&:not([type="sitemap"]) > *:not([slot="label"]):not([slot="icon"])
 	{ border: 1px solid var(--amenu-border); }
 
 /***** Text *****/
 
-	&[open]::part(summary),
-	&[open]::part(label)
+	& a:active
 	{ color: var(--amenu-accent); }
+
+	& [slot="icon"]:active,
+	& [slot="label"]:active,
+	&[open] > [slot="icon"],
+	&[open] > [slot="label"]
+	{ color: var(--amenu-text); }
 
 	& a,
 	&::part(summary),

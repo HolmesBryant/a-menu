@@ -13,6 +13,7 @@
   min-height: var(--amenu-min, 35px);
   text-decoration: none;
   white-space: nowrap;
+  width: 100%;
 }
 
 ::slotted(a),
@@ -43,7 +44,7 @@ summary {
   box-sizing: border-box;
   min-height: var(--amenu-min, 35px);
   padding-left: var(--amenu-pad, .5rem);
-  position: relative;
+  /* position: relative; */
 }
 
 summary::marker {
@@ -118,12 +119,21 @@ summary span {
   width: 100%;
 }
 
+:host([type="mobile"]) #label {
+  /* border: 1px solid lime; */
+  /* width: calc(100% - 2em); */
+}
+
+:host([top][type="mobile"]) summary {
+  width: max-content;
+}
+
 :host([type="mobile"]) #items {
   flex-direction: column;
   width: 100%;
 }
 
-/* -- Ribbon -- */
+/* -- Shingle -- */
 
 /* Ensure the top-level menu acts as the positioning anchor for child panels */
 :host([type="shingle"][top]) {
