@@ -4,7 +4,7 @@
 	Available parts (these map to elements in shadow dom):
 	::part(menu) - the details element
 	::part(summary) - the summary element
-	::part(label-wrapper) - div containing icon and label
+	::part(label-wrapper) - div (child of summary) containing icon and label
 	::part(icon) - span containing the icon slot
 	::part(label) - span containing the label slot
 	::part(items) - div containing the menu items
@@ -26,9 +26,11 @@
 	/* transition duration */
   --amenu-duration: 400ms;
 
-	/* Set to 1 if you want everything the same width. */
-	/* Otherwise, use same values as justify-content*/
-	--amenu-flex: start;
+	/* Set flex on slotted items. Useful values are 0 and 1 */
+	--amenu-flex: 0;
+
+	/* sets justify-content */
+	--amenu-justify: center;
 }
 
 /* For users who prefer dark theme */
@@ -44,8 +46,8 @@
 a-menu:not(:defined) {
   display: inline-block;
   visibility: hidden;
-  min-height: var(--icon-size);
-  min-width: var(--icon-size);
+  min-height: var(--amenu-min);
+  min-width: var(--amenu-min);
 }
 
 a-menu {
@@ -108,12 +110,6 @@ a-menu {
 		text-decoration: underline;
 	}
 
-/***** Cursor *****/
-
-	&::part(icon),
-	&::part(label)
-	{ cursor: pointer }
-
 /***** Shadows *****/
 
 	&[top]::part(items)
@@ -125,13 +121,10 @@ a-menu {
 /***** Misc *****/
 
 	& a,
-	& div,
-	& ::part(label)
+	& [slot="label"]
 	{ padding: 0 var(--amenu-pad); }
 
 	&[type="sitemap"] > * { padding: 0; }
 
-	& [slot="label"] {
-		flex: 1;
-	}
+	&[type="mobile"] [slot="label"] { flex: 1 }
 } /* end a-menu */

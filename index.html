@@ -31,16 +31,11 @@
 
 		a-iframe {
 			border: 2px dotted var(--border-color);
+			min-height: 175px;
 		}
 
 		.burger {
 			background: none;
-			/* transform: translateY(-0.08em); */
-		}
-
-		.resizable {
-			border: 1px solid var(--border-color);
-			overflow: auto;
 		}
 
 		#demo-controls { width: 250px }
@@ -59,7 +54,6 @@
 		}
 
 		#sitemap-menu {
-			/* height: 350px; */
 			position: relative;
 			z-index: 5;
 		}
@@ -146,29 +140,38 @@
 				<a-menu group="top-lvl">
 					<strong slot="label">Theme</strong>
 					<div class="flex stretch space-between">
-							<label for="demo-amenu-background">
-								--amenu-background
-							</label>
-							<a-bind prop="--amenu-background">
-								<a-color id="demo-amenu-background"></a-color>
-							</a-bind>
-						</div>
+						<label for="demo-amenu-background">
+							--amenu-background
+						</label>
+						<a-bind prop="--amenu-background">
+							<a-color id="demo-amenu-background"></a-color>
+						</a-bind>
+					</div>
 
-						<div class="flex stretch space-between">
-							<label for="demo-amenu-border">
-								--amenu-border
-							</label>
-							<a-bind prop="--amenu-border">
-								<a-color id="demo-amenu-border"></a-color>
-							</a-bind>
-						</div>
+					<div class="flex stretch space-between">
+						<label for="demo-amenu-border">
+							--amenu-border
+						</label>
+						<a-bind prop="--amenu-border">
+							<a-color id="demo-amenu-border"></a-color>
+						</a-bind>
+					</div>
 
-						<div class="flex stretch space-between">
-							<label for="demo-amenu-text">--amenu-text</label>
-							<a-bind prop="--amenu-text">
-								<a-color id="demo-amenu-text"></a-color>
-							</a-bind>
-						</div>
+					<div class="flex stretch space-between">
+						<label for="demo-amenu-text">--amenu-text</label>
+						<a-bind prop="--amenu-text">
+							<a-color id="demo-amenu-text"></a-color>
+						</a-bind>
+					</div>
+
+					<div class="flex stretch space-between">
+						<label for="demo-amenu-accent">
+							--amenu-accent
+						</label>
+						<a-bind prop="--amenu-accent">
+							<a-color id="demo-amenu-accent"></a-color>
+						</a-bind>
+					</div>
 				</a-menu>
 
 				<!-- CSS Vars -->
@@ -182,20 +185,38 @@
 
 						<div class="flex column">
 							<a-tooltip>
-								<label slot="text" for="demo-flex">--amenu-flex</label>
+								<label slot="text" for="demo-justify">--amenu-justify</label>
 
 								<b slot="title">Horizontal Justification of Menu Items</b>
 								<p>Only affects classic and shingle menus. Set to 1 if you want all items the same width. Otherwise, use same values as the css property justify-content.</p>
 							</a-tooltip>
 
-							<a-bind prop="--amenu-flex">
-								<select id="demo-flex">
-									<option>1</option>
+							<a-bind prop="--amenu-justify">
+								<select id="demo-justify">
 									<option>start</option>
 									<option>end</option>
 									<option>center</option>
 									<option>space-around</option>
 									<option>space-between</option>
+								</select>
+							</a-bind>
+						</div>
+
+						<div class="flex column">
+							<a-tooltip>
+								<label
+									slot="text"
+									for="demo-flex">
+									--amenu-flex
+								</label>
+
+								<p><b slot="title">Stretch Menu Items</b>Sets flex on slotted items. Set to 1 if you want all items the same width. This overrides --amenu-justify.</p>
+							</a-tooltip>
+
+							<a-bind prop="--amenu-flex">
+								<select id="demo-flex">
+									<option>0</option>
+									<option>1</option>
 								</select>
 							</a-bind>
 						</div>
@@ -402,7 +423,7 @@
 	<h3>Using the "group" attribute for accordian behavior</h3>
 
 		<div class="flex column stretch gap4">
-			<a-menu type="mobile">
+			<a-menu type="mobile" open>
 				<strong slot="icon">☰</strong>
 
 				<a-menu group="group1">
@@ -509,36 +530,32 @@
 			prop="value"
 			elem-prop="style.width">
 
-			<a-iframe id="resize-a">
-		  	<html>
-		  	<head>
-		  		<title>Breakpoint Example</title>
-		  		<script type="module" src="src/a-menu.js"></script>
-		  		<link rel="stylesheet" href="dist/a-menu.css">
-		  		<style>
-		  			a { cursor:pointer }
-		  			a-menu { display: flex }
-		  		</style>
-		  	</head>
-		  	<body>
-		    <a-menu open breakpoint="360">
-		      <b slot="icon">☰</b>
+			<a-iframe id="resize-a" title="Breakpoint Example">
+				<textarea>
+			  	<head>
+			  		<script type="module" src="src/a-menu.js"></script>
+			  		<link rel="stylesheet" href="dist/a-menu.css">
+			  	</head>
+			  	<body>
+			    <a-menu open breakpoint="360">
+			      <b slot="icon">☰</b>
 
-		      <a>Home</a>
-		      <a>About</a>
+			      <a>Home</a>
+			      <a>About</a>
 
-		      <a-menu>
-		        <span slot="label">Services</span>
-		        <a>Catering</a>
-		        <a>Take Out</a>
-		      </a-menu>
-		    </a-menu>
-		  	</body>
-		  	</html>
+			      <a-menu>
+			        <span slot="label">Services</span>
+			        <a>Catering</a>
+			        <a>Take Out</a>
+			      </a-menu>
+			    </a-menu>
+			  	</body>
+			  	</html>
+			  </textarea>
 			</a-iframe>
 		</a-bind>
 
-		<details>
+		<!-- <details>
 			<summary class="nofrills">Code</summary>
 			<a-code highlight>
 				<textarea>
@@ -563,7 +580,7 @@
 			    </a-menu>
 				</textarea>
 			</a-code>
-		</details>
+		</details> -->
 	</div>
 
 	<hr>
@@ -572,7 +589,6 @@
 	<h3>Showing the icon on "shingle" type menus</h3>
 		<div>
 			<a-menu
-				open
 				type="shingle"
 				show-icon="shingle, mobile"
 				style="display:inline-flex">

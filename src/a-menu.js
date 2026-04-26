@@ -176,7 +176,7 @@ export default class AMenu extends HTMLElement {
     if (oldval === newval) return;
     switch (attr) {
     case 'breakpoint':
-      this.#breakpoint = (newval) ? parseFloat(newval) : null;
+      this.#breakpoint = (newval && !isNaN(parseFloat(newval))) ? parseFloat(newval) : null;
       this.#setupMediaQuery(newval);
       globalThis[abindUpdate]?.(this, 'breakpoint', newval);
       break;
@@ -221,6 +221,9 @@ export default class AMenu extends HTMLElement {
       globalThis[abindUpdate]?.(this, 'type', newval);
       break;
     }
+
+    this.#logged = false;
+    if (this.debug) this.logVars(true);
   }
 
   /**
@@ -284,9 +287,7 @@ export default class AMenu extends HTMLElement {
       if (path.includes(this.#summary)) {
         event.preventDefault();
         event.stopPropagation();
-        if (event.target.tabIndex < 0) {
-          this.open = !this.open;
-        }
+        this.open = !this.open;
       }
     }, { signal:this.#abortController.signal });
 
@@ -336,7 +337,9 @@ export default class AMenu extends HTMLElement {
       return; // Stop here, attributeChangedCallback will call applyType again
     }
 
-    if (value === 'sitemap') this.open = true;
+    if (value === 'sitemap') {
+      this.open = true;
+    }
 
     this.#applyTypeToNested(value);
     this.#maybeHideHeader();
@@ -444,13 +447,14 @@ export default class AMenu extends HTMLElement {
    */
   #maybeShowIcon() {
     const show = this.#hasIcon && this.showIcon.includes(this.type);
-    if (this.debug) console.log(this.#hasIcon, this.type, this.showIcon);
     if (show) {
       this.#icon.classList.remove('hidden');
       this.#summary.classList.add('no-arrow');
     } else {
       this.#icon.classList.add('hidden');
-      this.#summary.classList.remove('no-arrow');
+      if (this.#type !== 'sitemap') {
+        this.#summary.classList.remove('no-arrow');
+      }
     }
 
     return show;
@@ -536,8 +540,20 @@ export default class AMenu extends HTMLElement {
     console.log('#hasLabel :', this.#hasLabel);
     console.log('#lockedType :', this.#lockedType);
     console.log('#mql :', this.#mql);
-    console.log('#mqlHandler :', this.#mqlHandler);
+    // console.log('#mqlHandler :', this.#mqlHandler);
     console.log('#originalType :', this.#originalType);
+
+    console.log('------ CSS Variables ------');
+    const computed = window.getComputedStyle(this);
+    console.log('--amenu-background', computed.getPropertyValue('--amenu-background'));
+    console.log('--amenu-text', computed.getPropertyValue('--amenu-text'));
+    console.log('--amenu-border', computed.getPropertyValue('--amenu-border'));
+    console.log('--amenu-accent', computed.getPropertyValue('--amenu-accent'));
+    console.log('--amenu-min', computed.getPropertyValue('--amenu-min'));
+    console.log('--amenu-pad', computed.getPropertyValue('--amenu-pad'));
+    console.log('--amenu-duration', computed.getPropertyValue('--amenu-duration'));
+    console.log('--amenu-justify', computed.getPropertyValue('--amenu-justify'));
+    console.log('--amenu-flex', computed.getPropertyValue('--amenu-flex'));
 
     // console.log('------ Elements ------');
     // console.log('#icon', this.#icon);
@@ -570,6 +586,11 @@ export default class AMenu extends HTMLElement {
    */
   get breakpoint() { return this.#breakpoint }
   set breakpoint(value) {
+    if (value && !isNaN(parseFloat(value))) {
+      console.warn(`breakpoint value must be a number. Value given was: {${typeof value}} ${value}`);
+      return;
+    }
+
     if (value) {
       this.setAttribute('breakpoint', value);
     } else {

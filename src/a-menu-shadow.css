@@ -1,7 +1,6 @@
 /* a-menu-shadow.css */
 
 :host {
-  display: flex;
   interpolate-size: allow-keywords;
   min-height: var(--amenu-min, 35px);
 }
@@ -9,22 +8,17 @@
 ::slotted(*) {
   align-items: center;
   display: flex;
-  line-height: 1;
-  min-height: var(--amenu-min, 35px);
+  flex: var(--amenu-flex, 0);
   text-decoration: none;
-  white-space: nowrap;
-  width: 100%;
-}
-
-::slotted(a),
-::slotted(a-menu) {
-  flex: var(--amenu-flex, center);
   min-height: var(--amenu-min, 35px);
+  white-space: nowrap;
 }
 
 details {
   display: flex;
+  height: 100%;
   position: relative;
+  width: 100%;
 }
 
 details > #items {
@@ -40,46 +34,56 @@ details.open > #items {
   overflow: visible;
 }
 
+details.open > summary::before {
+  transform: rotate(90deg);
+}
+
 summary {
-  box-sizing: border-box;
-  min-height: var(--amenu-min, 35px);
-  padding-left: var(--amenu-pad, .5rem);
-  /* position: relative; */
-}
-
-summary::marker {
-  font-size: 1em;
-}
-
-summary span {
-  display: flex;
-  flex: 1;
-}
-
-.hidden { display: none; }
-
-.no-arrow {
   align-items: center;
+  cursor: pointer;
   display: flex;
-  padding: 0;
+  flex: var(--amenu-flex, 0);
+  height: 100%;
+  padding-left: var(--amenu-pad, .5rem);
 }
 
-#icon:not(.hidden) { flex: 0 }
+summary::before {
+  align-items: center;
+  content: "▶";
+  display: inline-flex;
+  justify-content: center;
+  transition: transform .25s;
+}
+
+summary.no-arrow::before {
+  content: "";
+}
+
+.hidden,
+[hidden]
+{ display: none; }
 
 #label-wrapper {
   align-items: center;
-  display: inline-flex;
-  width: calc(100% - .5em);
+  display: flex;
+  flex: 1;
+  height: 100%;
+}
+
+#label {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  height: 100%;
 }
 
 #items {
-  align-items: stretch;
   display: flex;
-  justify-content: var(--amenu-flex, center);
+  justify-content: var(--amenu-justify, center);
   transition:
     height var(--amenu-duration, 400ms) ease-in-out,
     max-height var(--amenu-duration, 400ms) ease-in-out,
-    opacity var(--amenu-duration, 400ms) 200ms;
+    opacity var(--amenu-duration, 400ms) 300ms;
 }
 
 @supports (interpolate-size: allow-keywords) {
@@ -95,16 +99,19 @@ summary span {
 
 /* --- Classic --- */
 
-:host([type="classic"])
-{ padding: 0; }
+:host([type="classic"]) {
+  display: block;
+  padding: 0;
+}
 
 :host([type="classic"]) details {
   display: block;
   width: 100%;
 }
 
-:host([type="classic"]) summary
-{ list-style: none; }
+:host([type="classic"]) #label {
+  padding: 0 var(--amenu-pad, .5rem);
+}
 
 :host([type="classic"]) #items {
   flex-direction: row;
@@ -113,15 +120,16 @@ summary span {
 
 /* --- Mobile --- */
 
+:host([type="mobile"]) {
+  display: block;
+}
+
 :host([type="mobile"]) details {
   display: flex;
   flex-direction: column;
-  width: 100%;
 }
 
 :host([type="mobile"]) #label {
-  /* border: 1px solid lime; */
-  /* width: calc(100% - 2em); */
 }
 
 :host([top][type="mobile"]) summary {
@@ -137,6 +145,7 @@ summary span {
 
 /* Ensure the top-level menu acts as the positioning anchor for child panels */
 :host([type="shingle"][top]) {
+  display: block;
   position: relative;
 }
 
@@ -172,6 +181,10 @@ summary span {
 
 /* --- Dropdown --- */
 
+:host([type="dropdown"]) {
+  display: inline-block;
+}
+
 :host([type="dropdown"]) details {
   display: flex;
   flex-direction: column;
@@ -186,7 +199,9 @@ summary span {
 
 /* --- Flyout --- */
 
-:host([type="flyout"]) { display: inline-flex; }
+:host([type="flyout"]) {
+  display: inline-flex;
+}
 
 :host([type="flyout"]) details {
   display: flex;
@@ -220,16 +235,20 @@ summary span {
 }
 
 :host([type="sitemap"]) details {
+  height: auto;
   flex-direction: column;
 }
 
 :host([type="sitemap"]) summary {
-  list-style: none;
   padding: 0;
   pointer-events: none;
 }
 
+:host([type="sitemap"]) summary::before {
+  content: "";
+}
+
 :host([type="sitemap"]) #items {
   flex-direction: column;
-  margin-left: calc(var(--amenu-pad, .5rem) * 2.5);
+  margin-left: calc(var(--amenu-pad, .5em) * 2.5);
 }
