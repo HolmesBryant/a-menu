@@ -5,11 +5,19 @@
   min-height: var(--amenu-min, 35px);
 }
 
+:host(:not([type="sitemap"])) {
+  touch-action: none;
+}
+
+:host([type="mobile"]) {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 ::slotted(*) {
   align-items: center;
   display: flex;
   flex: var(--amenu-flex, 0);
-  text-decoration: none;
   min-height: var(--amenu-min, 35px);
   white-space: nowrap;
 }
@@ -44,7 +52,6 @@ summary {
   display: flex;
   flex: var(--amenu-flex, 0);
   height: 100%;
-  padding-left: var(--amenu-pad, .5rem);
 }
 
 summary::before {
@@ -70,12 +77,7 @@ summary.no-arrow::before {
   height: 100%;
 }
 
-#label {
-  align-items: center;
-  display: flex;
-  flex: 1;
-  height: 100%;
-}
+#icon { display: contents; }
 
 #items {
   display: flex;
@@ -109,10 +111,6 @@ summary.no-arrow::before {
   width: 100%;
 }
 
-:host([type="classic"]) #label {
-  padding: 0 var(--amenu-pad, .5rem);
-}
-
 :host([type="classic"]) #items {
   flex-direction: row;
   width: 100%;
@@ -120,16 +118,8 @@ summary.no-arrow::before {
 
 /* --- Mobile --- */
 
-:host([type="mobile"]) {
-  display: block;
-}
-
 :host([type="mobile"]) details {
-  display: flex;
   flex-direction: column;
-}
-
-:host([type="mobile"]) #label {
 }
 
 :host([top][type="mobile"]) summary {
@@ -138,14 +128,13 @@ summary.no-arrow::before {
 
 :host([type="mobile"]) #items {
   flex-direction: column;
-  width: 100%;
+  flex-wrap: nowrap;
 }
 
 /* -- Shingle -- */
 
 /* Ensure the top-level menu acts as the positioning anchor for child panels */
 :host([type="shingle"][top]) {
-  display: block;
   position: relative;
 }
 
@@ -163,20 +152,17 @@ summary.no-arrow::before {
   position: static;
 }
 
-:host([type="shingle"][top]) #items {
-  width: 100%;
-}
-
 :host([type="shingle"]) #items {
   flex-direction: row;
   position: absolute;
   left: 5%;
   top: 100%;
-  width: 100%;
+  width: max-content;
 }
 
 :host([type="shingle"][top]) #items {
   left: 0;
+  width: 100%;
 }
 
 /* --- Dropdown --- */

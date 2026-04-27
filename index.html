@@ -38,19 +38,12 @@
 			background: none;
 		}
 
-		#demo-controls { width: 250px }
+		/* #demo-controls { width: 250px } */
 
 		#demo-menu {
 			flex: 1;
 			position: relative;
 			z-index: 6;
-		}
-
-		#demo-section {
-			align-items: flex-start;
-			display: flex;
-			flex-wrap: wrap;
-			gap: 1rem;
 		}
 
 		#sitemap-menu {
@@ -84,6 +77,10 @@
 				height: 350px;
 			}
 		}
+
+		@media (max-width: 640px) {
+			#breakpoint-menu { display: none; }
+		}
 	</style>
 </head>
 <body>
@@ -100,11 +97,11 @@
 
 <h2>Demo</h2>
 
-<section id="demo-section">
+<section id="demo-section" class="flex top">
 	<!-- Top Level Controls -->
-	<div id="demo-controls">
+	<div id="demo-controls" class="flex360">
 		<a-bindgroup model="dom:#demo">
-			<a-menu type="mobile" id="demo-props">
+			<a-menu open type="mobile" id="demo-props">
 
 				<!-- Attrs -->
 
@@ -118,11 +115,11 @@
 						</a-bind>
 					</div>
 
-					<div class="flex">
+					<div class="flex space-between">
 						<label for="demo-type" class="flex1">
 							type
 						</label>
-						<a-bind prop="type" class="flex1">
+						<a-bind prop="type">
 							<select id="demo-type">
 								<option>classic</option>
 								<option>mobile</option>
@@ -172,6 +169,17 @@
 							<a-color id="demo-amenu-accent"></a-color>
 						</a-bind>
 					</div>
+
+					<div class="flex space-between">
+						<label for="demo-accent-text">
+							--amenu-accent-text
+						</label>
+
+						<a-bind prop="--amenu-accent-text">
+							<a-color id="demo-accent-text"></a-color>
+						</a-bind>
+
+					</div>
 				</a-menu>
 
 				<!-- CSS Vars -->
@@ -181,11 +189,15 @@
 					<a-tooltip-group
 						nohover
 						position="modal"
-						class="flex column stretch gap3">
+						class="flex column stretch gap3 nowrap">
 
-						<div class="flex column">
+						<div class="flex space-between">
 							<a-tooltip>
-								<label slot="text" for="demo-justify">--amenu-justify</label>
+								<label
+									slot="text"
+									for="demo-justify">
+									--amenu-justify
+								</label>
 
 								<b slot="title">Horizontal Justification of Menu Items</b>
 								<p>Only affects classic and shingle menus. Set to 1 if you want all items the same width. Otherwise, use same values as the css property justify-content.</p>
@@ -202,7 +214,7 @@
 							</a-bind>
 						</div>
 
-						<div class="flex column">
+						<div class="flex space-between">
 							<a-tooltip>
 								<label
 									slot="text"
@@ -221,7 +233,7 @@
 							</a-bind>
 						</div>
 
-						<div class="flex column">
+						<div class="flex space-between">
 							<a-tooltip>
 							  <label slot="text" for="demo-min" class="flex1 nowrap">
 							  	--amenu-min
@@ -239,7 +251,7 @@
 							</a-bind>
 					  </div>
 
-					  <div class="flex column">
+					  <div class="flex space-between">
 					  	<a-tooltip>
 						  	<label slot="text" for="demo-pad" class="flex1 nowrap">
 						  		--amenu-pad
@@ -257,7 +269,7 @@
 							</a-bind>
 						</div>
 
-						<div class="flex column">
+						<div class="flex space-between">
 							<a-tooltip>
 								<label slot="text" for="demo-duration" class="flex1 nowrap"> --amenu-duration </label>
 								<b slot="title">Transition Duration</b>
@@ -278,10 +290,11 @@
 		</a-bindgroup>
 	</div>
 
-	<div id="demo-menu">
+	<div id="demo-menu" style="padding:1rem">
 		<!-- Demo Menu -->
 		<a-menu id="demo" open>
-			<strong slot="icon">☰</strong>
+			<!-- <strong slot="icon">☰</strong> -->
+			<b slot="icon">&equiv;</b>
 			<a>Foo</a>
 
 			<a-menu id="demo-A" group="level-1" open>
@@ -331,7 +344,7 @@
 	<div class="card flex column stretch gap4">
 	<h3>Mobile Menu with Icons and Labels</h3>
 		<a-menu type="mobile" open>
-		  <b slot="icon">☰</b>
+		  <b slot="icon">&equiv;</b>
 		  <span slot="label">Menu</span>
 
 		  <a>Home</a>
@@ -351,18 +364,34 @@
 			<summary class="nofrills">Code</summary>
 			<a-code highlight>
 				<textarea>
-					<a-menu type="mobile">
-					  <span slot="icon">🍔</span>
-					  <span slot="label">Menu</span>
+					<a-menu
+						open
+						type="mobile">
 
-					  <a href="/">Home</a>
-					  <a href="/">About</a>
+					  <b slot="icon">
+					  	☰
+					  </b>
 
-					  <!-- Nested menus are supported -->
+					  <b slot="label">
+					  	Menu
+					  </b>
+
+					  <a>Home</a>
+					  <a>About</a>
+
 					  <a-menu>
-					    <span slot="label">Services</span>
-					    <a href="/">Catering</a>
-					    <a href="/">Take Out</a>
+					  	<b slot="icon">
+					  		🍔
+					  	</b>
+
+					    <b slot="label">
+					    	Products
+					    </b>
+
+					    <a>Hamburger</a>
+					    <a>Cheeseburger</a>
+					    <a>Fries</a>
+					    <a>Onion Rings</a>
 					  </a-menu>
 					</a-menu>
 				</textarea>
@@ -370,7 +399,7 @@
 		</details>
 	</div>
 
-	<hr>
+	<!-- <hr> -->
 
 	<div id="sitemap-menu" class="card">
 	<h3>Sitemap Menu</h3>
@@ -379,6 +408,7 @@
 
 		<div  class="flex column stretch gap4">
 				<a-menu
+					open
 					style="background:var(--amenu-background)"
 					type="sitemap"
 					breakpoint="0">
@@ -387,13 +417,13 @@
 				  <a>About</a>
 
 				  <a-menu>
-				    <span slot="label">Services</span>
+				    <strong slot="label">Services</strong>
 				    <a>Catering</a>
 				    <a>Take Out</a>
 				  </a-menu>
 
 					<a-menu>
-				    <span slot="label">Products</span>
+				    <strong slot="label">Products</strong>
 				    <a>Hamburger</a>
 				    <a>Cheeseburger</a>
 				    <a>Fries</a>
@@ -406,6 +436,7 @@
 				<a-code highlight>
 					<textarea>
 						<a-menu
+							open
 							type="sitemap"
 							breakpoint="0">
 
@@ -417,7 +448,7 @@
 		</div>
 	</div><!-- card -->
 
-	<hr>
+	<!-- <hr> -->
 
 	<div id="group-menu" class="card">
 	<h3>Using the "group" attribute for accordian behavior</h3>
@@ -427,7 +458,7 @@
 				<strong slot="icon">☰</strong>
 
 				<a-menu group="group1">
-			    <span slot="label">Products</span>
+			    <b slot="label">Products</b>
 			    <a>Hamburger</a>
 			    <a>Cheeseburger</a>
 			    <a>Fries</a>
@@ -435,7 +466,7 @@
 			  </a-menu>
 
 			  <a-menu group="group1">
-			    <span slot="label">Services</span>
+			    <b slot="label">Services</b>
 			    <a>Catering</a>
 			    <a>Take Out</a>
 			  </a-menu>
@@ -491,7 +522,7 @@
 		</div>
 	</div><!-- card -->
 
-	<hr>
+	<!-- <hr> -->
 
 	<div id="breakpoint-menu" class="card">
 	<h3>Classic Menu with breakpoint at 360px</h3>
@@ -538,7 +569,6 @@
 			  	</head>
 			  	<body>
 			    <a-menu open breakpoint="360">
-			      <b slot="icon">☰</b>
 
 			      <a>Home</a>
 			      <a>About</a>
@@ -555,7 +585,7 @@
 			</a-iframe>
 		</a-bind>
 
-		<!-- <details>
+		<details>
 			<summary class="nofrills">Code</summary>
 			<a-code highlight>
 				<textarea>
@@ -563,27 +593,27 @@
 						open
 						breakpoint="360">
 
-			      <span slot="icon">🍔</span>
+			      <b slot="icon">
+			      	☰
+			      </b>
 
-			      <a href="/">Home</a>
-			      <a href="/">About</a>
+			      <a>Home</a>
+			      <a>About</a>
 
 			      <a-menu>
-			        <span
-			        	slot="label">
+			        <b slot="label">
 			        	Services
-			        </span>
+			        </b>
 
-			        <a href="/">Catering</a>
-			        <a href="/">Take Out</a>
+			        <a>Catering</a>
+			        <a>Take Out</a>
 			      </a-menu>
 			    </a-menu>
 				</textarea>
 			</a-code>
-		</details> -->
+		</details>
 	</div>
 
-	<hr>
 
 	<div id="shingle-menu" class="card">
 	<h3>Showing the icon on "shingle" type menus</h3>

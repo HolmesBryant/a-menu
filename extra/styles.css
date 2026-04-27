@@ -1,7 +1,7 @@
 :root {
 	--bg1-color: snow;
 	--bg2-color: linen;
-	--bg3-color: floralwhite;
+	--bg3-color: hsl(30, 66.667%, 97%);
 	--bg4-color:  white;
 	--accent-color: orange;
 	--accent-text: rgb(40,40,40);
@@ -33,9 +33,9 @@
 	button
 	{ padding: 1px; }
 
-	.flex > * {
+	/* .flex > * {
 		min-width: 200px;
-	}
+	} */
 }
 
 body {
@@ -267,7 +267,10 @@ body {
 	button,
 	input,
 	select
-	{ min-height: var(--min); }
+	{
+		min-height: var(--min);
+		width: 100%;
+	}
 
 	.button,
 	button,

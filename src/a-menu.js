@@ -2,7 +2,7 @@
  * @file a-menu.js
  * @description A custom element that renders a configurable, responsive menu.
  * @author Holmes Bryant <Holmes Bryant <https://github.com/HolmesBryant>
- * @version 1.0.0
+ * @version 1.1
  * @license GPL-3.0
  */
 
@@ -129,17 +129,17 @@ export default class AMenu extends HTMLElement {
   static template = document.createElement('template');
   static {
     this.template.innerHTML = `
-      <details part="menu" id="menu">
+      <details part="menu" id="menu" role="group" aria-label="menu">
         <summary part="summary" id="summary" role="button" aria-expanded="false">
           <div id="label-wrapper">
             <span part="icon" id="icon">
               <slot name="icon"></slot>
             </span>
-            <span part="label" id="label">
-              <slot name="label"></slot>
-            </span>
+
+            <slot name="label"></slot>
           </div>
         </summary>
+
         <div part="items" id="items">
           <slot></slot>
         </div>
@@ -214,9 +214,6 @@ export default class AMenu extends HTMLElement {
       this.#type = newval;
       if (!this.#connected) return;
       if (this.#lockedType) return;
-      if (oldval === 'sitemap' && !this.top) {
-        this.open = false;
-      }
       this.#applyType(newval);
       globalThis[abindUpdate]?.(this, 'type', newval);
       break;
@@ -247,6 +244,7 @@ export default class AMenu extends HTMLElement {
 
     if (this.#group) AMenu.register(this.#group, this);
 
+    this.#maybeAddIcon();
     this.#applyType(this.#type);
     this.#addListeners();
     this.#setupMediaQuery(this.breakpoint);
@@ -282,7 +280,7 @@ export default class AMenu extends HTMLElement {
    * @private
    */
   #addListeners() {
-    this.#menu.addEventListener('click', (event) => {
+    this.addEventListener('click', (event) => {
       const path = event.composedPath();
       if (path.includes(this.#summary)) {
         event.preventDefault();
@@ -295,7 +293,6 @@ export default class AMenu extends HTMLElement {
       this.#hasLabel = this.#labelSlot.assignedElements().length > 0;
       this.#hasIcon = this.#iconSlot.assignedElements().length > 0;
       this.#maybeHideHeader();
-      // this.#maybeShowIcon();
     };
 
     this.#labelSlot.addEventListener('slotchange', handleSlotChange, { signal: this.#abortController.signal });
@@ -320,10 +317,7 @@ export default class AMenu extends HTMLElement {
    * @private
    */
   #applyType(value) {
-    if (this.#lockedType) {
-      if (this.debug) this.logVars();
-      return;
-    }
+    if (this.#lockedType) return;
 
     const types = ['mobile', 'classic', 'shingle', 'dropdown', 'flyout', 'sitemap'];
     for (const type of types) {
@@ -343,7 +337,6 @@ export default class AMenu extends HTMLElement {
 
     this.#applyTypeToNested(value);
     this.#maybeHideHeader();
-    this.#maybeShowIcon();
   }
 
   /**
@@ -393,31 +386,37 @@ export default class AMenu extends HTMLElement {
   /**
    * Closes the menu while waiting for CSS transitions to complete, guarding against event overlaps.
    * @param {HTMLDetailsElement} menu - The details element to close.
-   * @param {HTMLElement} items - The items container with the transition.
+   * @param {HTMLElement} elem - The items container with the transition.
    * @private
    */
-  #closeWithTransition(menu, items) {
+  async #closeWithTransition(menu, elem) {
     if (this.#isClosing) return;
     this.#isClosing = true;
 
     menu.classList.remove('open');
+    const animations = await elem.getAnimations();
+    let duration = 0;
 
-    const duration = parseFloat(getComputedStyle(items).transitionDuration) * 1000 || 0;
-    const fallbackDelay = duration > 0 ? duration + 50 : 50;
+    for (const anim of animations) {
+      duration = Math.max(duration, anim.effect.getComputedTiming().endTime);
+    }
+
+    const fallbackDelay = duration > 0 ? duration : 1000;
     let isClosed = false;
 
     const closeMenu = (event) => {
-      if (event && event.target !== items) return;
+      if (event && event.target !== elem) return;
       if (isClosed) return;
 
       isClosed = true;
       this.#isClosing = false;
       menu.open = false;
-      items.removeEventListener('transitionend', closeMenu);
+      this.#summary.setAttribute('aria-expanded', 'false');
+      elem.removeEventListener('transitionend', closeMenu);
       clearTimeout(fallbackTimeout);
     };
 
-    items.addEventListener('transitionend', closeMenu);
+    elem.addEventListener('transitionend', closeMenu);
     const fallbackTimeout = setTimeout(closeMenu, fallbackDelay);
   }
 
@@ -426,9 +425,21 @@ export default class AMenu extends HTMLElement {
    * @private
    */
   #handleSwipe() {
+    if (this.#type === 'sitemap') return;
     const delta = this.#swipeEnd - this.#swipeStart;
     if (Math.abs(delta) < this.#swipe) return;
-    this.toggleAttribute('open', delta > 0);
+    if (!this.#top || !this.#icon.classList.contains('hidden')) {
+      this.toggleAttribute('open', delta > 0);
+    }
+  }
+
+  #maybeAddIcon() {
+    const html = '<b>&equiv;</b>';
+    if (!this.#hasIcon && this.#showIcon.includes(this.#type)) {
+      this.#hasIcon = true;
+      this.#labelSlot.insertAdjacentHTML('afterbegin', html);
+      this.#maybeShowIcon();
+    }
   }
 
   /**
@@ -436,8 +447,8 @@ export default class AMenu extends HTMLElement {
    * @private
    */
   #maybeHideHeader() {
-    this.#summary.hidden = !this.#hasLabel && !this.#maybeShowIcon();
-    if (!this.#hasLabel && !this.#hasIcon && this.#top) this.open = true;
+    console.log(this.#hasLabel, this.#hasIcon)
+    this.#summary.hidden = !this.#hasLabel && !this.#hasIcon;
   }
 
   /**
@@ -446,6 +457,7 @@ export default class AMenu extends HTMLElement {
    * @private
    */
   #maybeShowIcon() {
+    // console.log(this.#hasIcon, this.showIcon.includes(this.type))
     const show = this.#hasIcon && this.showIcon.includes(this.type);
     if (show) {
       this.#icon.classList.remove('hidden');
@@ -456,8 +468,6 @@ export default class AMenu extends HTMLElement {
         this.#summary.classList.remove('no-arrow');
       }
     }
-
-    return show;
   }
 
   /**
@@ -505,6 +515,7 @@ export default class AMenu extends HTMLElement {
     if (this.#open && !this.#menu.open) {
       this.#menu.open = true;
       this.#menu.classList.add('open');
+      this.#summary.setAttribute('aria-expanded', 'true');
       if (this.#group && this.type !== 'sitemap') this.#closeOthers(this, this.#group);
     } else if (!this.open && this.#menu.open) {
       this.#closeWithTransition(this.#menu, this.#items);
@@ -540,7 +551,6 @@ export default class AMenu extends HTMLElement {
     console.log('#hasLabel :', this.#hasLabel);
     console.log('#lockedType :', this.#lockedType);
     console.log('#mql :', this.#mql);
-    // console.log('#mqlHandler :', this.#mqlHandler);
     console.log('#originalType :', this.#originalType);
 
     console.log('------ CSS Variables ------');
@@ -554,15 +564,6 @@ export default class AMenu extends HTMLElement {
     console.log('--amenu-duration', computed.getPropertyValue('--amenu-duration'));
     console.log('--amenu-justify', computed.getPropertyValue('--amenu-justify'));
     console.log('--amenu-flex', computed.getPropertyValue('--amenu-flex'));
-
-    // console.log('------ Elements ------');
-    // console.log('#icon', this.#icon);
-    // console.log('#iconSlot', this.#iconSlot);
-    // console.log('#items', this.#items);
-    // console.log('#itemsSlot', this.#itemsSlot);
-    // console.log('#labelSlot', this.#labelSlot);
-    // console.log('#menu', this.#menu);
-    // console.log('#summary', this.#summary);
 
     console.groupEnd();
     this.#logged = true;
@@ -586,7 +587,7 @@ export default class AMenu extends HTMLElement {
    */
   get breakpoint() { return this.#breakpoint }
   set breakpoint(value) {
-    if (value && !isNaN(parseFloat(value))) {
+    if (value && isNaN(parseFloat(value))) {
       console.warn(`breakpoint value must be a number. Value given was: {${typeof value}} ${value}`);
       return;
     }

@@ -4,17 +4,18 @@
 	Available parts (these map to elements in shadow dom):
 	::part(menu) - the details element
 	::part(summary) - the summary element
-	::part(label-wrapper) - div (child of summary) containing icon and label
-	::part(icon) - span containing the icon slot
-	::part(label) - span containing the label slot
+	::part(label-wrapper) - (child of summary) contains icon and label
 	::part(items) - div containing the menu items
 ****************************************************/
 
+/* Please test thoroughly if you move these variables out of :root */
 :root {
 	--amenu-background: snow;
 	--amenu-text: rgb(60,60,60);
 	--amenu-border: silver;
 	--amenu-accent: dodgerblue;
+	--amenu-accent-text: snow;
+	--amenu-shadow: dimgray;
 
 	/* minimum height of elements */
 	--amenu-min: 35px;
@@ -26,7 +27,9 @@
 	/* transition duration */
   --amenu-duration: 400ms;
 
-	/* Set flex on slotted items. Useful values are 0 and 1 */
+	/* Set flex on slotted items.
+		Useful values are 0 and 1
+		Overrides --amenu-justify */
 	--amenu-flex: 0;
 
 	/* sets justify-content */
@@ -39,6 +42,7 @@
     --amenu-background: rgb(40, 40, 40);
 		--amenu-border: dimgray;
 		--amenu-text: snow;
+		--amenu-shadow: black;
 	}
 }
 
@@ -54,22 +58,22 @@ a-menu {
 
 /***** Background *****/
 
-	& > *
+	&:not([top]) { background: var(--amenu-background) }
+
+	& a,
+	& div,
+	& ::part(summary)
 	{ background: var(--amenu-background) }
 
 	&[open]:not([type="sitemap"])::part(summary),
 	&[open]:not([type="sitemap"]) > [slot="icon"],
 	&[open]:not([type="sitemap"]) > [slot="label"],
-	& [slot="icon"]:active,
-	& [slot="label"]:active
-	{ background: var(--amenu-accent); }
+	&::part(summary):active
+	{ background: var(--amenu-accent) }
 
 	& a:hover,
 	& a:focus,
-	&::part(icon):hover,
-	&::part(icon):focus,
-	& [slot="label"]:hover,
-	& [slot="label"]:focus
+	&::part(summary):hover
 	{ filter: brightness(1.25) }
 
 /***** Border *****/
@@ -78,29 +82,32 @@ a-menu {
 	{ border-left: 4px solid var(--amenu-accent) }
 
 	&:not([type="sitemap"]) > *:not([slot="label"]):not([slot="icon"])
-	{ border: 1px solid var(--amenu-border); }
+	{ border: 1px solid var(--amenu-border) }
 
 /***** Text *****/
 
+	&[open]:not([type="sitemap"]) > [slot="label"],
+	&[open]:not([type="sitemap"])::part(summary),
+	& [slot="icon"]:active,
+	& [slot="label"]:active
+	{ color: var(--amenu-accent-text) }
+
 	& a:active
-	{ color: var(--amenu-accent); }
+	{ color: var(--amenu-accent) }
 
 	& [slot="icon"]:active,
-	& [slot="label"]:active,
-	&[open] > [slot="icon"],
-	&[open] > [slot="label"]
-	{ color: var(--amenu-text); }
+	& [slot="label"]:active
+	{ color: var(--amenu-text) }
 
 	& a,
 	&::part(summary),
-	&::part(label) {
+	& [slot="label"] {
 		color: var(--amenu-text);
-		font-weight: bold;
-		text-decoration: none
+		text-decoration: none;
 	}
 
 	& a:hover
-	{ text-decoration: underline; }
+	{ text-decoration: underline }
 
 	& [slot="icon"]
 	{ font-size: var(--amenu-min) }
@@ -115,16 +122,26 @@ a-menu {
 	&[top]::part(items)
 	{ box-shadow: none }
 
-	&:not([top]):not([type="sitemap"]):not([type="mobile"])::part(items)
-	{ box-shadow: 2px 2px 5px black; }
+	&[open]:not([type="classic"], [type="sitemap"], [type="shingle"][top])::part(items)
+	{ box-shadow: 2px 2px 5px var(--amenu-shadow) }
 
 /***** Misc *****/
 
-	& a,
-	& [slot="label"]
-	{ padding: 0 var(--amenu-pad); }
+	& a
+	{ text-decoration: none; }
 
-	&[type="sitemap"] > * { padding: 0; }
+	& a,
+	& div,
+	& [slot="label"]
+	{ padding: 0 var(--amenu-pad) }
+
+	&::part(summary)
+	{ padding-left: var(--amenu-pad) }
+
+	& [slot="icon"]
+	{ margin-right: var(--amenu-pad) }
+
+	&[type="sitemap"] > * { padding: 0 }
 
 	&[type="mobile"] [slot="label"] { flex: 1 }
 } /* end a-menu */

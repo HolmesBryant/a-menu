@@ -1,5 +1,0 @@
- In _addListeners()
- But if they literally just do <a-menu slot="label">Plain Text</a-menu>, it won't be caught by assignedElements().
-
-  _closeWithTransition
-  instead of parseFloat(), Fix: You can split the string, parse all, and find the Math.max(), OR look into the modern Web Animations API (elem.getAnimations()), which is much more reliable than parsing CSS strings.

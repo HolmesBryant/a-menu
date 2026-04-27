@@ -18,7 +18,10 @@ group("A-Menu Initialization & Defaults", () => {
 
   test("Element is defined", menu instanceof HTMLElement, true);
   test("Default type is 'classic'", menu.type, 'classic');
-  test("Default open is false", menu.open, false);
+  test("Default open is false", () => {
+    return menu.open
+  }, false);
+
   test("Default breakpoint is 600", menu.breakpoint, 600);
   test("Default swipe is 40", menu.swipe, 40);
   test("Default top is true (if no parent a-menu)", menu.top, true);
@@ -31,9 +34,9 @@ group("A-Menu Properties & Attributes", () => {
   document.body.appendChild(menu);
 
   test("Setting type reflects to attribute", () => {
-    menu.type = 'mobile';
+    menu.type = 'dropdown';
     return menu.getAttribute('type');
-  }, 'mobile');
+  }, 'dropdown');
 
   test("Setting open updates shadow DOM details element", async () => {
     menu.open = true;
@@ -46,9 +49,11 @@ group("A-Menu Properties & Attributes", () => {
     return menu.getAttribute('breakpoint');
   }, '800');
 
-  test("Setting debug reflects to attribute", () => {
+  test("Setting debug reflects to attribute", async () => {
     menu.debug = true;
-    return menu.hasAttribute('debug');
+    const result = menu.hasAttribute('debug');
+    menu.debug = false;
+    return result;
   }, true);
 
   menu.remove();

@@ -20,11 +20,14 @@ It uses native `<details>` and `<summary>` elements under the hood for built-in 
 
 Import the script in your HTML or JavaScript file, then use the `<a-menu>` tag.
 
+**Note** If you want the menu to be open when the page loads, you must add the `open` attribute. If you cannot see your menu, you may have forgotten to do this.
+
 ```html
 <script type="module" src="a-menu.min.js"></script>
 
-<a-menu type="classic" breakpoint="768">
-  <span slot="icon">🍔</span>
+<a-menu open>
+
+  <span slot="icon">&equiv;</span>
   <span slot="label">Menu</span>
 
   <a href="/">Home</a>
