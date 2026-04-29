@@ -23,7 +23,6 @@ group("A-Menu Initialization & Defaults", () => {
   }, false);
 
   test("Default breakpoint is 600", menu.breakpoint, 600);
-  test("Default swipe is 40", menu.swipe, 40);
   test("Default top is true (if no parent a-menu)", menu.top, true);
 
   menu.remove();

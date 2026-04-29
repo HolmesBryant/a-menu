@@ -10,32 +10,39 @@ It uses native `<details>` and `<summary>` elements under the hood for built-in 
 
 - **Smart Nesting:** Placing an `<a-menu>` inside another automatically configures the child menu types (e.g., a classic top menu creates dropdown children, which in turn create flyout grandchildren).
 
-- **Touch Friendly:** Built-in swipe gesture recognition for opening and closing.
-
-- **Animated:** Smooth CSS height and opacity transitions using modern interpolate-size: allow-keywords where supported, with fallback transition handlers.
+- **Animated:** Smooth CSS height and opacity transitions using `interpolate-size: allow-keywords` where supported, with fallback transition handlers.
 
 - **Configurable:** Each nested `<a-menu>` can have its own set of attributes/properties (including 'type'), so you can configure your menus however you need.
 
 ## Usage
 
-Import the script in your HTML or JavaScript file, then use the `<a-menu>` tag.
-
-**Note** If you want the menu to be open when the page loads, you must add the `open` attribute. If you cannot see your menu, you may have forgotten to do this.
+Import the script in your HTML or JavaScript file.
 
 ```html
+<!-- page.html -->
 <script type="module" src="a-menu.min.js"></script>
+```
 
+```javascript
+// script.js
+import AMenu from './a-menu.js';
+```
+
+Then use the `<a-menu>` tag in your page.
+
+**IMPORTANT** You must add the `open` attribute to your menu if you want it to be visible when the page loads. If you cannot see your menu, you may have forgotten to do this.
+
+```html
 <a-menu open>
-
-  <span slot="icon">&equiv;</span>
-  <span slot="label">Menu</span>
+  <b slot="label">Menu</b>
 
   <a href="/">Home</a>
   <a href="/about">About</a>
 
   <!-- Nested menus are supported automatically -->
   <a-menu>
-    <span slot="label">Services</span>
+    <b slot="label">Services</b>
+
     <a href="/web">Web Design</a>
     <a href="/seo">SEO</a>
   </a-menu>
@@ -44,53 +51,57 @@ Import the script in your HTML or JavaScript file, then use the `<a-menu>` tag.
 
 ## Attributes & Properties
 
-- **type:** (default "classic")
-	- @type: String
-	- possible values: 'classic', 'mobile', 'ribbon', 'dropdown', 'flyout', 'sitemap'
-	- The layout style
-
 - **breakpoint:** (default: 600)
-	- @type: Number
-	- Max width (in pixels) before the menu automatically switches to mobile view.
-
-- **group:**
-	- @type: String
-	- Assigning a group name creates accordion-like behavior (only one menu in the group can be open at a time).
-
-- **open** (default: it depends...)
-	- @type: Boolean
-	- Indicates whether the menu is currently expanded. Does not have a value, its presence alone triggers the effect.
-	- An `<a-menu>` opens automatically: when the open attribute is explicitly present on the element, when its type is set to 'sitemap' (which forces menus to remain expanded), or when it is a top-level menu (top is true) and it lacks a slotted label, forcing it to expand since there is no clickable header to toggle its state.
-
-- **swipe:** (default: 40)
-	- @type: Number
-	- Minimum vertical touch swipe distance (in pixels) required to toggle the menu.
-
-- **top:** (default: false)
-	- @type: Boolean
-	- Indicates if this is a top-level menu. Automatically set to true if no parent `<a-menu>` is detected. Does not have a value, its presence alone triggers the effect.
+	- @type: number
+	- The maximum width in pixels before switching to mobile view.
 
 - **debug:** (default: false)
-	- @type: Boolean
-	- Enables state and property logging to the console. Does not have a value, its presence alone triggers the effect.
+	- @type: boolean
+	- Enables state and property logging to the console.
 
-**Note:** Attributes reflect to properties and vice versa.
+- **group:** (default: undefined)
+	- @type: string
+	- Assigning groups to menus creates accordion-like behavior between menus having the same group name.
+
+- **open:** (default: false)
+	- @type: boolean
+	- Indicates if the menu is currently expanded.
+
+- **show-icon:** (default: 'mobile, flyout, dropdown')
+	- @type: comma separated string
+	- Comma-separated list of menu types that display an icon.
+
+- **top:** (default: it depends...)
+	- @type boolean
+	- Indicates if this is the top-level menu in a nested structure. This is set automatically. It is not normally set manually.
+
+- **type:** (default "classic")
+	- @type: string
+	- The visual style type of the menu.
+	- Possible values: 'classic', 'mobile', 'ribbon', 'dropdown', 'flyout', 'sitemap'
+
+**Note:** Attributes reflect to properties and vice versa. If an attribute is hyphen-ated, its corresponding property is camelCase. For example, if the attribute `show-icon`, the property is `showIcon`.
 
 ## Slots
 
-- **label** The text or HTML displayed in the menu header/summary.
+- **label** The HTML displayed in the menu header/summary. `<b slot="label">My Label</b>`
 
-- **icon** An icon displayed next to the label. (Only visible on mobile, flyout, and dropdown types by default).
+- **icon** An icon displayed next to the label. By default, the icon is only visible on mobile, flyout, and dropdown types. If you want the icon to show on other types, include them in the value for `show-icon`. `<b slot="icon">!</b>`
 
 ## CSS Custom Properties
 
 You can style `<a-menu>` by defining the following custom CSS variables in your stylesheet.
 
-- **--amenu-min**	(default 35px)	Minimum height for the menu header and menu items.
-
-- **--amenu-flex**	(default: center)	Flexbox alignment for slotted items and horizontal justification.
-
 - **--amenu-duration**	(default: 400ms)	Transition duration for opening/closing animations (height and opacity).
 
-- **--amenu-pad**	(default: 1rem)	The horizontal padding or left margin indentation applied to all menu items, depending on type.
+- **--amenu-flex**	(default: 0) Sets flex on menu items. When set to 1, all items will be the same with. Only affects 'classic' and 'shingle' menus. When set to 1, it overrides `--amenu-justify`.
 
+- **--amenu-justify** (default: center) Sets `justify-content` on elements containing the menu items. Only affects 'classic' and 'shingle' menus.
+
+- **--amenu-min**	(default: 35px)	Minimum height for menu items.
+
+- **--amenu-pad**	(default: 1rem) The horizontal padding of menu items.
+
+## Theming
+
+If you don't add additional css to theme your menus, they will look terrible. Included in the 'dist' folder is a stylesheet (a-menu.css) which will give you a good start. Just include that stylesheet in your html page.

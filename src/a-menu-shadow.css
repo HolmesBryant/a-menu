@@ -5,15 +5,6 @@
   min-height: var(--amenu-min, 35px);
 }
 
-:host(:not([type="sitemap"])) {
-  touch-action: none;
-}
-
-:host([type="mobile"]) {
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
 ::slotted(*) {
   align-items: center;
   display: flex;
@@ -40,6 +31,7 @@ details.open > #items {
   max-height: 100svh;
   opacity: 1;
   overflow: visible;
+  overflow-x: visible;
 }
 
 details.open > summary::before {
@@ -77,11 +69,14 @@ summary.no-arrow::before {
   height: 100%;
 }
 
-#icon { display: contents; }
+#icon {
+  font-size: var(--amenu-min, 35px);
+}
 
 #items {
   display: flex;
   justify-content: var(--amenu-justify, center);
+  overflow: auto;
   transition:
     height var(--amenu-duration, 400ms) ease-in-out,
     max-height var(--amenu-duration, 400ms) ease-in-out,
@@ -113,6 +108,7 @@ summary.no-arrow::before {
 
 :host([type="classic"]) #items {
   flex-direction: row;
+  flex-wrap: wrap;
   width: 100%;
 }
 
@@ -129,39 +125,30 @@ summary.no-arrow::before {
 :host([type="mobile"]) #items {
   flex-direction: column;
   flex-wrap: nowrap;
+  overflow-y: auto;
 }
 
 /* -- Shingle -- */
 
 /* Ensure the top-level menu acts as the positioning anchor for child panels */
 :host([type="shingle"][top]) {
+  flex-direction: row;
   position: relative;
 }
 
-:host([type="shingle"][top]) details {
-  display: flex;
-}
-
-:host([type="shingle"]) details {
-  display: block;
-  width: 100%;
-}
-
 /* Remove relative positioning from individual tabs so absolute #items escapes them */
-:host([type="shingle"]:not([top])) details {
+:host([type="shingle"]) details {
+  justify-content: var(--amenu-justify, center);
   position: static;
 }
 
 :host([type="shingle"]) #items {
+  justify-content: var(--amenu-justify, center);
   flex-direction: row;
+  flex-wrap: wrap;
   position: absolute;
-  left: 5%;
-  top: 100%;
-  width: max-content;
-}
-
-:host([type="shingle"][top]) #items {
   left: 0;
+  top: 100%;
   width: 100%;
 }
 

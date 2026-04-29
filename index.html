@@ -101,7 +101,7 @@
 	<!-- Top Level Controls -->
 	<div id="demo-controls" class="flex360">
 		<a-bindgroup model="dom:#demo">
-			<a-menu open type="mobile" id="demo-props">
+			<a-menu open type="mobile" show-icon="" id="demo-props">
 
 				<!-- Attrs -->
 
@@ -210,6 +210,7 @@
 									<option>center</option>
 									<option>space-around</option>
 									<option>space-between</option>
+									<option>space-evenly</option>
 								</select>
 							</a-bind>
 						</div>
@@ -338,13 +339,53 @@
 	</div>
 </section>
 
-<section id="examples" class="flex column stretch">
+<section id="examples" class="flex column stretch gap4">
 	<h2>Examples</h2>
 
 	<div class="card flex column stretch gap4">
+	<h3>Using the default icon</h3>
+		<span>You just have to make sure your menu type is included in <code>show-icon</code>. Default is 'mobile', 'flyout', and 'dropdown'.</span>
+
+		<a-menu
+			type="mobile">
+			<a>Foo</a>
+			<a>Bar</a>
+
+			<a-menu>
+				<b slot="label">More</b>
+				<a>Baz</a>
+				<a>Boom</a>
+			</a-menu>
+		</a-menu>
+
+		<details>
+			<summary class="nofrills">
+				Code
+			</summary>
+
+			<a-code highlight>
+				<textarea>
+					<a-menu
+						type="mobile">
+						<a>Foo</a>
+						<a>Bar</a>
+
+						<a-menu>
+							<b slot="label">More</b>
+							<a>Baz</a>
+							<a>Boom</a>
+						</a-menu>
+					</a-menu>
+				</textarea>
+			</a-code>
+		</details>
+	</div>
+
+	<div class="card flex column stretch gap4">
 	<h3>Mobile Menu with Icons and Labels</h3>
+		<span>If you want custom icons, include them in <code>icon</code> slots.</span>
+
 		<a-menu type="mobile" open>
-		  <b slot="icon">&equiv;</b>
 		  <span slot="label">Menu</span>
 
 		  <a>Home</a>
@@ -367,10 +408,6 @@
 					<a-menu
 						open
 						type="mobile">
-
-					  <b slot="icon">
-					  	☰
-					  </b>
 
 					  <b slot="label">
 					  	Menu
@@ -399,12 +436,10 @@
 		</details>
 	</div>
 
-	<!-- <hr> -->
-
 	<div id="sitemap-menu" class="card">
 	<h3>Sitemap Menu</h3>
 
-		<p>Set type to "sitemap" and breakpoint to "0".</p>
+		<p>Set <code>type</code> to "sitemap" and <code>breakpoint</code> to "0".</p>
 
 		<div  class="flex column stretch gap4">
 				<a-menu
@@ -447,8 +482,6 @@
 			</details>
 		</div>
 	</div><!-- card -->
-
-	<!-- <hr> -->
 
 	<div id="group-menu" class="card">
 	<h3>Using the "group" attribute for accordian behavior</h3>
@@ -522,13 +555,9 @@
 		</div>
 	</div><!-- card -->
 
-	<!-- <hr> -->
-
 	<div id="breakpoint-menu" class="card">
 	<h3>Classic Menu with breakpoint at 360px</h3>
-		<p>If the top menu has no label and the icon is absent or hidden, you must manually add the "open" attribute to the top menu. When the breakpoint is triggered, the menu will automatically close.</p>
-		<strong>Note:</strong>
-		<p>The icon (even if present) is hidden on "classic", "shingle", and "sitemap" menus by default.</p>
+		<p>When the breakpoint is triggered, the menu will automatically close.</p>
 		<p>The "breakpoint" attribute is only honored on top level menus.</p>
 
 		<!-- slider -->
@@ -568,13 +597,16 @@
 			  		<link rel="stylesheet" href="dist/a-menu.css">
 			  	</head>
 			  	<body>
-			    <a-menu open breakpoint="360">
+			    <a-menu
+			    	open
+			    	breakpoint="360">
 
 			      <a>Home</a>
 			      <a>About</a>
 
 			      <a-menu>
-			        <span slot="label">Services</span>
+			        <b slot="label">
+			        	Services</b>
 			        <a>Catering</a>
 			        <a>Take Out</a>
 			      </a-menu>
@@ -590,40 +622,25 @@
 			<a-code highlight>
 				<textarea>
 					<a-menu
-						open
-						breakpoint="360">
-
-			      <b slot="icon">
-			      	☰
-			      </b>
+			    	open
+			    	breakpoint="360">
 
 			      <a>Home</a>
 			      <a>About</a>
 
-			      <a-menu>
-			        <b slot="label">
-			        	Services
-			        </b>
-
-			        <a>Catering</a>
-			        <a>Take Out</a>
-			      </a-menu>
+			      ....
 			    </a-menu>
 				</textarea>
 			</a-code>
 		</details>
 	</div>
 
-
 	<div id="shingle-menu" class="card">
 	<h3>Showing the icon on "shingle" type menus</h3>
 		<div>
 			<a-menu
 				type="shingle"
-				show-icon="shingle, mobile"
-				style="display:inline-flex">
-
-			  <b slot="icon">☰</b>
+				show-icon="shingle, mobile">
 
 			  <a>Home</a>
 			  <a>About</a>
@@ -641,20 +658,13 @@
 			<a-code highlight>
 				<textarea>
 					<a-menu
-						open
 						type="shingle"
 						show-icon="shingle, mobile">
 
-					  <span slot="icon">☰</span>
-
-					  <a href="/">Home</a>
+					  <a href="/home">Home</a>
 					  <a href="/about">About</a>
 
-					  <a-menu>
-					    <b slot="label">Services</b>
-					    <a href="/">Catering</a>
-					    <a href="/">Take Out</a>
-					  </a-menu>
+					  ....
 					</a-menu>
 				</textarea>
 			</a-code>

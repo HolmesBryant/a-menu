@@ -1,6 +1,6 @@
 /***************************************************
 	@file a-menu.css
-	Styles for a-menu light dom
+	Theming Styles for a-menu
 	Available parts (these map to elements in shadow dom):
 	::part(menu) - the details element
 	::part(summary) - the summary element
@@ -21,20 +21,24 @@
 	--amenu-min: 35px;
 
 	/* left/right padding of menu items */
-	/* left margin of items in 'sitemap' menu*/
+	/* also affects the left margin of items in 'sitemap' menu*/
 	--amenu-pad: .5rem;
 
 	/* transition duration */
   --amenu-duration: 400ms;
 
 	/* Set flex on slotted items.
-		Useful values are 0 and 1
+		Useful values are 0 and 1.
+		Only affects 'classic' and 'shingle' menus.
 		Overrides --amenu-justify */
 	--amenu-flex: 0;
 
-	/* sets justify-content */
+	/* sets justify-content.
+		Only affects 'classic' and 'shingle' menus. */
 	--amenu-justify: center;
 }
+
+/***** @Media *****/
 
 /* For users who prefer dark theme */
 @media (prefers-color-scheme: dark) {
@@ -66,8 +70,6 @@ a-menu {
 	{ background: var(--amenu-background) }
 
 	&[open]:not([type="sitemap"])::part(summary),
-	&[open]:not([type="sitemap"]) > [slot="icon"],
-	&[open]:not([type="sitemap"]) > [slot="label"],
 	&::part(summary):active
 	{ background: var(--amenu-accent) }
 
@@ -86,25 +88,16 @@ a-menu {
 
 /***** Text *****/
 
-	&[open]:not([type="sitemap"]) > [slot="label"],
-	&[open]:not([type="sitemap"])::part(summary),
-	& [slot="icon"]:active,
-	& [slot="label"]:active
+	& a,
+	&[open]:not([type="sitemap"]) [slot="label"],
+	&:not([type="sitemap"])::part(summary)
 	{ color: var(--amenu-accent-text) }
 
 	& a:active
 	{ color: var(--amenu-accent) }
 
-	& [slot="icon"]:active,
-	& [slot="label"]:active
-	{ color: var(--amenu-text) }
-
-	& a,
-	&::part(summary),
-	& [slot="label"] {
-		color: var(--amenu-text);
-		text-decoration: none;
-	}
+	a
+	{ text-decoration: none }
 
 	& a:hover
 	{ text-decoration: underline }
@@ -122,13 +115,11 @@ a-menu {
 	&[top]::part(items)
 	{ box-shadow: none }
 
-	&[open]:not([type="classic"], [type="sitemap"], [type="shingle"][top])::part(items)
-	{ box-shadow: 2px 2px 5px var(--amenu-shadow) }
+	&[type="shingle"]:not([top])[open] > *,
+	&[open]:not([type="classic"], [type="sitemap"], [type="shingle"])::part(items)
+	{ box-shadow: 2px 2px 4px var(--amenu-shadow) }
 
 /***** Misc *****/
-
-	& a
-	{ text-decoration: none; }
 
 	& a,
 	& div,
@@ -138,10 +129,12 @@ a-menu {
 	&::part(summary)
 	{ padding-left: var(--amenu-pad) }
 
-	& [slot="icon"]
-	{ margin-right: var(--amenu-pad) }
+	&::part(icon)
+	{ padding-right: var(--amenu-pad) }
 
-	&[type="sitemap"] > * { padding: 0 }
+	&[type="sitemap"] > *
+	{ padding: 0 }
 
-	&[type="mobile"] [slot="label"] { flex: 1 }
+	&:is([type="classic"], [type="shingle"]) > *
+	{ justify-content: center }
 } /* end a-menu */

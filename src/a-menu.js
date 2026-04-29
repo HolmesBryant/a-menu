@@ -2,8 +2,8 @@
  * @file a-menu.js
  * @description A custom element that renders a configurable, responsive menu.
  * @author Holmes Bryant <Holmes Bryant <https://github.com/HolmesBryant>
- * @version 1.1
  * @license GPL-3.0
+ * @version 1.2
  */
 
 import styles from './a-menu-shadow.css' with {type: 'css'};
@@ -19,14 +19,11 @@ export default class AMenu extends HTMLElement {
   /** @type {string|undefined} The name of the group this menu belongs to for accordion-like behavior. */
   #group;
 
-  /** @type {string} Comma-separated list of menu types that display an icon. */
+  /** @type {string[]} Comma-separated list of menu types that display an icon. */
   #showIcon = ['mobile', 'flyout', 'dropdown'];
 
   /** @type {boolean} Indicates if the menu is currently expanded. */
   #open = false;
-
-  /** @type {number} The swipe distance threshold in pixels. */
-  #swipe = 40;
 
   /** @type {boolean} Indicates if this is the top-level menu in a nested structure. */
   #top = false;
@@ -93,11 +90,8 @@ export default class AMenu extends HTMLElement {
   /** @type {HTMLElement} The summary element acting as the menu toggle. */
   #summary;
 
-  /** @type {number} The Y-coordinate where a touch ends. */
-  #swipeEnd;
-
-  /** @type {number} The Y-coordinate where a touch begins. */
-  #swipeStart;
+  /** @type {number|null} Timeout ID for closing transition fallback. */
+  #transitionTimeout = null;
 
   // -- Static --
 
@@ -203,17 +197,19 @@ export default class AMenu extends HTMLElement {
       globalThis[abindUpdate]?.(this, 'top', this.#top);
       break;
     case 'show-icon':
-      this.#showIcon = newval.split(',').map( item => item.trim());
+      this.#showIcon = newval ? newval.split(',').map( item => item.trim()) : [];
+      if (this.#connected) {
+        this.#maybeAddIcon();
+        this.#maybeShowIcon();
+        this.#maybeHideHeader();
+      }
       globalThis[abindUpdate]?.(this, 'showIcon', this.#showIcon);
-      break;
-    case 'swipe':
-      this.#swipe = Number(newval);
-      globalThis[abindUpdate]?.(this, 'swipe', this.#swipe);
       break;
     case 'type':
       this.#type = newval;
       if (!this.#connected) return;
       if (this.#lockedType) return;
+      if (oldval === 'sitemap' && !this.#top) this.open = false;
       this.#applyType(newval);
       globalThis[abindUpdate]?.(this, 'type', newval);
       break;
@@ -240,11 +236,10 @@ export default class AMenu extends HTMLElement {
     }
 
     this.#hasLabel = this.#labelSlot.assignedElements().length > 0;
-    this.#hasIcon = this.#iconSlot.assignedElements().length > 0;
-
+    // this.#hasIcon = this.#iconSlot.assignedElements().length > 0;
+    this.#maybeAddIcon();
     if (this.#group) AMenu.register(this.#group, this);
 
-    this.#maybeAddIcon();
     this.#applyType(this.#type);
     this.#addListeners();
     this.#setupMediaQuery(this.breakpoint);
@@ -271,6 +266,12 @@ export default class AMenu extends HTMLElement {
     if (this.#mql && this.#mqlHandler) {
       this.#mql.removeEventListener('change', this.#mqlHandler);
     }
+
+    if (this.#transitionTimeout) {
+      clearTimeout(this.#transitionTimeout);
+      this.#transitionTimeout = null;
+      this.#isClosing = false;
+    }
   }
 
   // -- Private --
@@ -286,29 +287,25 @@ export default class AMenu extends HTMLElement {
         event.preventDefault();
         event.stopPropagation();
         this.open = !this.open;
+      } else {
+        const link = event.target.closest('a');
+        if (link) this.open = false;
       }
     }, { signal:this.#abortController.signal });
 
-    const handleSlotChange = () => {
-      this.#hasLabel = this.#labelSlot.assignedElements().length > 0;
-      this.#hasIcon = this.#iconSlot.assignedElements().length > 0;
-      this.#maybeHideHeader();
-    };
+    this.#labelSlot.addEventListener('slotchange', () => {
+      this.#handleSlotChange() },
+      { signal: this.#abortController.signal });
 
-    this.#labelSlot.addEventListener('slotchange', handleSlotChange, { signal: this.#abortController.signal });
-    this.#iconSlot.addEventListener('slotchange', handleSlotChange, { signal: this.#abortController.signal });
+    this.#iconSlot.addEventListener('slotchange', () => {
+      this.#handleSlotChange },
+    { signal: this.#abortController.signal });
 
-    this.addEventListener('touchstart', event => {
-      this.#swipeStart = event.touches[0].clientY;
-    }, {
-      signal: this.#abortController.signal,
-      passive: true
+    // Listener for the "Back" gesture/button
+    window.addEventListener('popstate', (event) => {
+      // If the user goes back, close the menu
+      this.open = false;
     });
-
-    this.addEventListener('touchend', event => {
-      this.#swipeEnd = event.changedTouches[0].clientY;
-      this.#handleSwipe();
-    }, { signal: this.#abortController.signal });
   }
 
   /**
@@ -336,7 +333,9 @@ export default class AMenu extends HTMLElement {
     }
 
     this.#applyTypeToNested(value);
+    this.#maybeAddIcon();
     this.#maybeHideHeader();
+    this.#maybeShowIcon();
   }
 
   /**
@@ -413,32 +412,34 @@ export default class AMenu extends HTMLElement {
       menu.open = false;
       this.#summary.setAttribute('aria-expanded', 'false');
       elem.removeEventListener('transitionend', closeMenu);
-      clearTimeout(fallbackTimeout);
+      clearTimeout(this.#transitionTimeout);
+      this.#transitionTimeout = null;
     };
 
     elem.addEventListener('transitionend', closeMenu);
-    const fallbackTimeout = setTimeout(closeMenu, fallbackDelay);
+    this.#transitionTimeout = setTimeout(closeMenu, fallbackDelay);
   }
 
-  /**
-   * Evaluates swipe gestures to open or close the menu based on the distance threshold.
-   * @private
-   */
-  #handleSwipe() {
-    if (this.#type === 'sitemap') return;
-    const delta = this.#swipeEnd - this.#swipeStart;
-    if (Math.abs(delta) < this.#swipe) return;
-    if (!this.#top || !this.#icon.classList.contains('hidden')) {
-      this.toggleAttribute('open', delta > 0);
-    }
+  #handleSlotChange() {
+    this.#hasLabel = this.#labelSlot.assignedElements().length > 0;
+    this.#maybeAddIcon();
+    this.#maybeHideHeader();
+    this.#maybeShowIcon();
   }
 
   #maybeAddIcon() {
-    const html = '<b>&equiv;</b>';
-    if (!this.#hasIcon && this.#showIcon.includes(this.#type)) {
+    const hasAssigned = this.#iconSlot.assignedElements().length > 0;
+    const needsFallback = this.#top && !hasAssigned && this.#showIcon.includes(this.#type);
+    if (needsFallback) {
+      if (!this.#iconSlot.firstElementChild) {
+        this.#iconSlot.innerHTML = '<strong>&equiv;</strong>';
+      }
       this.#hasIcon = true;
-      this.#labelSlot.insertAdjacentHTML('afterbegin', html);
-      this.#maybeShowIcon();
+    } else {
+      if (!hasAssigned && this.#iconSlot.firstElementChild) {
+        this.#iconSlot.innerHTML = '';
+      }
+      this.#hasIcon = hasAssigned;
     }
   }
 
@@ -447,7 +448,6 @@ export default class AMenu extends HTMLElement {
    * @private
    */
   #maybeHideHeader() {
-    console.log(this.#hasLabel, this.#hasIcon)
     this.#summary.hidden = !this.#hasLabel && !this.#hasIcon;
   }
 
@@ -457,14 +457,15 @@ export default class AMenu extends HTMLElement {
    * @private
    */
   #maybeShowIcon() {
-    // console.log(this.#hasIcon, this.showIcon.includes(this.type))
     const show = this.#hasIcon && this.showIcon.includes(this.type);
     if (show) {
       this.#icon.classList.remove('hidden');
       this.#summary.classList.add('no-arrow');
     } else {
       this.#icon.classList.add('hidden');
-      if (this.#type !== 'sitemap') {
+      if (this.#top) {
+        this.#summary.classList.add('no-arrow');
+      } else if (this.#type !== 'sitemap') {
         this.#summary.classList.remove('no-arrow');
       }
     }
@@ -516,6 +517,7 @@ export default class AMenu extends HTMLElement {
       this.#menu.open = true;
       this.#menu.classList.add('open');
       this.#summary.setAttribute('aria-expanded', 'true');
+      window.history.pushState({ menuOpen: true }, '');
       if (this.#group && this.type !== 'sitemap') this.#closeOthers(this, this.#group);
     } else if (!this.open && this.#menu.open) {
       this.#closeWithTransition(this.#menu, this.#items);
@@ -634,7 +636,7 @@ export default class AMenu extends HTMLElement {
 
   /**
    * Gets the comma-separated list of types that permit icons.
-   * @type {string}
+   * @type {string[]}
    * @readonly
    */
   get showIcon() { return this.#showIcon }
@@ -643,19 +645,13 @@ export default class AMenu extends HTMLElement {
    * Sets the 'show-icon' attribute.
    * @param {string} value - A comma separated list of menu types for which to show the icon.
    */
-  set showIcon(value) { this.setAttribute('show-icon', value) }
-
-  /**
-   * Gets or sets the minimum swipe distance to trigger state changes. Setting to null removes the attribute.
-   * @type {number}
-   */
-  get swipe() { return this.#swipe }
-  set swipe(value) {
+  set showIcon(value) {
     if (value == null) {
-      this.removeAttribute('swipe');
+      this.removeAttribute('show-icon');
     } else {
-      this.setAttribute('swipe', value) }
+      this.setAttribute('show-icon', value);
     }
+  }
 
   /**
    * Gets or sets whether this is a top-level menu.
