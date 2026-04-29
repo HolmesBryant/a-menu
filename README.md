@@ -4,6 +4,8 @@ A configurable, responsive, and lightweight web component for building nested me
 
 It uses native `<details>` and `<summary>` elements under the hood for built-in accessibility, and automatically adapts to mobile views based on a configurable breakpoint.
 
+Demo: https://holmesbryant.github.io/a-menu/
+
 ## Features
 
 - **Responsive Breakpoints:** Automatically converts complex horizontal navigations into vertical mobile menus when the viewport shrinks below the breakpoint.
