@@ -10,10 +10,10 @@
 
 /* Please test thoroughly if you move these variables out of :root */
 :root {
-	--amenu-background: snow;
+	--amenu-background: linen;
 	--amenu-text: rgb(60,60,60);
 	--amenu-border: silver;
-	--amenu-accent: dodgerblue;
+	--amenu-accent: orange;
 	--amenu-accent-text: snow;
 	--amenu-shadow: dimgray;
 
@@ -89,8 +89,12 @@ a-menu {
 /***** Text *****/
 
 	& a,
-	&[open]:not([type="sitemap"]) [slot="label"],
-	&:not([type="sitemap"])::part(summary)
+	& div,
+	& ::part(summary)
+	{ color: var(--amenu-text) }
+
+	&[open]:not([type="sitemap"])::part(summary),
+	&::part(summary):active
 	{ color: var(--amenu-accent-text) }
 
 	& a:active
@@ -121,10 +125,13 @@ a-menu {
 
 /***** Misc *****/
 
+	&[top] { width: 100%; }
+
 	& a,
-	& div,
 	& [slot="label"]
 	{ padding: 0 var(--amenu-pad) }
+
+	& div { padding: var(--amenu-pad) }
 
 	&::part(summary)
 	{ padding-left: var(--amenu-pad) }
