@@ -82,7 +82,7 @@ Then use the `<a-menu>` tag in your page.
 	- The visual style type of the menu.
 	- Possible values: 'classic', 'mobile', 'ribbon', 'dropdown', 'flyout', 'sitemap'
 
-**Note:** Attributes reflect to properties and vice versa. If an attribute is hyphen-ated, its corresponding property is camelCase. For example, if the attribute `show-icon`, the property is `showIcon`.
+**Note:** Attributes reflect to properties and vice versa. If an attribute is hyphen-ated, its corresponding property is camelCase. For example, if the attribute is `show-icon`, the property is `showIcon`.
 
 ## Slots
 
