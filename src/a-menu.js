@@ -3,7 +3,7 @@
  * @description A custom element that renders a configurable, responsive menu.
  * @author Holmes Bryant <Holmes Bryant <https://github.com/HolmesBryant>
  * @license GPL-3.0
- * @version 1.2
+ * @version 1.5
  */
 
 import styles from './a-menu-shadow.css' with {type: 'css'};

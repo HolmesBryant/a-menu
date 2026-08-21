@@ -1,6 +1,7 @@
 /* a-menu-shadow.css */
 
 :host {
+  display: block;
   interpolate-size: allow-keywords;
   min-height: var(--amenu-min, 35px);
 }
@@ -31,7 +32,6 @@ details.open > #items {
   max-height: 100svh;
   opacity: 1;
   overflow: visible;
-  overflow-x: visible;
 }
 
 details.open > summary::before {
@@ -74,12 +74,12 @@ summary.no-arrow::before {
 }
 
 #items {
-  display: flex;
-  justify-content: var(--amenu-justify, center);
-  overflow: auto;
+  /* display: flex; */
+  /* justify-content: var(--amenu-justify, center); */
+  overflow: visible;
   transition:
     height var(--amenu-duration, 400ms) ease-in-out,
-    max-height var(--amenu-duration, 400ms) ease-in-out,
+    /* max-height var(--amenu-duration, 400ms) ease-in-out, */
     opacity var(--amenu-duration, 400ms) 300ms;
 }
 
@@ -114,6 +114,10 @@ summary.no-arrow::before {
 
 /* --- Mobile --- */
 
+:host([top][type="mobile"]) {
+  overflow: auto;
+}
+
 :host([type="mobile"]) details {
   flex-direction: column;
 }
@@ -125,7 +129,7 @@ summary.no-arrow::before {
 :host([type="mobile"]) #items {
   flex-direction: column;
   flex-wrap: nowrap;
-  overflow-y: auto;
+  /* overflow-y: auto; */
 }
 
 /* -- Shingle -- */

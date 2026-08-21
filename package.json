@@ -1,13 +1,13 @@
 {
   "name": "a-menu",
   "description": "Custom element that renders a configurable menu",
-  "version": "1.0.0",
+  "version": "1.5",
   "license": "GPL-3.0-or-later",
   "author": "Holmes Bryant <webmaastaa@gmail.com>",
   "homepage": "https://github.com/HolmesBryant/a-menu",
   "type": "module",
-  "main": "./dist/a-menu.js.min.js",
-  "module": "./dist/a-menu.js.min.js",
+  "main": "./dist/a-menu.min.js",
+  "module": "./dist/a-menu.min.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/HolmesBryant/a-menu.git"
@@ -17,7 +17,7 @@
     "component"
   ],
   "exports": {
-    ".": "./dist/a-menu.js.min.js",
+    ".": "./dist/a-menu.min.js",
     "./src/a-menu.js": "./src/a-menu.js"
   },
   "files": [
@@ -29,14 +29,11 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "dev": "vite"
+    "dev": "reload"
   },
   "devDependencies": {
-    "@roenlie/vite-plugin-import-css-sheet": "^0.0.7",
-    "@rollup/plugin-node-resolve": "^16.0.3",
-    "@rollup/plugin-terser": "^0.4.4",
-    "rollup": "^4.57.1",
-    "rollup-plugin-import-css": "^4.2.0",
-    "vite": "^6.4.1"
+    "@rollup/plugin-node-resolve": "latest",
+    "@rollup/plugin-terser": "latest",
+    "rollup": "latest"
   }
 }

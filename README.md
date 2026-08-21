@@ -107,3 +107,11 @@ You can style `<a-menu>` by defining the following custom CSS variables in your 
 ## Theming
 
 If you don't add additional css to theme your menus, they will look terrible. Included in the 'dist' folder is a stylesheet (a-menu.css) which will give you a good start. Just include that stylesheet in your html page.
+
+## Chenge Log
+
+- v1.5
+- Changed developer dependencies.
+- Fixed css issue where parts of long menus rendered incorrectly on short screens.
+
+- v1.0 Initial commit.
